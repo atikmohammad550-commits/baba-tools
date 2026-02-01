@@ -195,7 +195,7 @@
         };
 
         // --- THE FINANCIAL BRAIN COMPONENT ---
-        const FinancialBrain = ({ onBack }) => {
+        ({ onBack }) => {
             return (
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
@@ -321,19 +321,18 @@
 
             useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [activeTool, isOn]);
 
-          const handleInitialize = (id) => {
+         const handleInitialize = (id) => {
     if (id === 'financial-brain') {
         window.open(
-            '/financial-brain/', // planner ka folder
+            '/financial-brain/index.html',
             '_blank'
         );
         return;
     }
 
-    // future tools (resume, essentials etc.)
-    setActiveTool(id);
+    // future tools ke liye
+    console.log('Tool not live yet:', id);
 };
-
 
     // future tools (resume, essentials etc.)
     setActiveTool(id);
@@ -361,11 +360,7 @@
                             </span>
                         </div>
                     </header>
-
-                    <AnimatePresence mode="wait">
-                        {activeTool === 'financial-brain' ? (
-                            <FinancialBrain key="brain" onBack={() => setActiveTool(null)} />
-                        ) : (
+                    
                             <motion.div 
                                 key="landing"
                                 exit={{ opacity: 0, x: -20 }}
@@ -542,4 +537,5 @@
     </script>
 </body>
 </html>
+
 
