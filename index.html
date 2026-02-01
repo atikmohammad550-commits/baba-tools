@@ -19,6 +19,7 @@
             --bg-on: #050506;
             --amber-glow: rgba(255, 191, 0, 0.12);
             --border: rgba(255, 255, 255, 0.05);
+            --brain-accent: #2DD4BF; /* Financial Brain Teal */
         }
 
         body { 
@@ -137,6 +138,21 @@
             color: rgba(255, 191, 0, 0.03);
             pointer-events: none;
         }
+
+        /* Custom Input Styling for Financial Brain */
+        .brain-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .brain-input:focus {
+            border-color: var(--brain-accent);
+            background: rgba(45, 212, 191, 0.05);
+        }
     </style>
 </head>
 <body class="noise">
@@ -145,7 +161,6 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
         
-        // Safety initialization for Framer Motion
         const MotionLib = window.framerMotion || window.Motion || {};
         const motion = MotionLib.motion || {
             div: (props) => <div {...props}>{props.children}</div>,
@@ -179,17 +194,94 @@
             );
         };
 
+        // --- THE FINANCIAL BRAIN COMPONENT ---
+        const FinancialBrain = ({ onBack }) => {
+            return (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="min-h-screen pt-32 pb-20 px-[10%]"
+                >
+                    <div className="max-w-5xl mx-auto">
+                        <header className="flex justify-between items-end mb-16 border-b border-white/5 pb-10">
+                            <div>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-8 h-8 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center">
+                                        <Icon name="brain" size={18} className="text-teal-400" />
+                                    </div>
+                                    <span className="mono text-teal-400 text-[10px] uppercase tracking-[0.4em] font-bold">Financial Brain</span>
+                                </div>
+                                <h2 className="text-5xl font-bold glow-text tracking-tighter">Strategy Blueprint.</h2>
+                            </div>
+                            <button 
+                                onClick={onBack}
+                                className="px-6 py-2 rounded-full border border-white/10 hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white flex items-center gap-2"
+                            >
+                                <Icon name="arrow-left" size={14} /> Back to Lab
+                            </button>
+                        </header>
+
+                        {/* WORKSPACE AREA: This is where you can drop your local logic */}
+                        <div className="grid lg:grid-cols-12 gap-12">
+                            <div className="lg:col-span-7 space-y-12">
+                                <div className="beam-card p-10 bg-zinc-900/40 border-teal-500/10">
+                                    <span className="mono text-teal-500/50 text-[10px] uppercase tracking-widest block mb-8">01 / Client Input Profile</span>
+                                    
+                                    <div className="space-y-8">
+                                        <div className="grid sm:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Current Age</label>
+                                                <input type="number" placeholder="45" className="brain-input w-full" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Retirement Target</label>
+                                                <input type="number" placeholder="60" className="brain-input w-full" />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Monthly Lifestyle Burn</label>
+                                            <input type="number" placeholder="₹ 9,210" className="brain-input w-full" />
+                                        </div>
+                                        <button className="w-full py-4 rounded-xl bg-teal-500 text-black font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform shadow-[0_0_30px_rgba(45,212,191,0.2)]">
+                                            Calculate Projection
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="lg:col-span-5 space-y-8">
+                                <div className="p-8 rounded-3xl border border-white/5 bg-zinc-900/20">
+                                    <h4 className="text-zinc-500 text-xs font-bold uppercase tracking-widest mb-6">Insight Engine</h4>
+                                    <p className="text-sm text-zinc-400 leading-relaxed">
+                                        Input your current financial variables to see the <span className="text-teal-400">Wealth Flow</span> projections across your horizon set.
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
+                                        <Icon name="shield-check" className="text-teal-500 mb-3" size={16}/>
+                                        <span className="block mono text-[9px] text-zinc-600 uppercase">Protection</span>
+                                        <span className="text-lg font-bold">LOCKED</span>
+                                    </div>
+                                    <div className="p-6 rounded-2xl bg-white/5 border border-white/5">
+                                        <Icon name="trending-up" className="text-teal-500 mb-3" size={16}/>
+                                        <span className="block mono text-[9px] text-zinc-600 uppercase">Growth</span>
+                                        <span className="text-lg font-bold">READY</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
         const PullSwitch = ({ isOn, onToggle }) => {
             const [dragY, setDragY] = useState(0);
-            
             return (
                 <div className="switch-box">
-                    {/* Minimal lamp head ceiling mount */}
                     <div className="w-14 h-4 bg-zinc-900 rounded-b-lg border-x border-b border-white/5 flex items-center justify-center">
                         <div className={`w-2 h-2 rounded-full blur-sm transition-colors duration-500 ${isOn ? 'bg-amber-400' : 'bg-zinc-800'}`}></div>
                     </div>
-                    
-                    {/* Elegant springy rope */}
                     <motion.div
                         drag="y"
                         dragConstraints={{ top: 0, bottom: 60 }}
@@ -210,20 +302,10 @@
                                     <div className="w-full h-[1px] bg-black"></div>
                                 </div>
                             </div>
-                            
-                            {/* Prompt positioned strictly next to the handle at the bottom of the rope, close to edge */}
                             <AnimatePresence>
                                 {isOn && (
-                                    <motion.div 
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: 20 }}
-                                        className="exit-prompt"
-                                    >
-                                        <p className="text-[9px] font-bold text-amber-500/40 uppercase tracking-[0.2em] leading-tight">
-                                            Leaving? <br/>
-                                            <span className="text-zinc-600 font-medium">Power Down</span>
-                                        </p>
+                                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="exit-prompt">
+                                        <p className="text-[9px] font-bold text-amber-500/40 uppercase tracking-[0.2em] leading-tight">Leaving? <br/><span className="text-zinc-600 font-medium">Power Down</span></p>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -235,166 +317,189 @@
 
         const App = () => {
             const [isOn, setIsOn] = useState(false);
+            const [activeTool, setActiveTool] = useState(null); // Tool state: null, 'financial-brain', etc.
 
-            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, []);
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [activeTool, isOn]);
+
+            const handleInitialize = (id) => {
+                if (id === 'financial-brain') {
+                    setActiveTool('financial-brain');
+                    // Scroll to top immediately when tool opens
+                    window.scrollTo(0, 0);
+                }
+            };
 
             return (
                 <div className="relative min-h-screen">
                     <FloatingParticles isOn={isOn} />
                     <div className={`global-light ${isOn ? 'opacity-100' : 'opacity-0'}`}></div>
                     
-                    <PullSwitch isOn={isOn} onToggle={() => setIsOn(!isOn)} />
+                    {/* Switch only appears if not in a tool or shows slightly */}
+                    {!activeTool && <PullSwitch isOn={isOn} onToggle={() => setIsOn(!isOn)} />}
 
-                    {/* Branding Header: Fixed with new Brain Icon */}
+                    {/* Branding Header */}
                     <header className={`fixed top-0 left-0 w-full z-[80] py-10 px-[10%] transition-all duration-1000 ${isOn ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                         <div className="flex items-center gap-4">
-                            <div className="w-7 h-7 bg-white rounded flex items-center justify-center shadow-[0_0_25px_rgba(255,255,255,0.2)]">
+                            <div className="w-7 h-7 bg-white rounded flex items-center justify-center shadow-[0_0_25px_rgba(255,255,255,0.2)] cursor-pointer" onClick={() => setActiveTool(null)}>
                                 <Icon name="brain" size={16} className="text-black" />
                             </div>
-                            <span className="font-bold text-xl tracking-tighter uppercase text-white">Baba Tools</span>
+                            <span className="font-bold text-xl tracking-tighter uppercase text-white cursor-pointer" onClick={() => setActiveTool(null)}>Baba Tools</span>
                             <div className="ml-8 h-[1px] w-10 bg-white/10 hidden md:block"></div>
-                            <span className="ml-8 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.4em] hidden md:block">Strategic Lab</span>
+                            <span className="ml-8 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.4em] hidden md:block">
+                                {activeTool ? 'Active Workroom' : 'Strategic Lab'}
+                            </span>
                         </div>
                     </header>
 
-                    <div className={`snap-container ${isOn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12 pointer-events-none'}`} style={{ transition: 'all 1.5s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-                        
-                        {/* Section 1: Hero */}
-                        <section>
-                            <div className="max-w-5xl">
-                                <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 1 }}>
-                                    <span className="mono text-amber-500 text-[11px] uppercase tracking-[0.6em] mb-12 block font-black">Thesis / Access</span>
-                                    <h1 className="text-7xl md:text-[10rem] font-bold tracking-tighter mb-12 glow-text leading-[0.8] -ml-2">
-                                        Useful things, <br />
-                                        <span className="text-zinc-800 tracking-[-0.04em]">made accessible.</span>
-                                    </h1>
-                                    <p className="text-2xl md:text-4xl text-zinc-500 font-medium leading-tight tracking-tight max-w-2xl">
-                                        High-signal logic, delivered freely. <br/>
-                                        I build the tools that normally cost a subscription.
-                                    </p>
-                                    <div className="mt-20 flex items-center gap-8">
-                                        <div className="flex -space-x-3">
-                                            {[1,2,3].map(i => <div key={i} className="w-10 h-10 rounded-full border-4 border-[#050506] bg-zinc-800 flex items-center justify-center shadow-lg"><Icon name="shield-check" size={14} className="text-amber-500"/></div>)}
-                                        </div>
-                                        <span className="text-[11px] font-bold text-zinc-700 uppercase tracking-[0.3em]">Systems-Verified / Anonymous / Free</span>
-                                    </div>
-                                </motion.div>
-                            </div>
-                        </section>
-
-                        {/* Section 2: Transitions */}
-                        <section className="bg-white/[0.02]">
-                            <div className="max-w-5xl grid md:grid-cols-2 gap-32 items-center">
-                                <div className="space-y-16">
-                                    <div className="space-y-6">
-                                        <span className="mono text-zinc-600 text-[11px] uppercase tracking-[0.4em] font-bold">The Journey</span>
-                                        <h2 className="text-6xl font-bold glow-text tracking-tighter leading-none">Pharma logic. <br/>Finance rigor.</h2>
-                                    </div>
-                                    <div className="space-y-10 text-2xl text-zinc-400 font-medium leading-relaxed">
-                                        <p>Industry pivots taught me one truth: <br/><span className="text-white italic underline decoration-amber-500/20 underline-offset-8">Value is found in outcomes.</span></p>
-                                        <p className="text-lg text-zinc-500">I don't write code. I design systems that solve problems without the noise of paywalls.</p>
-                                    </div>
-                                </div>
-                                <div className="aspect-square rounded-[4rem] border border-white/5 bg-black/40 flex items-center justify-center p-24 group transition-all hover:border-amber-500/20">
-                                    <div className="text-center opacity-20 group-hover:opacity-40 transition-all scale-125">
-                                        <Icon name="binary" size={80} className="mb-8 mx-auto text-amber-500" />
-                                        <p className="mono text-[11px] uppercase tracking-[0.4em] font-black">Structural Integrity</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Section 3: Workspace */}
-                        <section id="workspace">
-                            <div className="max-w-6xl mx-auto w-full">
-                                <div className="mb-24 flex justify-between items-end border-b border-white/5 pb-12">
-                                    <div>
-                                        <span className="mono text-zinc-600 text-[11px] uppercase block mb-6 tracking-widest font-bold">02 / Workspace</span>
-                                        <h2 className="text-6xl font-bold glow-text tracking-tighter leading-none">Select a module.</h2>
-                                    </div>
-                                    <span className="text-[11px] font-bold text-zinc-800 uppercase tracking-[0.5em] hidden lg:block">Active Registry: 03</span>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                                    {[
-                                        { title: "Resume Architect", cat: "CAREER_SYSTEM", desc: "Build ATS-beating resumes that actually look like a human wrote them.", status: "Live" },
-                                        { title: "Clarity Planner", cat: "FINANCE_LAB", desc: "Complex financial projections simplified. I did the math for you.", status: "Beta" },
-                                        { title: "The Essentials", cat: "UTILITY_CORE", desc: "Small, high-precision tools for everyday digital friction. Zero logs.", status: "Live" }
-                                    ].map((p, i) => (
-                                        <div key={i} className="beam-card p-14 h-[420px] flex flex-col justify-between group cursor-pointer">
-                                            <div>
-                                                <div className="flex justify-between items-start mb-20">
-                                                    <span className="mono text-zinc-600 text-[10px] uppercase tracking-widest font-bold">{p.cat}</span>
-                                                    <span className="text-[9px] font-black text-zinc-600 uppercase border border-white/5 px-2.5 py-1 rounded-md">{p.status}</span>
+                    <AnimatePresence mode="wait">
+                        {activeTool === 'financial-brain' ? (
+                            <FinancialBrain key="brain" onBack={() => setActiveTool(null)} />
+                        ) : (
+                            <motion.div 
+                                key="landing"
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.5 }}
+                                className={`snap-container ${isOn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12 pointer-events-none'}`} 
+                                style={{ transition: 'all 1.5s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                            >
+                                {/* Section 1: Hero */}
+                                <section>
+                                    <div className="max-w-5xl">
+                                        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 1 }}>
+                                            <span className="mono text-amber-500 text-[11px] uppercase tracking-[0.6em] mb-12 block font-black">Thesis / Access</span>
+                                            <h1 className="text-7xl md:text-[10rem] font-bold tracking-tighter mb-12 glow-text leading-[0.8] -ml-2">
+                                                Useful things, <br />
+                                                <span className="text-zinc-800 tracking-[-0.04em]">made accessible.</span>
+                                            </h1>
+                                            <p className="text-2xl md:text-4xl text-zinc-500 font-medium leading-tight tracking-tight max-w-2xl">
+                                                High-signal logic, delivered freely. <br/>
+                                                I build the tools that normally cost a subscription.
+                                            </p>
+                                            <div className="mt-20 flex items-center gap-8">
+                                                <div className="flex -space-x-3">
+                                                    {[1,2,3].map(i => <div key={i} className="w-10 h-10 rounded-full border-4 border-[#050506] bg-zinc-800 flex items-center justify-center shadow-lg"><Icon name="shield-check" size={14} className="text-amber-500"/></div>)}
                                                 </div>
-                                                <h3 className="text-4xl font-bold mb-8 group-hover:text-amber-400 transition-colors leading-tight tracking-tighter">{p.title}</h3>
-                                                <p className="text-lg text-zinc-500 font-medium leading-relaxed">{p.desc}</p>
+                                                <span className="text-[11px] font-bold text-zinc-700 uppercase tracking-[0.3em]">Systems-Verified / Anonymous / Free</span>
                                             </div>
-                                            <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-zinc-600 group-hover:text-white transition-all">
-                                                Initialize <Icon name="arrow-right" size={14} className="group-hover:translate-x-1 transition-transform" />
+                                        </motion.div>
+                                    </div>
+                                </section>
+
+                                {/* Section 2: Transitions */}
+                                <section className="bg-white/[0.02]">
+                                    <div className="max-w-5xl grid md:grid-cols-2 gap-32 items-center">
+                                        <div className="space-y-16">
+                                            <div className="space-y-6">
+                                                <span className="mono text-zinc-600 text-[11px] uppercase tracking-[0.4em] font-bold">The Journey</span>
+                                                <h2 className="text-6xl font-bold glow-text tracking-tighter leading-none">Pharma logic. <br/>Finance rigor.</h2>
+                                            </div>
+                                            <div className="space-y-10 text-2xl text-zinc-400 font-medium leading-relaxed">
+                                                <p>Industry pivots taught me one truth: <br/><span className="text-white italic underline decoration-amber-500/20 underline-offset-8">Value is found in outcomes.</span></p>
+                                                <p className="text-lg text-zinc-500">I don't write code. I design systems that solve problems without the noise of paywalls.</p>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Section 4: Integrity Dialogue */}
-                        <section className="bg-white text-black">
-                            <div className="max-w-5xl mx-auto text-center">
-                                <h2 className="text-8xl md:text-[11rem] font-black tracking-tighter mb-16 leading-[0.85]">Zero catch.</h2>
-                                <p className="text-3xl md:text-5xl text-zinc-400 font-medium mb-20 leading-tight tracking-tight max-w-4xl mx-auto">
-                                    You shouldn't have to trade your identity for a utility. <br/>
-                                    If a tool is here, it is <span className="text-black underline decoration-4 decoration-amber-500 underline-offset-8">yours to use.</span> No signups. No tracking.
-                                </p>
-                                <div className="flex flex-wrap justify-center gap-16 text-[12px] font-black uppercase tracking-[0.6em] text-zinc-300">
-                                    <span>Honest Intent</span>
-                                    <span className="text-amber-500 opacity-30">|</span>
-                                    <span>Logic First</span>
-                                    <span className="text-amber-500 opacity-30">|</span>
-                                    <span>Always Free</span>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Section 5: Expanded About & Close */}
-                        <section>
-                            <div className="max-w-5xl mx-auto">
-                                <div className="grid lg:grid-cols-2 gap-24 items-start">
-                                    <div className="space-y-12">
-                                        <div className="w-16 h-[1px] bg-amber-500/40 mb-16"></div>
-                                        <h3 className="text-5xl font-bold glow-text tracking-tighter leading-none">The Story.</h3>
-                                        <div className="space-y-8 text-lg text-zinc-500 font-medium leading-relaxed">
-                                            <p>Hi, I'm the founder of Baba Tools. My career didn't follow a typical tech roadmap.</p>
-                                            <p>I started in the high-stakes laboratories of the <span className="text-white">Pharmaceutical industry</span>, where precision is literally a matter of life. I then pivoted to the <span className="text-white">Finance world</span>, mastering the analytical discipline of market rigor.</p>
-                                            <p>Today, as a <span className="text-white">Product Manager</span>, I blend those worlds. I don't code; I solve. I build these tools because I believe digital resources should be high-signal and low-friction.</p>
+                                        <div className="aspect-square rounded-[4rem] border border-white/5 bg-black/40 flex items-center justify-center p-24 group transition-all hover:border-amber-500/20">
+                                            <div className="text-center opacity-20 group-hover:opacity-40 transition-all scale-125">
+                                                <Icon name="binary" size={80} className="mb-8 mx-auto text-amber-500" />
+                                                <p className="mono text-[11px] uppercase tracking-[0.4em] font-black">Structural Integrity</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    
-                                    <div className="flex flex-col items-center lg:items-end text-center lg:text-right pt-20 lg:pt-48">
-                                        <h4 className="text-4xl font-bold glow-text mb-10 tracking-tighter italic">Calculated for impact.</h4>
-                                        <p className="text-zinc-600 text-lg mb-16 max-w-sm font-medium leading-relaxed">
-                                            Everything here is built independently, maintained carefully, and intended to stay free. Always.
+                                </section>
+
+                                {/* Section 3: Workspace */}
+                                <section id="workspace">
+                                    <div className="max-w-6xl mx-auto w-full">
+                                        <div className="mb-24 flex justify-between items-end border-b border-white/5 pb-12">
+                                            <div>
+                                                <span className="mono text-zinc-600 text-[11px] uppercase block mb-6 tracking-widest font-bold">02 / Workspace</span>
+                                                <h2 className="text-6xl font-bold glow-text tracking-tighter leading-none">Select a module.</h2>
+                                            </div>
+                                            <span className="text-[11px] font-bold text-zinc-800 uppercase tracking-[0.5em] hidden lg:block">Active Registry: 03</span>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                                            {[
+                                                { id: 'resume-arch', title: "Resume Architect", cat: "CAREER_SYSTEM", desc: "Build ATS-beating resumes that actually look like a human wrote them.", status: "Live" },
+                                                { id: 'financial-brain', title: "Financial Brain", cat: "FINANCE_LAB", desc: "Complex financial projections simplified. I did the math for you.", status: "Beta" },
+                                                { id: 'essentials', title: "The Essentials", cat: "UTILITY_CORE", desc: "Small, high-precision tools for everyday digital friction. Zero logs.", status: "Live" }
+                                            ].map((p, i) => (
+                                                <div key={i} onClick={() => handleInitialize(p.id)} className="beam-card p-14 h-[420px] flex flex-col justify-between group cursor-pointer">
+                                                    <div>
+                                                        <div className="flex justify-between items-start mb-20">
+                                                            <span className="mono text-zinc-600 text-[10px] uppercase tracking-widest font-bold">{p.cat}</span>
+                                                            <span className="text-[9px] font-black text-zinc-600 uppercase border border-white/5 px-2.5 py-1 rounded-md">{p.status}</span>
+                                                        </div>
+                                                        <h3 className="text-4xl font-bold mb-8 group-hover:text-amber-400 transition-colors leading-tight tracking-tighter">{p.title}</h3>
+                                                        <p className="text-lg text-zinc-500 font-medium leading-relaxed">{p.desc}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-zinc-600 group-hover:text-white transition-all">
+                                                        Initialize <Icon name="arrow-right" size={14} className="group-hover:translate-x-1 transition-transform" />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Section 4: Integrity Dialogue */}
+                                <section className="bg-white text-black">
+                                    <div className="max-w-5xl mx-auto text-center">
+                                        <h2 className="text-8xl md:text-[11rem] font-black tracking-tighter mb-16 leading-[0.85]">Zero catch.</h2>
+                                        <p className="text-3xl md:text-5xl text-zinc-400 font-medium mb-20 leading-tight tracking-tight max-w-4xl mx-auto">
+                                            You shouldn't have to trade your identity for a utility. <br/>
+                                            If a tool is here, it is <span className="text-black underline decoration-4 decoration-amber-500 underline-offset-8">yours to use.</span> No signups. No tracking.
                                         </p>
-                                        <div className="flex gap-16 text-zinc-700 font-bold text-[11px] uppercase tracking-[0.4em] mb-32">
-                                            <a href="#" className="hover:text-amber-500 transition-colors">LinkedIn</a>
-                                            <a href="#" className="hover:text-amber-500 transition-colors">GitHub</a>
-                                            <a href="#" className="hover:text-amber-500 transition-colors">Lab_Notes</a>
+                                        <div className="flex flex-wrap justify-center gap-16 text-[12px] font-black uppercase tracking-[0.6em] text-zinc-300">
+                                            <span>Honest Intent</span>
+                                            <span className="text-amber-500 opacity-30">|</span>
+                                            <span>Logic First</span>
+                                            <span className="text-amber-500 opacity-30">|</span>
+                                            <span>Always Free</span>
                                         </div>
-                                        <div className="flex items-center gap-3 justify-center lg:justify-end">
-                                            <Icon name="brain" size={14} className="text-zinc-600" />
-                                            <div className="text-[10px] font-bold text-zinc-800 uppercase tracking-[0.8em]">
-                                                © 2024 / BABA.TOOLS
+                                    </div>
+                                </section>
+
+                                {/* Section 5: Story */}
+                                <section>
+                                    <div className="max-w-5xl mx-auto">
+                                        <div className="grid lg:grid-cols-2 gap-24 items-start">
+                                            <div className="space-y-12">
+                                                <div className="w-16 h-[1px] bg-amber-500/40 mb-16"></div>
+                                                <h3 className="text-5xl font-bold glow-text tracking-tighter leading-none">The Story.</h3>
+                                                <div className="space-y-8 text-lg text-zinc-500 font-medium leading-relaxed">
+                                                    <p>Hi, I'm the founder of Baba Tools. My career didn't follow a typical tech roadmap.</p>
+                                                    <p>I started in the high-stakes laboratories of the <span className="text-white">Pharmaceutical industry</span>, where precision is literally a matter of life. I then pivoted to the <span className="text-white">Finance world</span>, mastering the analytical discipline of market rigor.</p>
+                                                    <p>Today, as a <span className="text-white">Product Manager</span>, I blend those worlds. I don't code; I solve. I build these tools because I believe digital resources should be high-signal and low-friction.</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex flex-col items-center lg:items-end text-center lg:text-right pt-20 lg:pt-48">
+                                                <h4 className="text-4xl font-bold glow-text mb-10 tracking-tighter italic">Calculated for impact.</h4>
+                                                <p className="text-zinc-600 text-lg mb-16 max-w-sm font-medium leading-relaxed">
+                                                    Everything here is built independently, maintained carefully, and intended to stay free. Always.
+                                                </p>
+                                                <div className="flex gap-16 text-zinc-700 font-bold text-[11px] uppercase tracking-[0.4em] mb-32">
+                                                    <a href="#" className="hover:text-amber-500 transition-colors">LinkedIn</a>
+                                                    <a href="#" className="hover:text-amber-500 transition-colors">GitHub</a>
+                                                    <a href="#" className="hover:text-amber-500 transition-colors">Lab_Notes</a>
+                                                </div>
+                                                <div className="flex items-center gap-3 justify-center lg:justify-end">
+                                                    <Icon name="brain" size={14} className="text-zinc-600" />
+                                                    <div className="text-[10px] font-bold text-zinc-800 uppercase tracking-[0.8em]">
+                                                        © 2024 / BABA.TOOLS
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
+                                </section>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* Offline Overlay */}
                     <AnimatePresence>
-                        {!isOn && (
+                        {!isOn && !activeTool && (
                             <motion.div 
                                 initial={{ opacity: 0 }} 
                                 animate={{ opacity: 1 }} 
