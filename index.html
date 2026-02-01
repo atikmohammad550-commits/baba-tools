@@ -321,13 +321,24 @@
 
             useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [activeTool, isOn]);
 
-            const handleInitialize = (id) => {
-                if (id === 'financial-brain') {
-                    setActiveTool('financial-brain');
-                    // Scroll to top immediately when tool opens
-                    window.scrollTo(0, 0);
-                }
-            };
+          const handleInitialize = (id) => {
+    if (id === 'financial-brain') {
+        window.open(
+            '/financial-brain/', // planner ka folder
+            '_blank'
+        );
+        return;
+    }
+
+    // future tools (resume, essentials etc.)
+    setActiveTool(id);
+};
+
+
+    // future tools (resume, essentials etc.)
+    setActiveTool(id);
+};
+
 
             return (
                 <div className="relative min-h-screen">
@@ -531,3 +542,4 @@
     </script>
 </body>
 </html>
+
