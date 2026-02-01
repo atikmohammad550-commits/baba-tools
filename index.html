@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baba Tools | Logical. Honest. Free.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        :root {
+            --bg-off: #020203;
+            --bg-on: #050506;
+            --amber-glow: rgba(255, 191, 0, 0.12);
+            --border: rgba(255, 255, 255, 0.05);
+        }
+
+        body { 
+            font-family: 'Instrument Sans', sans-serif;
+            background: var(--bg-off);
+            color: #F7F7F8;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Page Snapping Container */
+        .snap-container {
+            scroll-snap-type: y mandatory;
+            height: 100vh;
+            overflow-y: auto;
+            scrollbar-width: none;
+            transition: opacity 0.8s ease;
+        }
+        .snap-container::-webkit-scrollbar { width: 0px; }
+
+        section {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 10%;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .noise::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            opacity: 0.02;
+            z-index: 9999;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3BaseFilter id='filter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23filter)'/%3E%3C/svg%3E");
+        }
+
+        /* Global Light Wash */
+        .global-light {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 85% 15%, var(--amber-glow) 0%, transparent 60%);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 1s ease;
+            pointer-events: none;
+        }
+
+        .glow-text {
+            background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.5) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .beam-card {
+            background: rgba(12, 12, 14, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .beam-card:hover {
+            border-color: rgba(255, 191, 0, 0.2);
+            transform: translateY(-4px);
+        }
+
+        /* Side Pull Switch Positioning */
+        .switch-box {
+            position: fixed;
+            top: 0;
+            right: 4%;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .rope {
+            width: 1px;
+            background: linear-gradient(to bottom, #444, #222);
+            position: relative;
+            cursor: grab;
+        }
+        .rope:active { cursor: grabbing; }
+
+        .handle {
+            width: 14px;
+            height: 36px;
+            background: #F3F4F6;
+            border-radius: 4px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .exit-prompt {
+            position: absolute;
+            right: 25px;
+            bottom: 6px;
+            width: 120px;
+            text-align: right;
+            pointer-events: none;
+        }
+
+        .particle-text {
+            position: absolute;
+            font-size: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4em;
+            color: rgba(255, 191, 0, 0.03);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="noise">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        // Safety initialization for Framer Motion
+        const MotionLib = window.framerMotion || window.Motion || {};
+        const motion = MotionLib.motion || {
+            div: (props) => <div {...props}>{props.children}</div>,
+            span: (props) => <span {...props}>{props.children}</span>,
+            section: (props) => <section {...props}>{props.children}</section>
+        };
+        const { AnimatePresence } = MotionLib;
+
+        const Icon = ({ name, size = 16, className = "" }) => {
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [name]);
+            return <i data-lucide={name} className={className} style={{ width: size, height: size }}></i>;
+        };
+
+        const FloatingParticles = ({ isOn }) => {
+            const items = ["PHARMA_LOGIC", "FINANCE_RIGOR", "PRODUCT_MINDSET", "CLEAN_DATA", "ATS_FRIENDLY", "ZERO_CODE", "SYSTEMS_DESIGN"];
+            if (!isOn) return null;
+            return (
+                <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
+                    {items.map((txt, i) => (
+                        <motion.div
+                            key={i}
+                            className="particle-text mono"
+                            initial={{ x: Math.random() * 100 + "%", y: Math.random() * 100 + "%", opacity: 0 }}
+                            animate={{ y: ["110%", "-10%"], opacity: [0, 0.3, 0] }}
+                            transition={{ duration: 30 + Math.random() * 20, repeat: Infinity, ease: "linear", delay: Math.random() * 10 }}
+                        >
+                            {txt}
+                        </motion.div>
+                    ))}
+                </div>
+            );
+        };
+
+        const PullSwitch = ({ isOn, onToggle }) => {
+            const [dragY, setDragY] = useState(0);
+            
+            return (
+                <div className="switch-box">
+                    {/* Minimal lamp head ceiling mount */}
+                    <div className="w-14 h-4 bg-zinc-900 rounded-b-lg border-x border-b border-white/5 flex items-center justify-center">
+                        <div className={`w-2 h-2 rounded-full blur-sm transition-colors duration-500 ${isOn ? 'bg-amber-400' : 'bg-zinc-800'}`}></div>
+                    </div>
+                    
+                    {/* Elegant springy rope */}
+                    <motion.div
+                        drag="y"
+                        dragConstraints={{ top: 0, bottom: 60 }}
+                        dragElastic={0.1}
+                        onDrag={(e, info) => setDragY(info.offset.y)}
+                        onDragEnd={(e, info) => {
+                            if (info.offset.y > 40) onToggle();
+                            setDragY(0);
+                        }}
+                        animate={{ y: dragY }}
+                        className="rope h-[280px] flex flex-col items-center"
+                    >
+                        <div className="absolute top-full flex flex-col items-center">
+                            <div className="handle group">
+                                <div className="w-full h-full flex flex-col justify-around py-1.5 px-0.5 opacity-20">
+                                    <div className="w-full h-[1px] bg-black"></div>
+                                    <div className="w-full h-[1px] bg-black"></div>
+                                    <div className="w-full h-[1px] bg-black"></div>
+                                </div>
+                            </div>
+                            
+                            {/* Prompt positioned strictly next to the handle at the bottom of the rope, close to edge */}
+                            <AnimatePresence>
+                                {isOn && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 20 }}
+                                        className="exit-prompt"
+                                    >
+                                        <p className="text-[9px] font-bold text-amber-500/40 uppercase tracking-[0.2em] leading-tight">
+                                            Leaving? <br/>
+                                            <span className="text-zinc-600 font-medium">Power Down</span>
+                                        </p>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </motion.div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [isOn, setIsOn] = useState(false);
+
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, []);
+
+            return (
+                <div className="relative min-h-screen">
+                    <FloatingParticles isOn={isOn} />
+                    <div className={`global-light ${isOn ? 'opacity-100' : 'opacity-0'}`}></div>
+                    
+                    <PullSwitch isOn={isOn} onToggle={() => setIsOn(!isOn)} />
+
+                    {/* Branding Header: Fixed with new Brain Icon */}
+                    <header className={`fixed top-0 left-0 w-full z-[80] py-10 px-[10%] transition-all duration-1000 ${isOn ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                        <div className="flex items-center gap-4">
+                            <div className="w-7 h-7 bg-white rounded flex items-center justify-center shadow-[0_0_25px_rgba(255,255,255,0.2)]">
+                                <Icon name="brain" size={16} className="text-black" />
+                            </div>
+                            <span className="font-bold text-xl tracking-tighter uppercase text-white">Baba Tools</span>
+                            <div className="ml-8 h-[1px] w-10 bg-white/10 hidden md:block"></div>
+                            <span className="ml-8 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.4em] hidden md:block">Strategic Lab</span>
+                        </div>
+                    </header>
+
+                    <div className={`snap-container ${isOn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12 pointer-events-none'}`} style={{ transition: 'all 1.5s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+                        
+                        {/* Section 1: Hero */}
+                        <section>
+                            <div className="max-w-5xl">
+                                <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 1 }}>
+                                    <span className="mono text-amber-500 text-[11px] uppercase tracking-[0.6em] mb-12 block font-black">Thesis / Access</span>
+                                    <h1 className="text-7xl md:text-[10rem] font-bold tracking-tighter mb-12 glow-text leading-[0.8] -ml-2">
+                                        Useful things, <br />
+                                        <span className="text-zinc-800 tracking-[-0.04em]">made accessible.</span>
+                                    </h1>
+                                    <p className="text-2xl md:text-4xl text-zinc-500 font-medium leading-tight tracking-tight max-w-2xl">
+                                        High-signal logic, delivered freely. <br/>
+                                        I build the tools that normally cost a subscription.
+                                    </p>
+                                    <div className="mt-20 flex items-center gap-8">
+                                        <div className="flex -space-x-3">
+                                            {[1,2,3].map(i => <div key={i} className="w-10 h-10 rounded-full border-4 border-[#050506] bg-zinc-800 flex items-center justify-center shadow-lg"><Icon name="shield-check" size={14} className="text-amber-500"/></div>)}
+                                        </div>
+                                        <span className="text-[11px] font-bold text-zinc-700 uppercase tracking-[0.3em]">Systems-Verified / Anonymous / Free</span>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        </section>
+
+                        {/* Section 2: Transitions */}
+                        <section className="bg-white/[0.02]">
+                            <div className="max-w-5xl grid md:grid-cols-2 gap-32 items-center">
+                                <div className="space-y-16">
+                                    <div className="space-y-6">
+                                        <span className="mono text-zinc-600 text-[11px] uppercase tracking-[0.4em] font-bold">The Journey</span>
+                                        <h2 className="text-6xl font-bold glow-text tracking-tighter leading-none">Pharma logic. <br/>Finance rigor.</h2>
+                                    </div>
+                                    <div className="space-y-10 text-2xl text-zinc-400 font-medium leading-relaxed">
+                                        <p>Industry pivots taught me one truth: <br/><span className="text-white italic underline decoration-amber-500/20 underline-offset-8">Value is found in outcomes.</span></p>
+                                        <p className="text-lg text-zinc-500">I don't write code. I design systems that solve problems without the noise of paywalls.</p>
+                                    </div>
+                                </div>
+                                <div className="aspect-square rounded-[4rem] border border-white/5 bg-black/40 flex items-center justify-center p-24 group transition-all hover:border-amber-500/20">
+                                    <div className="text-center opacity-20 group-hover:opacity-40 transition-all scale-125">
+                                        <Icon name="binary" size={80} className="mb-8 mx-auto text-amber-500" />
+                                        <p className="mono text-[11px] uppercase tracking-[0.4em] font-black">Structural Integrity</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Section 3: Workspace */}
+                        <section id="workspace">
+                            <div className="max-w-6xl mx-auto w-full">
+                                <div className="mb-24 flex justify-between items-end border-b border-white/5 pb-12">
+                                    <div>
+                                        <span className="mono text-zinc-600 text-[11px] uppercase block mb-6 tracking-widest font-bold">02 / Workspace</span>
+                                        <h2 className="text-6xl font-bold glow-text tracking-tighter leading-none">Select a module.</h2>
+                                    </div>
+                                    <span className="text-[11px] font-bold text-zinc-800 uppercase tracking-[0.5em] hidden lg:block">Active Registry: 03</span>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                                    {[
+                                        { title: "Resume Architect", cat: "CAREER_SYSTEM", desc: "Build ATS-beating resumes that actually look like a human wrote them.", status: "Live" },
+                                        { title: "Clarity Planner", cat: "FINANCE_LAB", desc: "Complex financial projections simplified. I did the math for you.", status: "Beta" },
+                                        { title: "The Essentials", cat: "UTILITY_CORE", desc: "Small, high-precision tools for everyday digital friction. Zero logs.", status: "Live" }
+                                    ].map((p, i) => (
+                                        <div key={i} className="beam-card p-14 h-[420px] flex flex-col justify-between group cursor-pointer">
+                                            <div>
+                                                <div className="flex justify-between items-start mb-20">
+                                                    <span className="mono text-zinc-600 text-[10px] uppercase tracking-widest font-bold">{p.cat}</span>
+                                                    <span className="text-[9px] font-black text-zinc-600 uppercase border border-white/5 px-2.5 py-1 rounded-md">{p.status}</span>
+                                                </div>
+                                                <h3 className="text-4xl font-bold mb-8 group-hover:text-amber-400 transition-colors leading-tight tracking-tighter">{p.title}</h3>
+                                                <p className="text-lg text-zinc-500 font-medium leading-relaxed">{p.desc}</p>
+                                            </div>
+                                            <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-zinc-600 group-hover:text-white transition-all">
+                                                Initialize <Icon name="arrow-right" size={14} className="group-hover:translate-x-1 transition-transform" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Section 4: Integrity Dialogue */}
+                        <section className="bg-white text-black">
+                            <div className="max-w-5xl mx-auto text-center">
+                                <h2 className="text-8xl md:text-[11rem] font-black tracking-tighter mb-16 leading-[0.85]">Zero catch.</h2>
+                                <p className="text-3xl md:text-5xl text-zinc-400 font-medium mb-20 leading-tight tracking-tight max-w-4xl mx-auto">
+                                    You shouldn't have to trade your identity for a utility. <br/>
+                                    If a tool is here, it is <span className="text-black underline decoration-4 decoration-amber-500 underline-offset-8">yours to use.</span> No signups. No tracking.
+                                </p>
+                                <div className="flex flex-wrap justify-center gap-16 text-[12px] font-black uppercase tracking-[0.6em] text-zinc-300">
+                                    <span>Honest Intent</span>
+                                    <span className="text-amber-500 opacity-30">|</span>
+                                    <span>Logic First</span>
+                                    <span className="text-amber-500 opacity-30">|</span>
+                                    <span>Always Free</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Section 5: Expanded About & Close */}
+                        <section>
+                            <div className="max-w-5xl mx-auto">
+                                <div className="grid lg:grid-cols-2 gap-24 items-start">
+                                    <div className="space-y-12">
+                                        <div className="w-16 h-[1px] bg-amber-500/40 mb-16"></div>
+                                        <h3 className="text-5xl font-bold glow-text tracking-tighter leading-none">The Story.</h3>
+                                        <div className="space-y-8 text-lg text-zinc-500 font-medium leading-relaxed">
+                                            <p>Hi, I'm the founder of Baba Tools. My career didn't follow a typical tech roadmap.</p>
+                                            <p>I started in the high-stakes laboratories of the <span className="text-white">Pharmaceutical industry</span>, where precision is literally a matter of life. I then pivoted to the <span className="text-white">Finance world</span>, mastering the analytical discipline of market rigor.</p>
+                                            <p>Today, as a <span className="text-white">Product Manager</span>, I blend those worlds. I don't code; I solve. I build these tools because I believe digital resources should be high-signal and low-friction.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex flex-col items-center lg:items-end text-center lg:text-right pt-20 lg:pt-48">
+                                        <h4 className="text-4xl font-bold glow-text mb-10 tracking-tighter italic">Calculated for impact.</h4>
+                                        <p className="text-zinc-600 text-lg mb-16 max-w-sm font-medium leading-relaxed">
+                                            Everything here is built independently, maintained carefully, and intended to stay free. Always.
+                                        </p>
+                                        <div className="flex gap-16 text-zinc-700 font-bold text-[11px] uppercase tracking-[0.4em] mb-32">
+                                            <a href="#" className="hover:text-amber-500 transition-colors">LinkedIn</a>
+                                            <a href="#" className="hover:text-amber-500 transition-colors">GitHub</a>
+                                            <a href="#" className="hover:text-amber-500 transition-colors">Lab_Notes</a>
+                                        </div>
+                                        <div className="flex items-center gap-3 justify-center lg:justify-end">
+                                            <Icon name="brain" size={14} className="text-zinc-600" />
+                                            <div className="text-[10px] font-bold text-zinc-800 uppercase tracking-[0.8em]">
+                                                © 2024 / BABA.TOOLS
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    {/* Offline Overlay */}
+                    <AnimatePresence>
+                        {!isOn && (
+                            <motion.div 
+                                initial={{ opacity: 0 }} 
+                                animate={{ opacity: 1 }} 
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+                            >
+                                <div className="text-center space-y-10">
+                                    <div className="flex flex-col items-center gap-8">
+                                        <div className="w-px h-32 bg-gradient-to-t from-zinc-800 to-transparent"></div>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-3 justify-center mb-4">
+                                                <Icon name="brain" size={20} className="text-zinc-800" />
+                                                <span className="font-bold text-sm tracking-tighter uppercase text-zinc-800">Baba Tools</span>
+                                            </div>
+                                            <span className="mono text-[12px] uppercase tracking-[0.8em] text-zinc-800 font-black block">Lab Offline</span>
+                                            <p className="text-[11px] text-zinc-700 font-bold uppercase tracking-widest">Pull the rope to engage systems</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
