@@ -1,20 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Baba Tools | Logical. Honest. Free.</title>
 
-  <!-- Tailwind -->
+  <!-- Core libs -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- React -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -24,7 +21,7 @@
       font-family: 'Instrument Sans', sans-serif;
       background: #050506;
       color: #f7f7f8;
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
     .mono { font-family: 'JetBrains Mono', monospace; }
@@ -33,7 +30,9 @@
       height: 100vh;
       overflow-y: auto;
       scroll-snap-type: y mandatory;
+      scrollbar-width: none;
     }
+    .snap-container::-webkit-scrollbar { display: none; }
 
     section {
       min-height: 100vh;
@@ -45,36 +44,48 @@
 
     .beam-card {
       background: rgba(12,12,14,0.6);
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.06);
       border-radius: 24px;
-      transition: all .4s ease;
+      transition: all .5s ease;
     }
-
     .beam-card:hover {
       transform: translateY(-6px);
-      border-color: rgba(45,212,191,.5);
+      border-color: rgba(255,191,0,.35);
+    }
+
+    /* Rope switch */
+    .switch-box {
+      position: fixed;
+      top: 0;
+      right: 4%;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .rope {
+      width: 1px;
+      height: 260px;
+      background: linear-gradient(to bottom, #444, #111);
+      cursor: grab;
+    }
+    .handle {
+      width: 14px;
+      height: 36px;
+      background: #f3f4f6;
+      border-radius: 4px;
+      margin-top: 6px;
+      box-shadow: 0 10px 20px rgba(0,0,0,.6);
     }
   </style>
 </head>
 
 <body>
-  <!-- SAFE FALLBACK -->
-  <div id="root">
-    <div style="
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:12px;
-      letter-spacing:0.4em;
-      color:#666;
-    ">
-      LOADING BABA TOOLS
-    </div>
-  </div>
+  <div id="root"></div>
 
   <script type="text/babel">
-    const { useEffect } = React;
+    const { useState, useEffect } = React;
+    const { motion, AnimatePresence } = window.framerMotion;
 
     const Icon = ({ name, size = 16 }) => {
       useEffect(() => {
@@ -83,125 +94,140 @@
       return <i data-lucide={name} style={{ width: size, height: size }}></i>;
     };
 
+    const PullSwitch = ({ isOn, toggle }) => {
+      return (
+        <div className="switch-box">
+          <div className="rope" onClick={toggle}></div>
+          <div className="handle"></div>
+        </div>
+      );
+    };
+
     const App = () => {
+      const [isOn, setIsOn] = useState(false);
 
       const handleInitialize = (id) => {
         if (id === 'financial-brain') {
           window.open('/financial-brain/', '_blank');
           return;
         }
-        alert('Tool not live yet');
+        alert('This tool is not live yet.');
       };
 
       return (
-        <div className="snap-container">
+        <div className="relative min-h-screen">
+          <PullSwitch isOn={isOn} toggle={() => setIsOn(!isOn)} />
 
-          {/* HERO */}
-          <section>
-            <div className="max-w-5xl">
-              <span className="mono text-amber-500 text-xs tracking-[0.6em] uppercase">
-                Thesis / Access
-              </span>
+          <AnimatePresence>
+            {isOn && (
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 40 }}
+                transition={{ duration: 1 }}
+                className="snap-container"
+              >
 
-              <h1 className="text-7xl font-bold tracking-tight mt-8">
-                Useful things,<br/>
-                <span className="text-zinc-700">made accessible.</span>
-              </h1>
+                {/* HERO */}
+                <section>
+                  <div className="max-w-5xl">
+                    <span className="mono text-amber-500 text-xs tracking-[0.6em] uppercase">
+                      Thesis / Access
+                    </span>
+                    <h1 className="text-7xl md:text-[9rem] font-bold tracking-tight mt-10 leading-[0.85]">
+                      Useful things,<br/>
+                      <span className="text-zinc-700">made accessible.</span>
+                    </h1>
+                    <p className="text-2xl text-zinc-500 mt-12 max-w-2xl">
+                      High-signal logic. Zero paywalls.<br/>
+                      Tools built for thinking adults.
+                    </p>
+                  </div>
+                </section>
 
-              <p className="text-2xl text-zinc-500 mt-10 max-w-2xl">
-                High-signal logic. Zero paywalls.  
-                Tools built for thinking adults.
-              </p>
-            </div>
-          </section>
+                {/* WORKSPACE */}
+                <section>
+                  <div className="max-w-6xl w-full">
+                    <h2 className="text-6xl font-bold mb-20">Select a module.</h2>
 
-          {/* WORKSPACE */}
-          <section>
-            <div className="max-w-6xl w-full">
-              <h2 className="text-6xl font-bold mb-20">
-                Select a module.
-              </h2>
-
-              <div className="grid md:grid-cols-3 gap-10">
-                {[
-                  {
-                    id: 'resume',
-                    title: 'Resume Architect',
-                    desc: 'ATS-clean resumes that look human.',
-                    status: 'Live'
-                  },
-                  {
-                    id: 'financial-brain',
-                    title: 'Financial Brain',
-                    desc: 'Strategic financial projections, simplified.',
-                    status: 'Beta'
-                  },
-                  {
-                    id: 'essentials',
-                    title: 'The Essentials',
-                    desc: 'Small tools. Zero friction.',
-                    status: 'Soon'
-                  }
-                ].map(tool => (
-                  <div
-                    key={tool.id}
-                    onClick={() => handleInitialize(tool.id)}
-                    className="beam-card p-12 h-[420px] flex flex-col justify-between cursor-pointer"
-                  >
-                    <div>
-                      <span className="mono text-xs text-zinc-600 uppercase">
-                        {tool.status}
-                      </span>
-                      <h3 className="text-4xl font-bold mt-6">
-                        {tool.title}
-                      </h3>
-                      <p className="text-lg text-zinc-500 mt-6">
-                        {tool.desc}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-zinc-500">
-                      Initialize <Icon name="arrow-right"/>
+                    <div className="grid md:grid-cols-3 gap-10">
+                      {[
+                        {
+                          id: 'resume',
+                          title: 'Resume Architect',
+                          desc: 'ATS-clean resumes that look human.',
+                          status: 'Live'
+                        },
+                        {
+                          id: 'financial-brain',
+                          title: 'Financial Brain',
+                          desc: 'Strategic financial projections, simplified.',
+                          status: 'Beta'
+                        },
+                        {
+                          id: 'essentials',
+                          title: 'The Essentials',
+                          desc: 'Small tools. Zero friction.',
+                          status: 'Soon'
+                        }
+                      ].map(tool => (
+                        <div
+                          key={tool.id}
+                          onClick={() => handleInitialize(tool.id)}
+                          className="beam-card p-12 h-[420px] flex flex-col justify-between cursor-pointer"
+                        >
+                          <div>
+                            <span className="mono text-xs text-zinc-600 uppercase">
+                              {tool.status}
+                            </span>
+                            <h3 className="text-4xl font-bold mt-6">
+                              {tool.title}
+                            </h3>
+                            <p className="text-lg text-zinc-500 mt-6">
+                              {tool.desc}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-zinc-500">
+                            Initialize <Icon name="arrow-right"/>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </section>
+                </section>
 
-          {/* PHILOSOPHY */}
-          <section className="bg-white text-black">
-            <div className="max-w-5xl text-center mx-auto">
-              <h2 className="text-8xl font-black mb-16">
-                Zero catch.
-              </h2>
-              <p className="text-4xl text-zinc-500">
-                No logins. No tracking.  
-                If it’s here — it’s yours.
-              </p>
-            </div>
-          </section>
+                {/* PHILOSOPHY */}
+                <section className="bg-white text-black">
+                  <div className="max-w-5xl mx-auto text-center">
+                    <h2 className="text-8xl font-black mb-16">Zero catch.</h2>
+                    <p className="text-4xl text-zinc-500">
+                      No logins. No tracking.<br/>
+                      If it’s here — it’s yours.
+                    </p>
+                  </div>
+                </section>
 
-          {/* FOOTER */}
-          <section>
-            <div className="max-w-5xl mx-auto text-center">
-              <h3 className="text-5xl font-bold mb-10">
-                Built for clarity.
-              </h3>
-              <p className="text-lg text-zinc-500 max-w-xl mx-auto">
-                Pharma discipline. Finance rigor. Product thinking.
-              </p>
-              <div className="mt-20 mono text-xs tracking-[0.6em] text-zinc-700">
-                © 2024 BABA.TOOLS
-              </div>
-            </div>
-          </section>
+                {/* FOOTER */}
+                <section>
+                  <div className="max-w-5xl mx-auto text-center">
+                    <h3 className="text-5xl font-bold mb-10">Built for clarity.</h3>
+                    <p className="text-lg text-zinc-500 max-w-xl mx-auto">
+                      Pharma discipline. Finance rigor. Product thinking.
+                    </p>
+                    <div className="mt-20 mono text-xs tracking-[0.6em] text-zinc-700">
+                      © 2024 BABA.TOOLS
+                    </div>
+                  </div>
+                </section>
 
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       );
     };
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
 </html>
