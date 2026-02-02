@@ -1,196 +1,404 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Baba Tools | Logical. Honest. Free.</title>
-
-  <!-- CDN libs (Cloudflare safe) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
-
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
-    body {
-      margin: 0;
-      font-family: 'Instrument Sans', sans-serif;
-      background: #050506;
-      color: #f7f7f8;
-      overflow: hidden;
-    }
-
-    .mono { font-family: 'JetBrains Mono', monospace; }
-
-    .snap-container {
-      height: 100vh;
-      overflow-y: auto;
-      scroll-snap-type: y mandatory;
-    }
-
-    section {
-      min-height: 100vh;
-      scroll-snap-align: start;
-      display: flex;
-      align-items: center;
-      padding: 0 10%;
-    }
-
-    .beam-card {
-      background: rgba(12,12,14,0.6);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 24px;
-      transition: all .4s ease;
-      cursor: pointer;
-    }
-    .beam-card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(255,191,0,.3);
-    }
-  </style>
-</head>
-
-<body>
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useEffect } = React;
-
-    /* 🔒 SAFE FRAMER MOTION ACCESS (NO BLACK SCREEN) */
-    const Motion = window.framerMotion || {};
-    const motion = Motion.motion || {
-      div: (props) => <div {...props}>{props.children}</div>
-    };
-
-    const Icon = ({ name, size = 16 }) => {
-      useEffect(() => {
-        if (window.lucide) window.lucide.createIcons();
-      }, []);
-      return <i data-lucide={name} style={{ width: size, height: size }}></i>;
-    };
-
-    const App = () => {
-
-      const handleInitialize = (id) => {
-        if (id === 'financial-brain') {
-          window.open('/financial-brain/index.html', '_blank');
-          return;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baba Tools | Logical. Honest. Free.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        :root {
+            --bg-off: #010101;
+            --bg-on: #11141b; 
+            --amber-glow: rgba(255, 191, 0, 0.45);
+            --border: rgba(255, 255, 255, 0.1);
         }
-        alert('Tool not live yet');
-      };
 
-      return (
-        <div className="snap-container">
+        body { 
+            font-family: 'Instrument Sans', sans-serif;
+            background: var(--bg-off);
+            color: #F7F7F8;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 1s ease;
+            margin: 0;
+        }
 
-          {/* HERO */}
-          <section>
-            <div className="max-w-5xl">
-              <span className="mono text-amber-500 text-xs tracking-[0.6em] uppercase">
-                Thesis / Access
-              </span>
-              <h1 className="text-7xl font-bold tracking-tight mt-8">
-                Useful things,<br/>
-                <span className="text-zinc-700">made accessible.</span>
-              </h1>
-              <p className="text-2xl text-zinc-500 mt-10 max-w-2xl">
-                High-signal logic. Zero paywalls.<br/>
-                Tools built for thinking adults.
-              </p>
-            </div>
-          </section>
+        /* STRICT Page Snapping Architecture */
+        .snap-container {
+            scroll-snap-type: y mandatory;
+            height: 100vh;
+            overflow-y: auto;
+            scrollbar-width: none;
+            position: relative;
+            z-index: 10;
+        }
+        .snap-container::-webkit-scrollbar { width: 0px; }
 
-          {/* WORKSPACE */}
-          <section>
-            <div className="max-w-6xl w-full">
-              <h2 className="text-6xl font-bold mb-20">
-                Select a module.
-              </h2>
+        section {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 12rem 12% 6rem 12%; /* Generous padding to clear fixed header */
+            position: relative;
+            box-sizing: border-box;
+        }
 
-              <div className="grid md:grid-cols-3 gap-10">
-                {[
-                  {
-                    id: 'resume',
-                    title: 'Resume Architect',
-                    desc: 'ATS-clean resumes that look human.',
-                    status: 'Live'
-                  },
-                  {
-                    id: 'financial-brain',
-                    title: 'Financial Brain',
-                    desc: 'Strategic financial projections, simplified.',
-                    status: 'Beta'
-                  },
-                  {
-                    id: 'essentials',
-                    title: 'The Essentials',
-                    desc: 'Small tools. Zero friction.',
-                    status: 'Soon'
-                  }
-                ].map(tool => (
-                  <motion.div
-                    key={tool.id}
-                    onClick={() => handleInitialize(tool.id)}
-                    className="beam-card p-12 h-[420px] flex flex-col justify-between"
-                    whileHover={{ scale: 1.03 }}
-                  >
-                    <div>
-                      <span className="mono text-xs text-zinc-600 uppercase">
-                        {tool.status}
-                      </span>
-                      <h3 className="text-4xl font-bold mt-6">
-                        {tool.title}
-                      </h3>
-                      <p className="text-lg text-zinc-500 mt-6">
-                        {tool.desc}
-                      </p>
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .noise::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            opacity: 0.06;
+            z-index: 9999;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3BaseFilter id='filter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23filter)'/%3E%3C/svg%3E");
+        }
+
+        .global-light {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 90% 10%, var(--amber-glow) 0%, transparent 70%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            pointer-events: none;
+        }
+
+        .glow-text {
+            background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.9) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* FIXED: Product Cards Flex Layout */
+        .beam-card {
+            background: rgba(25, 28, 38, 0.85);
+            backdrop-filter: blur(24px);
+            border-radius: 32px;
+            border: 1px solid var(--border);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            padding: 3rem;
+            min-height: 500px;
+            height: 100%;
+        }
+        .beam-card:hover {
+            border-color: rgba(255, 191, 0, 0.5);
+            transform: translateY(-10px);
+            background: rgba(32, 36, 50, 0.95);
+            box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
+        }
+
+        .switch-box {
+            position: fixed;
+            top: 0;
+            right: 4%;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .rope {
+            width: 1.5px;
+            background: linear-gradient(to bottom, #888, #222);
+            position: relative;
+            cursor: grab;
+        }
+        .rope:active { cursor: grabbing; }
+
+        .handle {
+            width: 20px;
+            height: 48px;
+            background: #FFFFFF;
+            border-radius: 6px;
+            box-shadow: 0 10px 40px rgba(0,0,0,1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* HIGH VISIBILITY NAVIGATION - Fixed font issues */
+        .header-bg {
+            background: rgba(10, 12, 18, 0.98); 
+            backdrop-filter: blur(40px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .exit-prompt {
+            position: absolute;
+            right: 40px;
+            bottom: 20px;
+            width: 130px;
+            text-align: right;
+            pointer-events: none;
+        }
+
+        .nav-link {
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.4em;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #FFBF00;
+            letter-spacing: 0.5em;
+        }
+    </style>
+</head>
+<body class="noise">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        const MotionLib = window.framerMotion || window.Motion || {};
+        const motion = MotionLib.motion || {
+            div: (props) => <div {...props}>{props.children}</div>,
+            span: (props) => <span {...props}>{props.children}</span>,
+            section: (props) => <section {...props}>{props.children}</section>
+        };
+        const { AnimatePresence } = MotionLib;
+
+        const Icon = ({ name, size = 16, className = "" }) => {
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [name]);
+            return <i data-lucide={name} className={className} style={{ width: size, height: size }}></i>;
+        };
+
+        const PullSwitch = ({ isOn, onToggle }) => {
+            const [dragY, setDragY] = useState(0);
+            return (
+                <div className="switch-box">
+                    <div className="w-16 h-4 bg-[#0a0a0a] rounded-b-xl border-x border-b border-white/5 flex items-center justify-center">
+                        <div className={`w-3.5 h-3.5 rounded-full blur-sm transition-all duration-700 ${isOn ? 'bg-amber-400 shadow-[0_0_35px_rgba(251,191,36,1)]' : 'bg-zinc-800'}`}></div>
                     </div>
-                    <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-zinc-500">
-                      Initialize <Icon name="arrow-right"/>
+                    <motion.div
+                        drag="y" dragConstraints={{ top: 0, bottom: 60 }} dragElastic={0.1}
+                        onDrag={(e, info) => setDragY(info.offset.y)}
+                        onDragEnd={(e, info) => { if (info.offset.y > 40) onToggle(); setDragY(0); }}
+                        animate={{ y: dragY }}
+                        className="rope h-[220px] flex flex-col items-center"
+                    >
+                        <div className="absolute top-full flex flex-col items-center">
+                            <div className="handle flex flex-col justify-around py-3 px-2 opacity-40">
+                                <div className="w-full h-[2px] bg-black"></div>
+                                <div className="w-full h-[2px] bg-black"></div>
+                                <div className="w-full h-[2px] bg-black"></div>
+                            </div>
+                            <AnimatePresence>
+                                {isOn && (
+                                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="exit-prompt">
+                                        <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest leading-tight">Leaving? <br/><span className="text-zinc-500">Power Down</span></p>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </motion.div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [isOn, setIsOn] = useState(false);
+
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, []);
+
+            const handleProductClick = (id) => {
+                if (id === 'financial-brain') {
+                    // Correctly matches your subfolder structure on GitHub
+                    window.open('financial-brain/index.html', '_blank');
+                }
+            };
+
+            return (
+                <div className={`relative min-h-screen transition-colors duration-1000 ${isOn ? 'bg-[#11141b]' : 'bg-[#010101]'}`}>
+                    <div className={`global-light ${isOn ? 'opacity-100' : 'opacity-0'}`}></div>
+                    <PullSwitch isOn={isOn} onToggle={() => setIsOn(!isOn)} />
+
+                    {/* FIXED: High Contrast Header Navigation */}
+                    <header className={`fixed top-0 left-0 w-full z-[80] py-6 px-[12%] transition-all duration-1000 ${isOn ? 'opacity-100 translate-y-0 header-bg' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-6">
+                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_60px_rgba(255,255,255,0.4)]">
+                                    <Icon name="brain" size={26} className="text-black" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="font-black text-3xl tracking-tighter uppercase text-white leading-none">Baba Tools</span>
+                                    <span className="text-[10px] font-black text-amber-400 uppercase tracking-[0.4em] mt-2">Logical. Honest. Free.</span>
+                                </div>
+                            </div>
+                            <div className="hidden lg:flex items-center gap-14">
+                                <a href="#purpose" className="nav-link">Purpose</a>
+                                <a href="#lab" className="nav-link">Products</a>
+                                <a href="#about" className="nav-link">About</a>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className={`snap-container ${isOn ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} style={{ transition: 'opacity 1.5s ease' }}>
+                        
+                        {/* Section 1: Hero */}
+                        <section id="purpose">
+                            <div className="max-w-5xl">
+                                <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
+                                    <div className="flex items-center gap-6 mb-12">
+                                        <div className="h-[3px] w-16 bg-amber-500"></div>
+                                        <span className="mono text-amber-500 text-[14px] uppercase tracking-[0.6em] font-black">Chapter 01 / Purpose</span>
+                                    </div>
+                                    <h1 className="text-8xl md:text-[12rem] font-black tracking-tighter mb-16 glow-text leading-[0.8] -ml-4">
+                                        Useful things, <br />
+                                        <span className="text-zinc-700 tracking-[-0.04em]">made accessible.</span>
+                                    </h1>
+                                    <p className="text-2xl md:text-5xl text-zinc-300 font-medium leading-tight tracking-tight max-w-4xl mb-24">
+                                        High-signal tools that usually sit behind paywalls. <br/>
+                                        No subscription. No tracking. No limits.
+                                    </p>
+                                    <div className="flex items-center gap-14">
+                                        <div className="flex -space-x-6">
+                                            {[1,2,3].map(i => <div key={i} className="w-16 h-16 rounded-full border-4 border-[#11141b] bg-zinc-800 flex items-center justify-center shadow-2xl hover:scale-110 transition-transform"><Icon name="shield-check" size={24} className="text-amber-500"/></div>)}
+                                        </div>
+                                        <div className="space-y-1.5 pl-12 border-l-2 border-white/10">
+                                            <p className="text-[14px] font-black text-white uppercase tracking-widest">Logic First Protocol</p>
+                                            <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Established 2026</p>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        </section>
+
+                        {/* Section 2: Journey */}
+                        <section className="bg-white/[0.02] border-y border-white/5">
+                            <div className="max-w-6xl grid md:grid-cols-2 gap-32 items-center">
+                                <div className="space-y-16">
+                                    <div className="space-y-10">
+                                        <span className="mono text-zinc-500 text-[13px] uppercase tracking-[0.6em] font-black block">Chapter 02 / Journey</span>
+                                        <h2 className="text-7xl font-bold glow-text tracking-tighter leading-none italic">Pharma logic. <br/>Finance rigor.</h2>
+                                    </div>
+                                    <div className="space-y-12 text-2xl md:text-3xl text-zinc-400 font-medium leading-relaxed">
+                                        <p>Industry pivots taught me one truth: <br/><span className="text-white italic underline decoration-amber-500 decoration-4 underline-offset-[20px]">Value is found in outcomes.</span></p>
+                                        <p className="text-xl text-zinc-500 leading-relaxed max-w-xl">I transitioned from clinical labs to market analytical rigor. I design systems that solve problems, not systems that collect data.</p>
+                                    </div>
+                                </div>
+                                <div className="aspect-square rounded-[6rem] border-2 border-white/10 bg-black/40 flex items-center justify-center p-24 shadow-2xl">
+                                    <div className="text-center hover:scale-110 transition-transform duration-700">
+                                        <Icon name="workflow" size={110} className="mb-14 mx-auto text-amber-500" />
+                                        <p className="mono text-[13px] uppercase tracking-[0.6em] font-black text-white">Logic Driven</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Section 3: Lab / Products */}
+                        <section id="lab">
+                            <div className="max-w-7xl mx-auto w-full">
+                                <div className="mb-24 flex flex-col md:flex-row justify-between items-start md:items-end gap-12 border-b border-white/10 pb-20">
+                                    <div className="space-y-6">
+                                        <span className="mono text-zinc-500 text-[13px] uppercase block tracking-[0.7em] font-black">Chapter 03 / Products</span>
+                                        <h2 className="text-7xl md:text-8xl font-bold glow-text tracking-tighter leading-none italic">The Library.</h2>
+                                    </div>
+                                    <div className="flex items-center gap-6 px-8 py-3 rounded-full bg-emerald-500/10 border border-emerald-500/30">
+                                        <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        <span className="text-[13px] font-black text-emerald-400 uppercase tracking-[0.6em]">Registry Active</span>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                                    {[
+                                        { id: 'resume', title: "Resume Architect", cat: "CAREER", desc: "Build ATS-beating resumes that actually look like a human wrote them. Precision profile engine.", status: "Live" },
+                                        { id: 'financial-brain', title: "Financial Brain", cat: "FINANCE", desc: "Strategic projections simplified. Intelligence-driven wealth planning with logic first.", status: "Active" },
+                                        { id: 'essentials', title: "The Essentials", cat: "UTILITY", desc: "Small, high-precision tools for everyday friction. Zero accounts. Zero tracking.", status: "Live" }
+                                    ].map((p, i) => (
+                                        <div key={i} onClick={() => handleProductClick(p.id)} className="beam-card group cursor-pointer">
+                                            <div className="flex-1 flex flex-col gap-14">
+                                                <div className="flex justify-between items-start">
+                                                    <span className="mono text-zinc-500 text-[12px] uppercase tracking-widest font-black">{p.cat}</span>
+                                                    <span className="text-[11px] font-black text-white uppercase bg-zinc-800 border border-white/10 px-4 py-2 rounded-xl group-hover:bg-amber-500 group-hover:text-black transition-all">{p.status}</span>
+                                                </div>
+                                                <div className="space-y-6">
+                                                    <h3 className="text-5xl font-bold group-hover:text-amber-400 transition-colors leading-tight tracking-tighter">{p.title}</h3>
+                                                    <p className="text-xl text-zinc-400 font-medium leading-relaxed">{p.desc}</p>
+                                                </div>
+                                            </div>
+                                            <div className="mt-16 pt-10 border-t border-white/5 flex items-center gap-5 text-sm font-black uppercase tracking-[0.4em] text-zinc-600 group-hover:text-white transition-all">
+                                                Initialize <Icon name="arrow-right" size={20} className="group-hover:translate-x-3 transition-transform" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Section 4: About / Founders Story */}
+                        <section id="about">
+                            <div className="max-w-6xl mx-auto">
+                                <div className="grid lg:grid-cols-2 gap-40 items-start">
+                                    <div className="space-y-24">
+                                        <div className="w-32 h-[3px] bg-amber-500"></div>
+                                        <h3 className="text-7xl font-bold glow-text tracking-tighter leading-none italic">Chapter 04 / The Story.</h3>
+                                        <div className="space-y-16 text-2xl text-zinc-400 font-medium leading-relaxed">
+                                            <p>Baba Tools started in 2026. My career didn't follow a typical tech roadmap.</p>
+                                            <p>I started in <span className="text-white">Pharmaceuticals</span>, focusing on extreme precision. I then pivoted to <span className="text-white">Finance</span>, mastering analytical rigor.</p>
+                                            <p>Today, as a <span className="text-white">Product Manager</span>, I blend those worlds. I build these tools because I believe digital utility should be high-signal and low-friction.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex flex-col items-center lg:items-end text-center lg:text-right pt-32 lg:pt-80">
+                                        <h4 className="text-8xl font-black glow-text mb-20 tracking-tighter uppercase italic">Calculated <br/>for impact.</h4>
+                                        <div className="flex gap-20 text-zinc-500 font-black text-[14px] uppercase tracking-[0.6em] mb-60">
+                                            <a href="#" className="hover:text-amber-500 transition-all">LinkedIn</a>
+                                            <a href="#" className="hover:text-amber-500 transition-all">GitHub</a>
+                                        </div>
+                                        <div className="flex items-center gap-6 justify-center lg:justify-end opacity-40">
+                                            <Icon name="brain" size={32} className="text-white" />
+                                            <div className="text-[14px] font-black text-white uppercase tracking-[0.8em]">© 2026 / BABA.TOOLS</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
 
-          {/* PHILOSOPHY */}
-          <section className="bg-white text-black">
-            <div className="max-w-5xl text-center mx-auto">
-              <h2 className="text-8xl font-black mb-16">
-                Zero catch.
-              </h2>
-              <p className="text-4xl text-zinc-500">
-                No logins. No tracking.<br/>
-                If it’s here — it’s yours.
-              </p>
-            </div>
-          </section>
+                    {/* Offline Overlay */}
+                    <AnimatePresence>
+                        {!isOn && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <div className="text-center space-y-20">
+                                    <div className="flex flex-col items-center gap-20">
+                                        <div className="w-px h-80 bg-gradient-to-t from-zinc-800 to-transparent"></div>
+                                        <div className="space-y-8">
+                                            <div className="flex items-center gap-8 justify-center mb-14">
+                                                <div className="w-16 h-16 bg-zinc-900 border border-white/10 rounded-3xl flex items-center justify-center shadow-2xl">
+                                                    <Icon name="brain" size={36} className="text-zinc-700" />
+                                                </div>
+                                                <span className="font-bold text-5xl tracking-tighter uppercase text-zinc-700 leading-none">Baba Tools</span>
+                                            </div>
+                                            <span className="mono text-[16px] uppercase tracking-[2em] text-zinc-800 font-black block">Strategic Lab Offline</span>
+                                            <p className="text-[14px] text-zinc-700 font-bold uppercase tracking-widest">Pull the rope to engage systems</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        };
 
-          {/* FOOTER */}
-          <section>
-            <div className="max-w-5xl mx-auto text-center">
-              <h3 className="text-5xl font-bold mb-10">
-                Built for clarity.
-              </h3>
-              <p className="text-lg text-zinc-500 max-w-xl mx-auto">
-                Pharma discipline. Finance rigor. Product thinking.
-              </p>
-              <div className="mt-20 mono text-xs tracking-[0.6em] text-zinc-700">
-                © 2024 BABA.TOOLS
-              </div>
-            </div>
-          </section>
-
-        </div>
-      );
-    };
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
