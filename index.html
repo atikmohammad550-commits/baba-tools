@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Baba Tools | Logical. Honest. Free.</title>
 
-  <!-- Core libs -->
+  <!-- CDN libs (Cloudflare safe) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -30,9 +30,7 @@
       height: 100vh;
       overflow-y: auto;
       scroll-snap-type: y mandatory;
-      scrollbar-width: none;
     }
-    .snap-container::-webkit-scrollbar { display: none; }
 
     section {
       min-height: 100vh;
@@ -46,36 +44,12 @@
       background: rgba(12,12,14,0.6);
       border: 1px solid rgba(255,255,255,0.06);
       border-radius: 24px;
-      transition: all .5s ease;
+      transition: all .4s ease;
+      cursor: pointer;
     }
     .beam-card:hover {
       transform: translateY(-6px);
-      border-color: rgba(255,191,0,.35);
-    }
-
-    /* Rope switch */
-    .switch-box {
-      position: fixed;
-      top: 0;
-      right: 4%;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .rope {
-      width: 1px;
-      height: 260px;
-      background: linear-gradient(to bottom, #444, #111);
-      cursor: grab;
-    }
-    .handle {
-      width: 14px;
-      height: 36px;
-      background: #f3f4f6;
-      border-radius: 4px;
-      margin-top: 6px;
-      box-shadow: 0 10px 20px rgba(0,0,0,.6);
+      border-color: rgba(255,191,0,.3);
     }
   </style>
 </head>
@@ -84,8 +58,13 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
-    const { motion, AnimatePresence } = window.framerMotion;
+    const { useEffect } = React;
+
+    /* 🔒 SAFE FRAMER MOTION ACCESS (NO BLACK SCREEN) */
+    const Motion = window.framerMotion || {};
+    const motion = Motion.motion || {
+      div: (props) => <div {...props}>{props.children}</div>
+    };
 
     const Icon = ({ name, size = 16 }) => {
       useEffect(() => {
@@ -94,140 +73,124 @@
       return <i data-lucide={name} style={{ width: size, height: size }}></i>;
     };
 
-    const PullSwitch = ({ isOn, toggle }) => {
-      return (
-        <div className="switch-box">
-          <div className="rope" onClick={toggle}></div>
-          <div className="handle"></div>
-        </div>
-      );
-    };
-
     const App = () => {
-      const [isOn, setIsOn] = useState(false);
 
       const handleInitialize = (id) => {
         if (id === 'financial-brain') {
-          window.open('/financial-brain/', '_blank');
+          window.open('/financial-brain/index.html', '_blank');
           return;
         }
-        alert('This tool is not live yet.');
+        alert('Tool not live yet');
       };
 
       return (
-        <div className="relative min-h-screen">
-          <PullSwitch isOn={isOn} toggle={() => setIsOn(!isOn)} />
+        <div className="snap-container">
 
-          <AnimatePresence>
-            {isOn && (
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 40 }}
-                transition={{ duration: 1 }}
-                className="snap-container"
-              >
+          {/* HERO */}
+          <section>
+            <div className="max-w-5xl">
+              <span className="mono text-amber-500 text-xs tracking-[0.6em] uppercase">
+                Thesis / Access
+              </span>
+              <h1 className="text-7xl font-bold tracking-tight mt-8">
+                Useful things,<br/>
+                <span className="text-zinc-700">made accessible.</span>
+              </h1>
+              <p className="text-2xl text-zinc-500 mt-10 max-w-2xl">
+                High-signal logic. Zero paywalls.<br/>
+                Tools built for thinking adults.
+              </p>
+            </div>
+          </section>
 
-                {/* HERO */}
-                <section>
-                  <div className="max-w-5xl">
-                    <span className="mono text-amber-500 text-xs tracking-[0.6em] uppercase">
-                      Thesis / Access
-                    </span>
-                    <h1 className="text-7xl md:text-[9rem] font-bold tracking-tight mt-10 leading-[0.85]">
-                      Useful things,<br/>
-                      <span className="text-zinc-700">made accessible.</span>
-                    </h1>
-                    <p className="text-2xl text-zinc-500 mt-12 max-w-2xl">
-                      High-signal logic. Zero paywalls.<br/>
-                      Tools built for thinking adults.
-                    </p>
-                  </div>
-                </section>
+          {/* WORKSPACE */}
+          <section>
+            <div className="max-w-6xl w-full">
+              <h2 className="text-6xl font-bold mb-20">
+                Select a module.
+              </h2>
 
-                {/* WORKSPACE */}
-                <section>
-                  <div className="max-w-6xl w-full">
-                    <h2 className="text-6xl font-bold mb-20">Select a module.</h2>
-
-                    <div className="grid md:grid-cols-3 gap-10">
-                      {[
-                        {
-                          id: 'resume',
-                          title: 'Resume Architect',
-                          desc: 'ATS-clean resumes that look human.',
-                          status: 'Live'
-                        },
-                        {
-                          id: 'financial-brain',
-                          title: 'Financial Brain',
-                          desc: 'Strategic financial projections, simplified.',
-                          status: 'Beta'
-                        },
-                        {
-                          id: 'essentials',
-                          title: 'The Essentials',
-                          desc: 'Small tools. Zero friction.',
-                          status: 'Soon'
-                        }
-                      ].map(tool => (
-                        <div
-                          key={tool.id}
-                          onClick={() => handleInitialize(tool.id)}
-                          className="beam-card p-12 h-[420px] flex flex-col justify-between cursor-pointer"
-                        >
-                          <div>
-                            <span className="mono text-xs text-zinc-600 uppercase">
-                              {tool.status}
-                            </span>
-                            <h3 className="text-4xl font-bold mt-6">
-                              {tool.title}
-                            </h3>
-                            <p className="text-lg text-zinc-500 mt-6">
-                              {tool.desc}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-zinc-500">
-                            Initialize <Icon name="arrow-right"/>
-                          </div>
-                        </div>
-                      ))}
+              <div className="grid md:grid-cols-3 gap-10">
+                {[
+                  {
+                    id: 'resume',
+                    title: 'Resume Architect',
+                    desc: 'ATS-clean resumes that look human.',
+                    status: 'Live'
+                  },
+                  {
+                    id: 'financial-brain',
+                    title: 'Financial Brain',
+                    desc: 'Strategic financial projections, simplified.',
+                    status: 'Beta'
+                  },
+                  {
+                    id: 'essentials',
+                    title: 'The Essentials',
+                    desc: 'Small tools. Zero friction.',
+                    status: 'Soon'
+                  }
+                ].map(tool => (
+                  <motion.div
+                    key={tool.id}
+                    onClick={() => handleInitialize(tool.id)}
+                    className="beam-card p-12 h-[420px] flex flex-col justify-between"
+                    whileHover={{ scale: 1.03 }}
+                  >
+                    <div>
+                      <span className="mono text-xs text-zinc-600 uppercase">
+                        {tool.status}
+                      </span>
+                      <h3 className="text-4xl font-bold mt-6">
+                        {tool.title}
+                      </h3>
+                      <p className="text-lg text-zinc-500 mt-6">
+                        {tool.desc}
+                      </p>
                     </div>
-                  </div>
-                </section>
-
-                {/* PHILOSOPHY */}
-                <section className="bg-white text-black">
-                  <div className="max-w-5xl mx-auto text-center">
-                    <h2 className="text-8xl font-black mb-16">Zero catch.</h2>
-                    <p className="text-4xl text-zinc-500">
-                      No logins. No tracking.<br/>
-                      If it’s here — it’s yours.
-                    </p>
-                  </div>
-                </section>
-
-                {/* FOOTER */}
-                <section>
-                  <div className="max-w-5xl mx-auto text-center">
-                    <h3 className="text-5xl font-bold mb-10">Built for clarity.</h3>
-                    <p className="text-lg text-zinc-500 max-w-xl mx-auto">
-                      Pharma discipline. Finance rigor. Product thinking.
-                    </p>
-                    <div className="mt-20 mono text-xs tracking-[0.6em] text-zinc-700">
-                      © 2024 BABA.TOOLS
+                    <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-zinc-500">
+                      Initialize <Icon name="arrow-right"/>
                     </div>
-                  </div>
-                </section>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
 
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* PHILOSOPHY */}
+          <section className="bg-white text-black">
+            <div className="max-w-5xl text-center mx-auto">
+              <h2 className="text-8xl font-black mb-16">
+                Zero catch.
+              </h2>
+              <p className="text-4xl text-zinc-500">
+                No logins. No tracking.<br/>
+                If it’s here — it’s yours.
+              </p>
+            </div>
+          </section>
+
+          {/* FOOTER */}
+          <section>
+            <div className="max-w-5xl mx-auto text-center">
+              <h3 className="text-5xl font-bold mb-10">
+                Built for clarity.
+              </h3>
+              <p className="text-lg text-zinc-500 max-w-xl mx-auto">
+                Pharma discipline. Finance rigor. Product thinking.
+              </p>
+              <div className="mt-20 mono text-xs tracking-[0.6em] text-zinc-700">
+                © 2024 BABA.TOOLS
+              </div>
+            </div>
+          </section>
+
         </div>
       );
     };
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
   </script>
 </body>
 </html>
