@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BABA Studio - Create a resume that speaks for you</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['"Inter"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'] 
+                    },
+                    colors: {
+                        ios: { blue: '#007AFF', pink: '#FF2D55', purple: '#5856D6' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root { --accent-color: #007AFF; --spacing-factor: 1; }
+        
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+
+        body {
+            background-color: #FFFFFF;
+            color: #000000;
+            overflow: hidden;
+        }
+
+        /* Seamless Cinematic Scroll Snap */
+        #view-dashboard {
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            height: 100vh;
+            scroll-behavior: smooth;
+        }
+
+        .landing-section {
+            scroll-snap-align: start;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; 
+            padding: 2rem;
+            position: relative;
+            background: #FFFFFF;
+        }
+
+        /* Reveal Animations */
+        .reveal-node {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .reveal-node.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* View Transitions */
+        .view-section { 
+            position: fixed; inset: 0; display: none; opacity: 0; 
+            transform: scale(1.01) translateY(5px);
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .view-active { display: flex !important; opacity: 1; transform: scale(1) translateY(0); z-index: 10; }
+
+        .ios-glass {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+        }
+        
+        .ios-glass-dark {
+            background: rgba(10, 10, 15, 0.98);
+            backdrop-filter: blur(50px);
+        }
+
+        .text-premium {
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 50%, #FF2D55 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .ios-segmented-control { background: rgba(0, 0, 0, 0.06); border-radius: 12px; padding: 4px; display: flex; width: 100%; gap: 4px; }
+        .ios-tab { flex: 1; text-align: center; padding: 10px 0; border-radius: 10px; font-size: 13px; font-weight: 700; transition: all 0.2s; cursor: pointer; border: none; }
+        .ios-tab-active { background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.1); color: #000000; }
+        .ios-tab-inactive { color: #8E8E93; }
+
+        .input-label { color: #000000; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; font-size: 0.65rem; margin-bottom: 0.4rem; display: block; }
+        
+        .ios-input { 
+            background: #FFFFFF; 
+            border: 1.5px solid rgba(0,0,0,0.1); 
+            border-radius: 14px; padding: 14px 18px; 
+            font-size: 14px; width: 100%; color: #000000; font-weight: 600;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ios-input:focus { border-color: #007AFF; outline: none; box-shadow: 0 0 0 5px rgba(0, 122, 255, 0.08); }
+
+        .powered-badge {
+            display: inline-flex; align-items: center; gap: 10px; padding: 10px 24px;
+            background: #FFFFFF; border-radius: 100px; border: 1px solid rgba(0, 122, 255, 0.15);
+            font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em;
+            color: #000; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            margin-bottom: 2rem;
+        }
+
+        #modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px);
+            z-index: 100; display: none; align-items: center; justify-content: center;
+        }
+
+        /* Fixed Preview Area */
+        #preview-viewport {
+            width: 100%; height: 100%; overflow: auto; display: flex; justify-content: center; padding: 40px; background: #F8F8FA;
+        }
+
+        .page-container {
+            width: 210mm; min-height: 297mm; background: #FFFFFF;
+            transform-origin: center top;
+            color: #000000; flex-shrink: 0;
+            box-shadow: 0 0 50px rgba(0,0,0,0.15);
+        }
+
+        .resume-content { padding: 25mm 15mm; line-height: 1.45; font-size: 10pt; }
+        .resume-section { margin-bottom: calc(18px * var(--spacing-factor)); }
+        .resume-section h2 { font-size: 10pt; font-weight: 700; border-bottom: 1.5px solid #eee; padding-bottom: 2px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-color); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col selection:bg-ios-blue/20 text-black">
+
+    <!-- CUSTOM SECTION MODAL -->
+    <div id="modal-overlay">
+        <div class="ios-glass p-10 rounded-[40px] w-full max-w-md shadow-2xl space-y-6 border-none text-center">
+            <h3 class="text-2xl font-black tracking-tight text-black">New Module</h3>
+            <p class="text-sm opacity-60">Create a specific section for your career (e.g. Passport, Certifications).</p>
+            <input type="text" id="modal-input" class="ios-input border-2 text-center" placeholder="e.g. Certifications" autofocus>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeModal()" class="flex-1 py-4 rounded-2xl font-bold bg-black/5 hover:bg-black/10 transition-all uppercase text-[10px] tracking-widest text-black border-none">Cancel</button>
+                <button onclick="confirmAddSection()" class="flex-1 py-4 rounded-2xl font-bold bg-black text-white shadow-xl hover:bg-ios-blue transition-all uppercase text-[10px] tracking-widest">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 1: IMMERSIVE 4-PAGE DASHBOARD -->
+    <div id="view-dashboard" class="view-section view-active flex-col">
+        
+        <!-- Persistent Taskbar -->
+        <nav class="fixed top-6 inset-x-6 z-50 flex items-center justify-between px-8 py-4 ios-glass rounded-[24px] max-w-6xl mx-auto shadow-sm border-none">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg"><i class="fa-solid fa-feather-pointed"></i></div>
+                <h1 class="text-xl font-bold tracking-tight text-black uppercase">BABA Studio</h1>
+            </div>
+            <button onclick="window.startNewResume()" class="bg-black text-white px-8 py-3 rounded-full text-xs font-bold hover:scale-105 transition-all shadow-md">Open Studio</button>
+        </nav>
+
+        <!-- PAGE 1: THE HOOK (pt-32 ensures clearance of taskbar) -->
+        <section class="landing-section pt-32">
+            <div class="max-w-6xl w-full text-center space-y-8 reveal-node">
+                <div class="powered-badge mx-auto">
+                    <span class="w-2.5 h-2.5 rounded-full bg-ios-blue animate-pulse"></span>
+                    Powered by Baba Tools
+                </div>
+                <h1 class="text-6xl md:text-9xl font-black tracking-tighter uppercase leading-[0.9] text-premium">SPEAK FOR <br>YOURSELF.</h1>
+                <div class="space-y-4">
+                    <p class="text-black text-lg md:text-4xl font-bold max-w-4xl mx-auto tracking-tight leading-tight">Create a resume that speaks for you.</p>
+                    <p class="text-gray-500 text-sm md:text-xl font-medium max-w-3xl mx-auto italic opacity-60">Because your resume deserves more than a template.</p>
+                </div>
+                <div class="animate-bounce opacity-30 pt-8"><i class="fa-solid fa-chevron-down text-3xl text-black"></i></div>
+            </div>
+        </section>
+
+        <!-- PAGE 2: PHILOSOPHY -->
+        <section class="landing-section pt-32 bg-black/[0.01]">
+            <div class="max-w-5xl w-full text-center space-y-12 px-8 reveal-node">
+                <div class="powered-badge mx-auto">
+                    <span class="w-2.5 h-2.5 rounded-full bg-ios-purple animate-pulse"></span>
+                    Powered by Baba Tools
+                </div>
+                <h2 class="text-4xl md:text-7xl font-black tracking-tighter uppercase text-black leading-none tracking-tighter">NO SIGNUP DRAMA.<br><span class="text-premium italic text-3xl md:text-5xl">No pricing. 100% free.</span></h2>
+                <p class="text-lg md:text-xl font-medium text-black/60 leading-relaxed max-w-3xl mx-auto pt-4 italic">Privacy is a standard. We don't mine your data or hide layouts behind a paywall. Your session is private.</p>
+            </div>
+        </section>
+
+        <!-- PAGE 3: PRECISION -->
+        <section class="landing-section pt-32">
+            <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-20 px-12 items-center text-black reveal-node">
+                <div class="space-y-10 text-left">
+                    <div class="powered-badge">
+                        <span class="w-2.5 h-2.5 rounded-full bg-ios-pink animate-pulse"></span>
+                        Powered by Baba Tools
+                    </div>
+                    <h2 class="text-6xl font-black tracking-tighter uppercase leading-[0.9]">Technical <br><span class="text-premium italic text-5xl">Mastery.</span></h2>
+                    <p class="text-xl font-medium text-black/60 leading-relaxed max-w-md">Retina rendering ensures your artifact stays crisp on any screen. Recruiter-grade execution in every pixel.</p>
+                </div>
+                <div class="ios-glass p-14 rounded-[60px] shadow-2xl space-y-10 border-none font-bold">
+                    <div class="flex gap-8 items-center"><i class="fa-solid fa-shield-check text-ios-blue text-3xl"></i><span class="font-bold uppercase text-sm tracking-[0.2em]">100% Private Work</span></div>
+                    <div class="flex gap-8 items-center"><i class="fa-solid fa-file-pdf text-ios-purple text-3xl"></i><span class="font-bold uppercase text-sm tracking-[0.2em]">Vector Export</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 4: THE LAUNCH -->
+        <section class="landing-section pt-32">
+            <div class="max-w-4xl w-full text-center reveal-node text-black">
+                <div class="powered-badge mx-auto">
+                    <span class="w-2.5 h-2.5 rounded-full bg-black animate-pulse"></span>
+                    Powered by Baba Tools
+                </div>
+                <h2 class="text-7xl md:text-9xl font-black tracking-tighter uppercase leading-none pb-8">OWN THE <br><span class="text-premium italic text-6xl md:text-8xl">STUDIO.</span></h2>
+                <button onclick="window.startNewResume()" class="ios-glass px-16 py-8 rounded-[40px] text-xl font-bold flex items-center gap-6 hover:scale-[1.05] transition-all mx-auto border-none cursor-pointer shadow-2xl mt-4">
+                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-bolt-lightning text-xl"></i></div>
+                    <span class="text-black tracking-tight uppercase font-black text-2xl">Start Workspace</span>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- VIEW 2: STUDIO EDITOR -->
+    <div id="view-editor" class="view-section flex-col h-full bg-transparent">
+        <header class="h-20 px-8 ios-glass flex items-center justify-between z-30 shrink-0 m-5 rounded-[30px] shadow-lg border-none text-black">
+            <div class="flex items-center gap-5">
+                <button onclick="window.goToDashboard()" class="w-10 h-10 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center transition-all border-none focus:outline-none"><i class="fa-solid fa-arrow-left text-black"></i></button>
+                <div class="h-6 w-px bg-black/10"></div>
+                <div class="flex flex-col"><span class="text-sm font-bold text-black uppercase tracking-tight">BABA Studio</span><span class="text-[9px] font-bold text-ios-blue uppercase tracking-widest">Active Workspace</span></div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="toggle-preview-btn" onclick="window.togglePreview(true)" class="px-5 py-2 text-xs font-bold text-black bg-white rounded-full shadow-sm border border-black/10 hover:bg-black hover:text-white transition-all focus:outline-none"><i class="fa-regular fa-eye mr-2"></i> <span id="preview-btn-text">Preview & Style</span></button>
+                <button onclick="window.downloadPDF()" class="bg-black text-white px-8 py-2.5 rounded-full text-xs font-bold shadow-xl hover:bg-ios-blue active:scale-95 transition-all border-none"><i class="fa-solid fa-download mr-1"></i> Download PDF</button>
+            </div>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden relative px-5 pb-5 gap-5">
+            <!-- Sidebar -->
+            <aside id="left-sidebar" class="w-80 flex flex-col ios-glass rounded-[32px] shadow-sm overflow-hidden border-none text-black">
+                <div class="p-4" id="tab-container" style="display:none;">
+                    <div class="ios-segmented-control">
+                        <button onclick="window.switchSidebarTab('content')" id="tab-content" class="ios-tab ios-tab-active">Content</button>
+                        <button onclick="window.switchSidebarTab('design')" id="tab-design" class="ios-tab ios-tab-inactive">Mastery</button>
+                    </div>
+                </div>
+                <div id="sidebar-content" class="flex-1 overflow-y-auto px-5 pb-5 space-y-1.5 pt-4">
+                    <div id="section-list"></div>
+                    <button onclick="window.openCustomSectionModal()" class="mt-4 w-full py-4 border-2 border-dashed border-black/10 rounded-2xl text-[10px] font-bold text-black/30 hover:text-black transition-all uppercase tracking-widest border-none bg-transparent">+ Add Module</button>
+                </div>
+                <div id="sidebar-design" class="hidden flex-1 overflow-y-auto px-8 pb-8 space-y-12 pt-8">
+                    <div><h4 class="input-label">Hierarchy</h4><p class="text-[9px] text-gray-400 mb-4 tracking-widest italic uppercase">Drag to reorder</p><div id="order-list" class="space-y-2 mb-10"></div></div>
+                    <div><h4 class="input-label">Themes</h4><div class="grid grid-cols-1 gap-2.5" id="template-grid"></div></div>
+                    <div><h4 class="input-label">Brand Palette</h4><div class="flex gap-2.5 flex-wrap" id="color-picker"></div></div>
+                </div>
+            </aside>
+            
+            <div class="flex-1 overflow-y-auto ios-glass rounded-[40px] shadow-lg border-none" id="editor-panel">
+                <div class="max-w-3xl mx-auto py-16 px-10 pb-48">
+                    <div id="form-container" class="space-y-12 animate-fade-in text-black"></div>
+                    <div class="flex justify-between mt-16 pt-10 border-t border-black/5">
+                        <button onclick="window.goToPrevSection()" id="btn-prev-section" class="px-8 py-3 rounded-2xl border-2 border-black text-black font-bold text-[10px] uppercase tracking-widest hover:bg-black hover:text-white transition-all border-none bg-transparent">Back</button>
+                        <button onclick="window.goToNextSection()" id="btn-next-section" class="bg-black text-white px-12 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl hover:bg-ios-blue transition-all border-none">Next Phase</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PREVIEW DRAWER (CLIPPING FIX) -->
+            <aside id="right-preview" class="absolute inset-y-0 right-0 w-full md:w-[780px] ios-glass shadow-2xl z-50 transform translate-x-full transition-transform duration-500 flex flex-col border-l border-black/5 overflow-hidden">
+                <div class="h-20 flex items-center justify-between px-10 border-b border-white/10 text-black">
+                    <div class="flex flex-col"><span class="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Artifact Render</span><span class="font-bold text-lg text-premium uppercase">A4 Canvas</span></div>
+                    <button onclick="window.togglePreview(false)" class="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-all text-black border-none focus:outline-none"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div id="preview-viewport" class="flex-1 bg-zinc-50/50">
+                    <div id="resume-preview" class="page-container resume-content"></div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const COUNTRY_CODES = [{code:'+91',name:'India'},{code:'+1',name:'USA'},{code:'+44',name:'UK'},{code:'+971',name:'UAE'},{code:'+81',name:'JPN'}];
+        const TEMPLATES = [{id:'modern', name:'Modern Pro', desc:'Centered & Clean.'}, {id:'classic', name:'Legacy Executive', desc:'Professional Serif.'}, {id:'minimal', name:'Studio Clean', desc:'High Contrast Type.'}];
+        const COLORS = ['#007AFF','#000000','#FF2D55','#34C759','#5856D6','#FF9500'];
+        const SECTION_LABELS = { personal: 'Tell us about yourself', summary: 'Professional Bio', experience: 'Track Record', education: 'Educational Background', skills: 'Superpowers', languages: 'Languages' };
+        
+        const INITIAL_DATA = { 
+            settings: { template: 'modern', color: '#000000', spacing: '1.0' }, 
+            order: ['personal', 'summary', 'experience', 'education', 'skills', 'languages'], 
+            visibility: { personal: true, summary: true, experience: true, education: true, skills: true, languages: true },
+            personal: { firstName: '', lastName: '', title: '', email: '', countryCode: '+91', phone: '', city: '' }, 
+            summary: { content: '' }, experience: [{}], education: [{}], skills: { items: [{}] }, languages: { items: [{}] } 
+        };
+
+        let resumeData = JSON.parse(JSON.stringify(INITIAL_DATA));
+        let activeSection = 'personal';
+
+        // --- OBSERVER ---
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) entry.target.classList.add('visible');
+                else entry.target.classList.remove('visible');
+            });
+        }, { threshold: 0.15 });
+
+        // --- CORE LOGIC ---
+        window.openCustomSectionModal = () => { document.getElementById('modal-overlay').style.display = 'flex'; document.getElementById('modal-input').focus(); };
+        window.closeModal = () => { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('modal-input').value = ''; };
+        window.confirmAddSection = () => {
+            const t = document.getElementById('modal-input').value;
+            if(t.trim()) {
+                const id = 'c' + Date.now(); 
+                resumeData[id] = { type: 'custom', title: t, items: [{}] }; 
+                resumeData.order.push(id); resumeData.visibility[id] = true;
+                setActiveSection(id); closeModal(); renderPreview();
+            }
+        };
+
+        window.startNewResume = function() {
+            resumeData = JSON.parse(JSON.stringify(INITIAL_DATA));
+            setActiveSection('personal'); switchView('view-editor');
+            document.getElementById('tab-container').style.display = 'none';
+            renderPreview();
+        }
+        window.goToDashboard = () => switchView('view-dashboard');
+        
+        window.togglePreview = function(forceDesignPhase) {
+            const p = document.getElementById('right-preview');
+            const btnText = document.getElementById('preview-btn-text');
+            const isCurrentlyOpen = !p.classList.contains('translate-x-full');
+            
+            if(isCurrentlyOpen) { 
+                p.classList.add('translate-x-full'); 
+                if(btnText) btnText.innerText = "Preview & Style";
+                document.getElementById('tab-container').style.display = 'none';
+                window.switchSidebarTab('content');
+            } else {
+                p.classList.remove('translate-x-full');
+                if(btnText) btnText.innerText = "Hide Preview";
+                if(forceDesignPhase) { 
+                    window.switchSidebarTab('design');
+                    document.getElementById('tab-container').style.display = 'flex';
+                    renderOrderList();
+                }
+                renderPreview(); // Force synchronous render
+                setTimeout(scalePreview, 310);
+            }
+        }
+
+        function scalePreview() {
+            const container = document.getElementById('resume-preview');
+            const viewport = document.getElementById('preview-viewport');
+            if(!container || !viewport) return;
+            const scale = Math.min(1, (viewport.clientWidth - 80) / 794);
+            container.style.transform = `scale(${scale})`;
+        }
+
+        window.updateSetting = (k, v) => { resumeData.settings[k] = v; renderPreview(); }
+        window.upd = (s,k,v) => { resumeData[s][k]=v; renderPreview(); }
+        window.updArr = (s,i,k,v) => { 
+            const ds = resumeData[s];
+            if (Array.isArray(ds)) ds[i][k] = v; 
+            else ds.items[i][k] = v;
+            renderPreview(); 
+        }
+        window.addItem = (s) => { (Array.isArray(resumeData[s]) ? resumeData[s] : resumeData[s].items).push({}); renderForm(); renderPreview(); }
+        window.delItem = (s,i) => { (Array.isArray(resumeData[s]) ? resumeData[s] : resumeData[s].items).splice(i,1); renderForm(); renderPreview(); }
+        
+        window.switchSidebarTab = (t) => {
+            document.getElementById('sidebar-content').classList.toggle('hidden', t !== 'content');
+            document.getElementById('sidebar-design').classList.toggle('hidden', t !== 'design');
+            document.getElementById('tab-content').className = t === 'content' ? 'ios-tab ios-tab-active' : 'ios-tab ios-tab-inactive';
+            document.getElementById('tab-design').className = t === 'design' ? 'ios-tab ios-tab-active' : 'ios-tab ios-tab-inactive';
+        }
+
+        window.goToNextSection = () => {
+            const idx = resumeData.order.indexOf(activeSection);
+            if(idx < resumeData.order.length-1) setActiveSection(resumeData.order[idx+1]);
+            else { window.togglePreview(true); }
+        }
+        window.goToPrevSection = () => {
+            const idx = resumeData.order.indexOf(activeSection);
+            if(idx > 0) setActiveSection(resumeData.order[idx-1]);
+        }
+
+        function setActiveSection(k) { activeSection=k; renderSidebar(); renderForm(); }
+        function switchView(id) { 
+            document.querySelectorAll('.view-section').forEach(e=>e.classList.remove('view-active')); 
+            document.getElementById(id).classList.add('view-active');
+        }
+
+        function renderSidebar() {
+            const list = document.getElementById('section-list'); if(!list) return; list.innerHTML = '';
+            resumeData.order.forEach(key => {
+                const isActive = activeSection === key;
+                const label = resumeData[key]?.type === 'custom' ? resumeData[key].title : key;
+                list.innerHTML += `<div class="px-5 py-3 rounded-2xl cursor-pointer transition-all uppercase text-[10px] tracking-widest ${isActive ? 'bg-black text-white font-bold shadow-lg':'text-black/50 hover:bg-black/5'}" onclick="setActiveSection('${key}')">${label}</div>`;
+            });
+        }
+
+        function renderForm() {
+            const c = document.getElementById('form-container'); if(!c) return;
+            const d = resumeData[activeSection];
+            const friendly = SECTION_LABELS[activeSection] || (d?.type==='custom' ? d.title : activeSection);
+            let h = `<h2 class="text-6xl font-bold tracking-tighter text-black uppercase leading-[0.9]">${friendly}</h2>`;
+            
+            if(activeSection === 'personal') {
+                h += `<div class="grid grid-cols-2 gap-8 mt-10">
+                    ${inp('First Name','firstName')} ${inp('Last Name','lastName')}
+                    ${inp('Target Job Title','title','text','col-span-2')}
+                    ${inp('Email Address','email','email')}
+                    <div class="col-span-1"><label class="input-label">Phone</label><div class="flex gap-2">
+                        <select class="ios-input ios-select w-28 font-bold text-black border-none bg-black/5" onchange="upd('personal','countryCode',this.value)">${COUNTRY_CODES.map(c => `<option value="${c.code}" ${resumeData.personal.countryCode === c.code ? 'selected':''}>${c.code}</option>`).join('')}</select>
+                        <input type="tel" class="ios-input flex-1 font-bold text-black" value="${resumeData.personal.phone||''}" oninput="handleSmartInput(this, 'personal', 'phone')">
+                    </div></div></div>`;
+            } else if (activeSection === 'summary') {
+                h += `<div class="mt-12 p-8 ios-glass rounded-[40px] border border-black/5 shadow-sm focus-within:border-ios-blue transition-all"><label class="input-label mb-4 text-ios-blue uppercase tracking-widest">Impact Bio</label><textarea class="ios-input h-72 resize-none p-6 font-medium leading-relaxed bg-white border-2 text-black shadow-inner" placeholder="Tell your professional story..." oninput="upd('summary','content',this.value)">${d.content||''}</textarea></div>`;
+            } else {
+                const list = Array.isArray(d) ? d : d.items;
+                list.forEach((item, idx) => {
+                    h += `<div class="bg-black/[0.02] p-10 rounded-[45px] border border-black/5 relative mt-10 text-black">
+                        <button onclick="delItem('${activeSection}',${idx})" class="absolute top-8 right-8 w-11 h-11 rounded-full bg-white text-red-500 shadow-xl active:scale-90 border-none focus:outline-none"><i class="fa-solid fa-trash"></i></button>`;
+                    if(activeSection==='languages'||activeSection==='skills') h+=`<div class="grid grid-cols-2 gap-6">${inpItem(activeSection,idx,'name','Name')} ${activeSection==='languages'?inpItem(activeSection,idx,'level','Level'):''}</div>`;
+                    else h+=`<div class="grid grid-cols-2 gap-6">${inpItem(activeSection,idx,'title','Title')} ${inpItem(activeSection,idx,'date','Dates')} ${inpItem(activeSection,idx,'company','Org')} ${inpItem(activeSection,idx,'description','Details','text','col-span-2')}</div>`;
+                    h += `</div>`;
+                });
+                h += `<button onclick="addItem('${activeSection}')" class="w-full py-5 bg-black text-white rounded-3xl font-bold text-[10px] uppercase tracking-widest mt-8 shadow-xl hover:bg-ios-blue transition-all border-none">+ Add Entry</button>`;
+            }
+            c.innerHTML = h;
+        }
+
+        function renderOrderList() {
+            const list = document.getElementById('order-list'); list.innerHTML = '';
+            resumeData.order.forEach(k => {
+                if(k === 'personal') return;
+                const actualLabel = resumeData[k]?.type === 'custom' ? resumeData[k].title : k;
+                const isHidden = !resumeData.visibility[k];
+                list.innerHTML += `<div data-id="${k}" class="ios-glass p-3 rounded-xl flex items-center justify-between shadow-sm cursor-move border">
+                    <div class="flex items-center gap-3"><i class="fa-solid fa-grip-vertical text-black/20"></i><span class="text-[10px] font-bold uppercase tracking-widest text-black ${isHidden?'opacity-30 line-through':''}">${actualLabel}</span></div>
+                    <button onclick="toggleVisibility('${k}')" class="w-7 h-7 rounded-full bg-black/5 flex items-center justify-center text-black border-none transition-all focus:outline-none"><i class="fa-solid ${isHidden?'fa-eye-slash text-gray-400':'fa-eye text-ios-blue'} text-xs"></i></button>
+                </div>`;
+            });
+            new Sortable(list, { animation: 150, onEnd: () => {
+                resumeData.order = ['personal', ...Array.from(list.children).map(el => el.getAttribute('data-id'))];
+                renderPreview();
+            }});
+        }
+
+        window.toggleVisibility = (k) => { resumeData.visibility[k] = !resumeData.visibility[k]; renderOrderList(); renderPreview(); }
+
+        function inp(l, k, type='text', cls='') { return `<div class="${cls}"><label class="input-label">${l}</label><input type="${type}" class="ios-input" value="${resumeData[activeSection][k]||''}" oninput="handleSmartInput(this, '${activeSection}', '${k}')"></div>`; }
+        function inpItem(s, i, k, l, type='text', cls='') { 
+            const arr = Array.isArray(resumeData[s]) ? resumeData[s] : resumeData[s].items;
+            return `<div class="${cls}"><label class="input-label">${l}</label><input type="${type}" class="ios-input font-bold text-black" value="${arr[i] ? arr[i][k] || '' : ''}" oninput="handleSmartInput(this, '${s}', '${k}', ${i})"></div>`; 
+        }
+
+        function handleSmartInput(el, section, key, index = null) {
+            let val = el.value;
+            if (el.type === 'tel') { val = val.replace(/[^0-9+\-()\s]/g, ''); el.value = val; }
+            if (index === null) upd(section, key, val); else updArr(section, index, key, val);
+        }
+
+        function renderPreview() {
+            const p = document.getElementById('resume-preview'); if(!p) return;
+            const d = resumeData; const theme = d.settings.template;
+            p.className = `page-container resume-content tpl-${theme}`;
+            p.style.fontFamily = theme === 'classic' ? 'Playfair Display, serif' : 'Inter, sans-serif';
+            p.style.setProperty('--accent-color', d.settings.color);
+            p.style.setProperty('--spacing-factor', d.settings.spacing);
+            
+            const renderSec = (k) => {
+                if(!d.visibility[k]) return '';
+                const sec = d[k]; 
+                const items = Array.isArray(sec) ? sec : (sec?.items || []);
+                if(!items || (k !== 'summary' && items.length === 0)) return '';
+                
+                let html = `<div class="resume-section"><h2 style="color:var(--accent-color)">${d[k]?.title || k}</h2>`;
+                if(k==='summary') {
+                    html += `<p class="font-medium text-[9.5pt] text-black leading-relaxed whitespace-pre-wrap">${sec.content || ''}</p>`;
+                } else {
+                    html += items.map(i => `<div class="mb-4">
+                        <div class="flex justify-between font-bold text-[10pt] text-black"><span>${i.title||i.name||''}</span><span class="opacity-40 text-[8.5pt]">${i.date||''}</span></div>
+                        ${i.company ? `<p class="text-[9pt] font-bold opacity-70 text-black">${i.company}</p>` : ''}
+                        <p class="text-[9pt] leading-snug whitespace-pre-wrap mt-1 opacity-90 text-black">${i.description||''}</p>
+                    </div>`).join('');
+                }
+                return html + `</div>`;
+            };
+
+            let head = `<div class="preview-header mb-10 pb-8 border-b-2 border-black ${theme==='modern'?'text-center':''}">
+                <h1 style="color:var(--accent-color); font-size: 24pt; font-weight: 900;">${d.personal.firstName||'NAME'} ${d.personal.lastName||''}</h1>
+                <p class="font-bold text-xl opacity-80 text-black uppercase">${d.personal.title||''}</p>
+                <p class="text-[9pt] font-medium opacity-50 mt-2 text-black">${d.personal.email||''} • ${d.personal.countryCode} ${d.personal.phone}</p>
+            </div>`;
+            
+            p.innerHTML = head + d.order.filter(k=>k!=='personal').map(k=>renderSec(k)).join('');
+        }
+
+        window.downloadPDF = function() {
+            const el = document.getElementById('resume-preview');
+            const clone = el.cloneNode(true);
+            clone.style.transform = 'none';
+            const wrap = document.createElement('div');
+            wrap.style.position = 'fixed'; wrap.style.top = '-9999px'; wrap.appendChild(clone);
+            document.body.appendChild(wrap);
+            html2pdf().set({ margin:0, filename: 'Artifact.pdf', html2canvas:{scale:3, useCORS:true}, jsPDF:{unit:'mm',format:'a4'} }).from(clone).save().then(() => document.body.removeChild(wrap));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('template-grid').innerHTML = TEMPLATES.map(t => `<div onclick="window.updateSetting('template','${t.id}')" class="p-4 bg-black/5 rounded-2xl cursor-pointer hover:bg-black hover:text-white transition-all border-none"><div class="font-bold text-[10px] uppercase">${t.name}</div><div class="text-[8px] opacity-40">${t.desc}</div></div>`).join('');
+            document.getElementById('color-picker').innerHTML = COLORS.map(c => `<div onclick="window.updateSetting('color','${c}')" class="w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-lg hover:scale-125 transition-transform" style="background:${c}"></div>`).join('');
+            renderSidebar(); renderForm(); renderPreview();
+            document.querySelectorAll('.reveal-node').forEach(el => revealObserver.observe(el));
+            window.addEventListener('resize', scalePreview);
+        });
+    </script>
+</body>
+</html>
