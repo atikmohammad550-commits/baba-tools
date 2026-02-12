@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BABA Studio - Create a resume that speaks for you</title>
+    <title>BABA Studio - Elite HD Resume Engine</title>
     
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,11 +11,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    
+    <!-- Cropper.js for professional photo framing -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -23,7 +27,9 @@
                 extend: {
                     fontFamily: { 
                         sans: ['"Inter"', 'sans-serif'],
-                        serif: ['"Playfair Display"', 'serif'] 
+                        serif: ['"Merriweather"', 'serif'],
+                        poppins: ['"Poppins"', 'sans-serif'],
+                        mono: ['"Roboto Mono"', 'monospace']
                     },
                     colors: {
                         ios: { blue: '#007AFF', pink: '#FF2D55', purple: '#5856D6' }
@@ -34,503 +40,628 @@
     </script>
 
     <style>
-        :root { --accent-color: #007AFF; --spacing-factor: 1; }
+        :root { --accent-color: #0D9488; --accent-gradient: linear-gradient(135deg, #0D9488 0%, #0F766E 100%); }
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background: #F8FAFC; font-family: 'Inter', sans-serif; overflow: hidden; }
+
+        /* Dashboard */
+        #view-dashboard { height: 100vh; overflow-y: auto; scroll-behavior: smooth; z-index: 5; background: #fff; scroll-snap-type: y mandatory; }
+        .landing-section { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6rem 2rem; position: relative; scroll-snap-align: start; }
         
-        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
-
-        body {
-            background-color: #FFFFFF;
-            color: #000000;
-            overflow: hidden;
-        }
-
-        /* Seamless Cinematic Scroll Snap */
-        #view-dashboard {
-            scroll-snap-type: y mandatory;
-            overflow-y: scroll;
-            height: 100vh;
-            scroll-behavior: smooth;
-        }
-
-        .landing-section {
-            scroll-snap-align: start;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center; 
-            padding: 2rem;
-            position: relative;
-            background: #FFFFFF;
-        }
-
-        /* Reveal Animations */
-        .reveal-node {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .reveal-node.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* View Transitions */
-        .view-section { 
-            position: fixed; inset: 0; display: none; opacity: 0; 
-            transform: scale(1.01) translateY(5px);
-            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .view-active { display: flex !important; opacity: 1; transform: scale(1) translateY(0); z-index: 10; }
-
-        .ios-glass {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(40px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
-        }
+        /* View Switching */
+        .view-section { position: fixed; inset: 0; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; z-index: 0; display: none; }
+        .view-active { opacity: 1; pointer-events: auto; display: flex !important; flex-direction: column; z-index: 10; }
         
-        .ios-glass-dark {
-            background: rgba(10, 10, 15, 0.98);
-            backdrop-filter: blur(50px);
-        }
+        /* Gradients */
+        .text-gradient { background: linear-gradient(135deg, #2563EB 0%, #9333EA 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-gradient { background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%); color: white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2); transition: all 0.2s; border: none; }
+        .btn-gradient:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3); }
 
-        .text-premium {
-            background: linear-gradient(135deg, #007AFF 0%, #5856D6 50%, #FF2D55 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        /* UI Elements */
+        .ios-glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.05); }
+        .input-label { color: #475569; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem; margin-bottom: 0.4rem; display: block; }
+        .ios-input { background: #fff; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px 14px; font-size: 14px; width: 100%; color: #1E293B; font-weight: 500; transition: all 0.2s; }
+        .ios-input:focus { border-color: var(--accent-color); outline: none; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1); }
 
-        .ios-segmented-control { background: rgba(0, 0, 0, 0.06); border-radius: 12px; padding: 4px; display: flex; width: 100%; gap: 4px; }
-        .ios-tab { flex: 1; text-align: center; padding: 10px 0; border-radius: 10px; font-size: 13px; font-weight: 700; transition: all 0.2s; cursor: pointer; border: none; }
-        .ios-tab-active { background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.1); color: #000000; }
-        .ios-tab-inactive { color: #8E8E93; }
+        .ios-segmented-control { background: #F1F5F9; border-radius: 12px; padding: 4px; display: flex; width: 100%; gap: 4px; }
+        .ios-tab { flex: 1; text-align: center; padding: 10px 0; border-radius: 10px; font-size: 12px; font-weight: 800; transition: all 0.2s; cursor: pointer; border: none; text-transform: uppercase; letter-spacing: 0.05em; }
+        .ios-tab-active { background: #FFFFFF; box-shadow: 0 3px 8px rgba(0,0,0,0.05); color: #2563EB; }
+        .ios-tab-inactive { color: #64748B; background: transparent; }
 
-        .input-label { color: #000000; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; font-size: 0.65rem; margin-bottom: 0.4rem; display: block; }
-        
-        .ios-input { 
+        /* Sidebar Navigation Items */
+        .module-item { display: flex; align-items: center; gap: 6px; border-radius: 14px; margin-bottom: 6px; padding-right: 6px; }
+        .module-btn { flex: 1; text-align: left; padding: 14px 18px; border-radius: 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; }
+        .module-btn-active { background: linear-gradient(135deg, #EFF6FF 0%, #EEF2FF 100%); color: #2563EB; box-shadow: 0 2px 10px rgba(37, 99, 235, 0.1); border: 1px solid #DBEAFE; }
+        .module-btn-inactive { color: #475569; border: 1px solid transparent; }
+        .module-btn-inactive:hover { background: #F8FAFC; color: #1E293B; border-color: #E2E8F0; }
+        .module-delete-tab { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #94A3B8; cursor: pointer; transition: all 0.2s; background: transparent; border: none; }
+        .module-delete-tab:hover { background: #FEE2E2; color: #EF4444; }
+
+        /* Preview Canvas & Multi-Page Visual Guides */
+        #preview-viewport { flex: 1; overflow: auto; display: flex; justify-content: center; padding: 40px; background: #E2E8F0; }
+        .page-container { 
+            width: 210mm; 
+            min-height: 297mm; 
             background: #FFFFFF; 
-            border: 1.5px solid rgba(0,0,0,0.1); 
-            border-radius: 14px; padding: 14px 18px; 
-            font-size: 14px; width: 100%; color: #000000; font-weight: 600;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top center; 
+            color: #1E293B; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1); 
+            position: relative; 
+            overflow: visible; /* Let it expand for multiple pages in preview */
+            
+            /* Visual Page Breaks every A4 length */
+            background-image: linear-gradient(to bottom, transparent 296.5mm, #94A3B8 296.5mm, #94A3B8 297.5mm, transparent 297.5mm);
+            background-size: 100% 297mm;
         }
-        .ios-input:focus { border-color: #007AFF; outline: none; box-shadow: 0 0 0 5px rgba(0, 122, 255, 0.08); }
-
-        .powered-badge {
-            display: inline-flex; align-items: center; gap: 10px; padding: 10px 24px;
-            background: #FFFFFF; border-radius: 100px; border: 1px solid rgba(0, 122, 255, 0.15);
-            font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em;
-            color: #000; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-            margin-bottom: 2rem;
+        .resume-content { line-height: 1.5; font-size: 9.5pt; color: #334155; }
+        
+        /* HD Elements & PDF Protection */
+        .resume-section { margin-bottom: 24px; page-break-inside: avoid; break-inside: avoid; position: relative; }
+        .resume-section h2 { 
+            font-size: 10.5pt; font-weight: 900; padding: 4px 12px; margin-bottom: 12px; 
+            text-transform: uppercase; letter-spacing: 2px; color: #fff; background: var(--accent-gradient); 
+            display: inline-block; border-radius: 4px; page-break-after: avoid; 
         }
+        
+        .entry-box { background: rgba(0,0,0,0.02); padding: 18px; border-radius: 12px; margin-bottom: 14px; border: 1px solid rgba(0,0,0,0.04); page-break-inside: avoid; break-inside: avoid; }
+        .date-badge { background: #F1F5F9; padding: 2px 10px; border-radius: 100px; font-size: 8pt; font-weight: 700; color: #475569; float: right; }
 
-        #modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px);
-            z-index: 100; display: none; align-items: center; justify-content: center;
-        }
+        .brand-logo-fixed { position: absolute; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; color: var(--accent-color); font-size: 28pt; pointer-events: none; z-index: 10; }
+        .pos-top-left { top: 20mm; left: 15mm; }
+        .pos-top-right { top: 20mm; right: 15mm; }
+        .pos-header-center { top: 10mm; left: 50%; transform: translateX(-50%); }
 
-        /* Fixed Preview Area */
-        #preview-viewport {
-            width: 100%; height: 100%; overflow: auto; display: flex; justify-content: center; padding: 40px; background: #F8F8FA;
-        }
-
-        .page-container {
-            width: 210mm; min-height: 297mm; background: #FFFFFF;
-            transform-origin: center top;
-            color: #000000; flex-shrink: 0;
-            box-shadow: 0 0 50px rgba(0,0,0,0.15);
-        }
-
-        .resume-content { padding: 25mm 15mm; line-height: 1.45; font-size: 10pt; }
-        .resume-section { margin-bottom: calc(18px * var(--spacing-factor)); }
-        .resume-section h2 { font-size: 10pt; font-weight: 700; border-bottom: 1.5px solid #eee; padding-bottom: 2px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-color); }
+        /* Modal */
+        #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); z-index: 100; display: none; align-items: center; justify-content: center; }
+        #crop-modal { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 200; display: none; align-items: center; justify-content: center; }
+        .crop-container { width: 100%; max-width: 500px; height: 400px; background: #000; border-radius: 24px; overflow: hidden; margin-bottom: 20px;}
+        #crop-image { max-width: 100%; }
 
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+        /* Styling Selectors in Mastery */
+        .design-card { background: #F8FAFC; padding: 12px; border-radius: 14px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.2s; }
+        .design-card:hover { background: #F1F5F9; border-color: #CBD5E1; }
+        .design-card-active { border-color: var(--accent-color); background: #EFF6FF; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        /* AutoComplete Styles */
+        .autocomplete-suggestions { position: absolute; border: 1px solid #E2E8F0; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; background: #fff; border-radius: 0 0 10px 10px; overflow: hidden; box-shadow: 0 10px 15px rgba(0,0,0,0.05); }
+        .autocomplete-suggestions div { padding: 10px 16px; cursor: pointer; background-color: #fff; border-bottom: 1px solid #F1F5F9; font-size: 0.85rem; font-weight: 600; color: #475569;}
+        .autocomplete-suggestions div:hover { background-color: #EFF6FF; color: #2563EB; }
     </style>
 </head>
-<body class="h-screen flex flex-col selection:bg-ios-blue/20 text-black">
+<body class="text-slate-800">
 
-    <!-- CUSTOM SECTION MODAL -->
+    <!-- MODAL: ADD CUSTOM SECTION -->
     <div id="modal-overlay">
-        <div class="ios-glass p-10 rounded-[40px] w-full max-w-md shadow-2xl space-y-6 border-none text-center">
-            <h3 class="text-2xl font-black tracking-tight text-black">New Module</h3>
-            <p class="text-sm opacity-60">Create a specific section for your career (e.g. Passport, Certifications).</p>
-            <input type="text" id="modal-input" class="ios-input border-2 text-center" placeholder="e.g. Certifications" autofocus>
-            <div class="flex gap-3 pt-2">
-                <button onclick="closeModal()" class="flex-1 py-4 rounded-2xl font-bold bg-black/5 hover:bg-black/10 transition-all uppercase text-[10px] tracking-widest text-black border-none">Cancel</button>
-                <button onclick="confirmAddSection()" class="flex-1 py-4 rounded-2xl font-bold bg-black text-white shadow-xl hover:bg-ios-blue transition-all uppercase text-[10px] tracking-widest">Create</button>
+        <div class="ios-glass p-10 rounded-[40px] w-full max-w-md shadow-2xl text-center">
+            <h3 class="text-xl font-black mb-6 text-slate-800 uppercase tracking-tight">Add Module</h3>
+            <input type="text" id="modal-input" class="ios-input mb-6 text-center text-lg" placeholder="e.g. Certifications" autofocus>
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 py-4 rounded-2xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 uppercase text-[10px] tracking-widest border-none">Cancel</button>
+                <button onclick="confirmAddSection()" class="flex-1 py-4 rounded-2xl font-bold btn-gradient text-white uppercase text-[10px] tracking-widest border-none">Create</button>
             </div>
         </div>
     </div>
 
-    <!-- VIEW 1: IMMERSIVE 4-PAGE DASHBOARD -->
-    <div id="view-dashboard" class="view-section view-active flex-col">
-        
-        <!-- Persistent Taskbar -->
-        <nav class="fixed top-6 inset-x-6 z-50 flex items-center justify-between px-8 py-4 ios-glass rounded-[24px] max-w-6xl mx-auto shadow-sm border-none">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg"><i class="fa-solid fa-feather-pointed"></i></div>
-                <h1 class="text-xl font-bold tracking-tight text-black uppercase">BABA Studio</h1>
+    <!-- MODAL: CROPPER -->
+    <div id="crop-modal">
+        <div class="ios-glass p-8 rounded-[40px] w-full max-w-xl flex flex-col items-center shadow-2xl">
+            <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight mb-6">Frame Headshot</h3>
+            <div class="crop-container"><img id="crop-image" src=""></div>
+            <div class="flex gap-3 w-full">
+                <button onclick="closeCropModal()" class="flex-1 py-4 rounded-2xl font-bold bg-slate-100 text-slate-600 uppercase text-[10px] tracking-widest border-none hover:bg-slate-200">Cancel</button>
+                <button onclick="finalizeCrop()" class="flex-1 py-4 rounded-2xl font-bold btn-gradient text-white uppercase text-[10px] tracking-widest border-none">Apply Photo</button>
             </div>
-            <button onclick="window.startNewResume()" class="bg-black text-white px-8 py-3 rounded-full text-xs font-bold hover:scale-105 transition-all shadow-md">Open Studio</button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="view-dashboard" class="view-section view-active">
+        <nav class="fixed top-6 inset-x-6 z-50 flex items-center justify-between px-8 py-4 ios-glass rounded-[24px] max-w-6xl mx-auto shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 btn-gradient rounded-xl flex items-center justify-center text-white shadow-lg"><i class="fa-solid fa-feather-pointed"></i></div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900 uppercase">BABA Studio</h1>
+            </div>
+            <button onclick="window.startNewResume()" class="btn-gradient text-white px-8 py-3 rounded-full text-xs font-bold hover:scale-105 transition-all shadow-md uppercase tracking-wide border-none">Start Engine</button>
         </nav>
 
-        <!-- PAGE 1: THE HOOK (pt-32 ensures clearance of taskbar) -->
-        <section class="landing-section pt-32">
-            <div class="max-w-6xl w-full text-center space-y-8 reveal-node">
-                <div class="powered-badge mx-auto">
-                    <span class="w-2.5 h-2.5 rounded-full bg-ios-blue animate-pulse"></span>
-                    Powered by Baba Tools
-                </div>
-                <h1 class="text-6xl md:text-9xl font-black tracking-tighter uppercase leading-[0.9] text-premium">SPEAK FOR <br>YOURSELF.</h1>
-                <div class="space-y-4">
-                    <p class="text-black text-lg md:text-4xl font-bold max-w-4xl mx-auto tracking-tight leading-tight">Create a resume that speaks for you.</p>
-                    <p class="text-gray-500 text-sm md:text-xl font-medium max-w-3xl mx-auto italic opacity-60">Because your resume deserves more than a template.</p>
-                </div>
-                <div class="animate-bounce opacity-30 pt-8"><i class="fa-solid fa-chevron-down text-3xl text-black"></i></div>
+        <section class="landing-section">
+            <div class="max-w-6xl w-full text-center space-y-8 reveal-node visible">
+                <div class="inline-flex items-center gap-2 px-6 py-2 bg-white rounded-full border border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-600 shadow-sm">Powered by Baba Tools</div>
+                <h1 class="text-6xl md:text-[8.5rem] font-black tracking-tighter uppercase leading-[0.85] text-gradient">SPEAK FOR <br>YOURSELF.</h1>
+                <p class="text-slate-600 text-xl md:text-4xl font-black tracking-tight leading-tight">Create an HD resume that works.</p>
+                <div class="animate-bounce opacity-40 pt-12"><i class="fa-solid fa-chevron-down text-3xl text-blue-600"></i></div>
             </div>
         </section>
 
-        <!-- PAGE 2: PHILOSOPHY -->
-        <section class="landing-section pt-32 bg-black/[0.01]">
-            <div class="max-w-5xl w-full text-center space-y-12 px-8 reveal-node">
-                <div class="powered-badge mx-auto">
-                    <span class="w-2.5 h-2.5 rounded-full bg-ios-purple animate-pulse"></span>
-                    Powered by Baba Tools
-                </div>
-                <h2 class="text-4xl md:text-7xl font-black tracking-tighter uppercase text-black leading-none tracking-tighter">NO SIGNUP DRAMA.<br><span class="text-premium italic text-3xl md:text-5xl">No pricing. 100% free.</span></h2>
-                <p class="text-lg md:text-xl font-medium text-black/60 leading-relaxed max-w-3xl mx-auto pt-4 italic">Privacy is a standard. We don't mine your data or hide layouts behind a paywall. Your session is private.</p>
+         <section class="landing-section bg-slate-50/50">
+            <div class="max-w-5xl w-full text-center space-y-10 reveal-node px-6 text-center">
+                <div class="inline-flex items-center px-6 py-2 bg-white rounded-full border border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-500 shadow-sm">Authority & Ethics</div>
+                <h2 class="text-5xl md:text-8xl font-black tracking-tighter uppercase text-slate-900 leading-[0.9]">NO SIGNUP DRAMA.<br><span class="text-gradient italic text-4xl md:text-7xl">No pricing. 100% free.</span></h2>
             </div>
         </section>
 
-        <!-- PAGE 3: PRECISION -->
-        <section class="landing-section pt-32">
-            <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-20 px-12 items-center text-black reveal-node">
-                <div class="space-y-10 text-left">
-                    <div class="powered-badge">
-                        <span class="w-2.5 h-2.5 rounded-full bg-ios-pink animate-pulse"></span>
-                        Powered by Baba Tools
-                    </div>
-                    <h2 class="text-6xl font-black tracking-tighter uppercase leading-[0.9]">Technical <br><span class="text-premium italic text-5xl">Mastery.</span></h2>
-                    <p class="text-xl font-medium text-black/60 leading-relaxed max-w-md">Retina rendering ensures your artifact stays crisp on any screen. Recruiter-grade execution in every pixel.</p>
+        <section class="landing-section">
+            <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-16 px-12 items-center reveal-node">
+                <div class="space-y-8 text-left">
+                    <div class="inline-flex items-center px-6 py-2 bg-slate-100 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-600">Visual Mastery</div>
+                    <h2 class="text-6xl md:text-7xl font-black tracking-tighter uppercase leading-[0.9] text-slate-900">Technical <br><span class="text-gradient italic text-5xl md:text-6xl">Precision.</span></h2>
+                    <p class="text-lg md:text-xl font-medium text-slate-500 leading-relaxed max-w-md">HD rounded elements, dynamic sidebars, and international branding. Vector-quality exports tailored for elites.</p>
                 </div>
-                <div class="ios-glass p-14 rounded-[60px] shadow-2xl space-y-10 border-none font-bold">
-                    <div class="flex gap-8 items-center"><i class="fa-solid fa-shield-check text-ios-blue text-3xl"></i><span class="font-bold uppercase text-sm tracking-[0.2em]">100% Private Work</span></div>
-                    <div class="flex gap-8 items-center"><i class="fa-solid fa-file-pdf text-ios-purple text-3xl"></i><span class="font-bold uppercase text-sm tracking-[0.2em]">Vector Export</span></div>
+                <div class="ios-glass p-14 rounded-[40px] shadow-2xl space-y-10 border border-slate-200 font-bold text-slate-800">
+                    <div class="flex gap-6 items-center mb-8"><i class="fa-solid fa-shield-check text-teal-600 text-3xl"></i><span class="font-bold uppercase text-sm tracking-widest">100% Private Work</span></div>
+                    <div class="flex gap-6 items-center"><i class="fa-solid fa-file-pdf text-blue-600 text-3xl"></i><span class="font-bold uppercase text-sm tracking-widest">Vector Quality Export</span></div>
                 </div>
             </div>
         </section>
 
-        <!-- PAGE 4: THE LAUNCH -->
-        <section class="landing-section pt-32">
-            <div class="max-w-4xl w-full text-center reveal-node text-black">
-                <div class="powered-badge mx-auto">
-                    <span class="w-2.5 h-2.5 rounded-full bg-black animate-pulse"></span>
-                    Powered by Baba Tools
-                </div>
-                <h2 class="text-7xl md:text-9xl font-black tracking-tighter uppercase leading-none pb-8">OWN THE <br><span class="text-premium italic text-6xl md:text-8xl">STUDIO.</span></h2>
-                <button onclick="window.startNewResume()" class="ios-glass px-16 py-8 rounded-[40px] text-xl font-bold flex items-center gap-6 hover:scale-[1.05] transition-all mx-auto border-none cursor-pointer shadow-2xl mt-4">
-                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-bolt-lightning text-xl"></i></div>
-                    <span class="text-black tracking-tight uppercase font-black text-2xl">Start Workspace</span>
+        <section class="landing-section">
+            <div class="max-w-4xl w-full text-center space-y-10 reveal-node">
+                <div class="inline-flex items-center px-6 py-2 bg-slate-100 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-600">V3.2 Final</div>
+                <h2 class="text-7xl md:text-9xl font-black tracking-tighter uppercase leading-[0.8] pb-8 text-slate-900">OWN THE <br><span class="text-gradient italic text-6xl md:text-[8rem]">STUDIO.</span></h2>
+                <button onclick="window.startNewResume()" class="btn-gradient px-14 py-6 rounded-full text-xl font-bold flex items-center gap-5 hover:scale-105 transition-all mx-auto shadow-2xl uppercase border-none">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><i class="fa-solid fa-bolt-lightning text-lg text-white"></i></div>
+                    <span class="text-white font-black text-xl tracking-wider">Open Studio</span>
                 </button>
             </div>
         </section>
     </div>
 
-    <!-- VIEW 2: STUDIO EDITOR -->
-    <div id="view-editor" class="view-section flex-col h-full bg-transparent">
-        <header class="h-20 px-8 ios-glass flex items-center justify-between z-30 shrink-0 m-5 rounded-[30px] shadow-lg border-none text-black">
+    <!-- EDITOR -->
+    <div id="view-editor" class="view-section">
+        <header class="h-20 px-8 ios-glass flex items-center justify-between shrink-0 m-5 rounded-[30px] shadow-sm text-slate-800">
             <div class="flex items-center gap-5">
-                <button onclick="window.goToDashboard()" class="w-10 h-10 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center transition-all border-none focus:outline-none"><i class="fa-solid fa-arrow-left text-black"></i></button>
-                <div class="h-6 w-px bg-black/10"></div>
-                <div class="flex flex-col"><span class="text-sm font-bold text-black uppercase tracking-tight">BABA Studio</span><span class="text-[9px] font-bold text-ios-blue uppercase tracking-widest">Active Workspace</span></div>
+                <button onclick="window.goToDashboard()" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-all border-none shadow-inner"><i class="fa-solid fa-arrow-left text-slate-500"></i></button>
+                <div class="h-6 w-px bg-slate-200"></div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.undo()" id="undo-btn" class="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center disabled:opacity-30 border-none transition-colors"><i class="fa-solid fa-rotate-left text-slate-500"></i></button>
+                    <button onclick="window.redo()" id="redo-btn" class="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center disabled:opacity-30 border-none transition-colors"><i class="fa-solid fa-rotate-right text-slate-500"></i></button>
+                </div>
             </div>
             <div class="flex items-center gap-3">
-                <button id="toggle-preview-btn" onclick="window.togglePreview(true)" class="px-5 py-2 text-xs font-bold text-black bg-white rounded-full shadow-sm border border-black/10 hover:bg-black hover:text-white transition-all focus:outline-none"><i class="fa-regular fa-eye mr-2"></i> <span id="preview-btn-text">Preview & Style</span></button>
-                <button onclick="window.downloadPDF()" class="bg-black text-white px-8 py-2.5 rounded-full text-xs font-bold shadow-xl hover:bg-ios-blue active:scale-95 transition-all border-none"><i class="fa-solid fa-download mr-1"></i> Download PDF</button>
+                <button onclick="window.togglePreview(true)" class="px-6 py-2.5 text-xs font-bold text-slate-600 bg-white rounded-full shadow-sm border border-slate-200 hover:bg-slate-50 hover:text-blue-600 transition-all focus:outline-none uppercase tracking-widest"><i class="fa-regular fa-eye mr-2"></i> <span id="preview-btn-text">Preview & Style</span></button>
+                <button onclick="window.downloadPDF()" class="btn-gradient text-white px-8 py-2.5 rounded-full text-xs font-bold shadow-md active:scale-95 transition-all uppercase tracking-widest border-none"><i class="fa-solid fa-download mr-2"></i> Export PDF</button>
             </div>
         </header>
 
         <div class="flex-1 flex overflow-hidden relative px-5 pb-5 gap-5">
-            <!-- Sidebar -->
-            <aside id="left-sidebar" class="w-80 flex flex-col ios-glass rounded-[32px] shadow-sm overflow-hidden border-none text-black">
-                <div class="p-4" id="tab-container" style="display:none;">
+            <aside id="left-sidebar" class="w-80 flex flex-col ios-glass rounded-[32px] overflow-hidden border border-slate-100 shadow-sm relative z-20 bg-white">
+                <div class="p-5 border-b border-slate-100">
                     <div class="ios-segmented-control">
                         <button onclick="window.switchSidebarTab('content')" id="tab-content" class="ios-tab ios-tab-active">Content</button>
                         <button onclick="window.switchSidebarTab('design')" id="tab-design" class="ios-tab ios-tab-inactive">Mastery</button>
                     </div>
                 </div>
-                <div id="sidebar-content" class="flex-1 overflow-y-auto px-5 pb-5 space-y-1.5 pt-4">
+                
+                <div id="sidebar-content" class="flex-1 overflow-y-auto px-5 pb-5 space-y-1 pt-3 font-bold text-slate-600">
                     <div id="section-list"></div>
-                    <button onclick="window.openCustomSectionModal()" class="mt-4 w-full py-4 border-2 border-dashed border-black/10 rounded-2xl text-[10px] font-bold text-black/30 hover:text-black transition-all uppercase tracking-widest border-none bg-transparent">+ Add Module</button>
+                    <button onclick="window.openCustomSectionModal()" class="mt-4 w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-[10px] font-bold text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all uppercase tracking-widest border-none bg-transparent">+ Add Module</button>
                 </div>
-                <div id="sidebar-design" class="hidden flex-1 overflow-y-auto px-8 pb-8 space-y-12 pt-8">
-                    <div><h4 class="input-label">Hierarchy</h4><p class="text-[9px] text-gray-400 mb-4 tracking-widest italic uppercase">Drag to reorder</p><div id="order-list" class="space-y-2 mb-10"></div></div>
-                    <div><h4 class="input-label">Themes</h4><div class="grid grid-cols-1 gap-2.5" id="template-grid"></div></div>
-                    <div><h4 class="input-label">Brand Palette</h4><div class="flex gap-2.5 flex-wrap" id="color-picker"></div></div>
+                
+                <div id="sidebar-design" class="hidden flex-1 overflow-y-auto px-6 pb-8 space-y-10 pt-6 text-slate-800 font-bold bg-slate-50">
+                    <div><h4 class="input-label font-black text-slate-900">HD Templates</h4><div id="template-grid" class="grid grid-cols-1 gap-3"></div></div>
+                    <div><h4 class="input-label font-black text-slate-900">Branding Icon</h4><div id="brand-grid" class="grid grid-cols-2 gap-3"></div></div>
+                    <div><h4 class="input-label font-black text-slate-900">Icon Position</h4><div id="pos-grid" class="grid grid-cols-2 gap-3"></div></div>
+                    <div><h4 class="input-label font-black text-slate-900">Hierarchy</h4><p class="text-[9px] text-slate-400 mb-3 tracking-widest uppercase">Drag to reorder</p><div id="order-list" class="space-y-2"></div></div>
+                    <div><h4 class="input-label font-black text-slate-900">Accent Gradient</h4><div id="color-picker" class="flex gap-3 flex-wrap bg-white p-4 rounded-2xl border border-slate-200"></div></div>
                 </div>
             </aside>
             
-            <div class="flex-1 overflow-y-auto ios-glass rounded-[40px] shadow-lg border-none" id="editor-panel">
+            <div class="flex-1 overflow-y-auto ios-glass rounded-[40px] shadow-sm border border-slate-100 bg-white" id="editor-panel">
                 <div class="max-w-3xl mx-auto py-16 px-10 pb-48">
-                    <div id="form-container" class="space-y-12 animate-fade-in text-black"></div>
-                    <div class="flex justify-between mt-16 pt-10 border-t border-black/5">
-                        <button onclick="window.goToPrevSection()" id="btn-prev-section" class="px-8 py-3 rounded-2xl border-2 border-black text-black font-bold text-[10px] uppercase tracking-widest hover:bg-black hover:text-white transition-all border-none bg-transparent">Back</button>
-                        <button onclick="window.goToNextSection()" id="btn-next-section" class="bg-black text-white px-12 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl hover:bg-ios-blue transition-all border-none">Next Phase</button>
+                    <div id="form-container" class="space-y-12 animate-fade-in text-slate-800" onkeydown="window.handleEnterNav(event)"></div>
+                    <div class="flex justify-between mt-16 pt-10 border-t border-slate-100">
+                        <button onclick="window.goToPrevSection()" id="btn-prev-section" class="px-8 py-4 rounded-2xl border-2 border-slate-200 text-slate-500 font-bold text-[10px] uppercase tracking-widest hover:bg-slate-50 hover:text-slate-800 transition-all border-none bg-transparent shadow-sm">Back</button>
+                        <button onclick="window.goToNextSection()" id="btn-next-section" class="btn-gradient text-white px-14 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all border-none shadow-md">Next Phase</button>
                     </div>
                 </div>
             </div>
             
-            <!-- PREVIEW DRAWER (CLIPPING FIX) -->
-            <aside id="right-preview" class="absolute inset-y-0 right-0 w-full md:w-[780px] ios-glass shadow-2xl z-50 transform translate-x-full transition-transform duration-500 flex flex-col border-l border-black/5 overflow-hidden">
-                <div class="h-20 flex items-center justify-between px-10 border-b border-white/10 text-black">
-                    <div class="flex flex-col"><span class="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Artifact Render</span><span class="font-bold text-lg text-premium uppercase">A4 Canvas</span></div>
-                    <button onclick="window.togglePreview(false)" class="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-all text-black border-none focus:outline-none"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <aside id="right-preview" class="absolute inset-y-0 right-0 w-full md:w-[850px] ios-glass shadow-2xl z-50 transform translate-x-full transition-transform duration-500 flex flex-col border-l border-slate-200 overflow-hidden bg-slate-50">
+                <div class="h-20 flex items-center justify-between px-10 border-b border-slate-200 text-slate-800 bg-white shadow-sm z-10">
+                    <div class="flex flex-col">
+                        <span class="text-[12px] font-black text-slate-900 uppercase tracking-[0.15em]">Live Output</span>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em]">HD Rendering Engine</span>
+                    </div>
+                    <button onclick="window.togglePreview(false)" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all text-slate-600 border-none focus:outline-none shadow-inner"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
-                <div id="preview-viewport" class="flex-1 bg-zinc-50/50">
-                    <div id="resume-preview" class="page-container resume-content"></div>
-                </div>
+                <div id="preview-viewport"><div id="resume-preview" class="page-container resume-content"></div></div>
             </aside>
         </div>
     </div>
 
     <script>
-        // --- DATA ---
-        const COUNTRY_CODES = [{code:'+91',name:'India'},{code:'+1',name:'USA'},{code:'+44',name:'UK'},{code:'+971',name:'UAE'},{code:'+81',name:'JPN'}];
-        const TEMPLATES = [{id:'modern', name:'Modern Pro', desc:'Centered & Clean.'}, {id:'classic', name:'Legacy Executive', desc:'Professional Serif.'}, {id:'minimal', name:'Studio Clean', desc:'High Contrast Type.'}];
-        const COLORS = ['#007AFF','#000000','#FF2D55','#34C759','#5856D6','#FF9500'];
-        const SECTION_LABELS = { personal: 'Tell us about yourself', summary: 'Professional Bio', experience: 'Track Record', education: 'Educational Background', skills: 'Superpowers', languages: 'Languages' };
+        // --- DATA & STATE ---
+        const COUNTRY_CODES = [{code:'+91',name:'India'},{code:'+1',name:'USA'},{code:'+44',name:'UK'},{code:'+971',name:'UAE'},{code:'+81',name:'JPN'},{code:'+61',name:'AUS'}];
+        const SECTORS = [
+            {id:'none', name:'No Brand', icon:''},
+            {id:'medical', name:'Medical Care', icon:'fa-cross'},
+            {id:'tech', name:'Tech Systems', icon:'fa-microchip'},
+            {id:'eng', name:'Engineer Hub', icon:'fa-gears'},
+            {id:'sales', name:'Global Sales', icon:'fa-chart-line'},
+            {id:'finance', name:'Finance', icon:'fa-building-columns'}
+        ];
+        const POSITIONS = [
+            {id:'top-left', name:'Top Left'},
+            {id:'top-right', name:'Top Right'},
+            {id:'header-center', name:'Header Center'}
+        ];
+        const TEMPLATES = [
+            {id:'clinical', name:'Clinical Catalyst', desc:'Vibrant Sidebar IA (Optimized Space).'},
+            {id:'modern', name:'Modern Pro', desc:'Full-Width Colored Banner IA.'}, 
+            {id:'classic', name:'Classic Clean', desc:'Minimalist & Airy Center Align.'},
+            {id:'audit', name:'Technical Audit', desc:'Mono Space Logging.'}
+        ];
         
-        const INITIAL_DATA = { 
-            settings: { template: 'modern', color: '#000000', spacing: '1.0' }, 
-            order: ['personal', 'summary', 'experience', 'education', 'skills', 'languages'], 
-            visibility: { personal: true, summary: true, experience: true, education: true, skills: true, languages: true },
-            personal: { firstName: '', lastName: '', title: '', email: '', countryCode: '+91', phone: '', city: '' }, 
-            summary: { content: '' }, experience: [{}], education: [{}], skills: { items: [{}] }, languages: { items: [{}] } 
+        // Replaced Black with Slate/Grey colors. Added Gradients.
+        const COLORS = [
+            {hex: '#0D9488', grad: 'linear-gradient(135deg, #0D9488 0%, #0F766E 100%)'}, // Teal
+            {hex: '#2563EB', grad: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)'}, // Royal Blue
+            {hex: '#7C3AED', grad: 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)'}, // Violet
+            {hex: '#E11D48', grad: 'linear-gradient(135deg, #E11D48 0%, #BE123C 100%)'}, // Rose
+            {hex: '#EA580C', grad: 'linear-gradient(135deg, #EA580C 0%, #C2410C 100%)'}, // Orange
+            {hex: '#334155', grad: 'linear-gradient(135deg, #334155 0%, #1E293B 100%)'}  // Slate (Replaces Black)
+        ];
+        
+        const LANG_LEVELS = ['Native', 'Fluent', 'Professional', 'Intermediate', 'Beginner'];
+        const SECTION_LABELS = { personal: 'Identity', summary: 'Professional Summary', experience: 'Work Experience', education: 'Academic History', skills: 'Expertise & Skills', languages: 'Languages', certifications: 'Certifications', passport: 'Passport Details' };
+        
+        let resumeData = { 
+            settings: { template: 'clinical', color: '#0D9488', gradient: 'linear-gradient(135deg, #0D9488 0%, #0F766E 100%)', logoPos: 'top-left' }, 
+            order: ['personal', 'summary', 'experience', 'education', 'skills', 'languages', 'certifications', 'passport'], 
+            visibility: { personal: true, summary: true, experience: true, education: true, skills: true, languages: true, certifications: true, passport: true },
+            personal: { photo: '', firstName: '', lastName: '', title: '', email: '', countryCode: '+91', phone: '', city: '', sector: 'none' }, 
+            summary: { content: '' }, experience: [{}], education: [{}], skills: { items: [{name:''}] }, languages: { items: [{name:'', level:'Fluent'}] }, certifications: [{}], passport: { number: '', expiry: '' }
         };
 
-        let resumeData = JSON.parse(JSON.stringify(INITIAL_DATA));
-        let activeSection = 'personal';
+        let historyStack = []; let redoStack = []; let activeSection = 'personal'; let cropper; let debounceTimer;
+        let sortableInstance = null;
 
-        // --- OBSERVER ---
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if(entry.isIntersecting) entry.target.classList.add('visible');
-                else entry.target.classList.remove('visible');
-            });
-        }, { threshold: 0.15 });
+        function saveState() { historyStack.push(JSON.stringify(resumeData)); redoStack = []; updateUndoRedoUI(); }
+        window.undo = () => { if (historyStack.length === 0) return; redoStack.push(JSON.stringify(resumeData)); resumeData = JSON.parse(historyStack.pop()); syncUI(); }
+        window.redo = () => { if (redoStack.length === 0) return; historyStack.push(JSON.stringify(resumeData)); resumeData = JSON.parse(redoStack.pop()); syncUI(); }
+        function updateUndoRedoUI() { const u = document.getElementById('undo-btn'); const r = document.getElementById('redo-btn'); if(u) u.disabled = historyStack.length === 0; if(r) r.disabled = redoStack.length === 0; }
+        function syncUI() { renderSidebar(); renderForm(); renderPreview(); updateUndoRedoUI(); }
 
-        // --- CORE LOGIC ---
+        const revealObserver = new IntersectionObserver((entries) => { entries.forEach(entry => { if(entry.isIntersecting) entry.target.classList.add('visible'); else entry.target.classList.remove('visible'); }); }, { threshold: 0.15 });
+
+        // --- UTILITIES ---
+        window.handleInput = (fn) => { fn(); clearTimeout(debounceTimer); debounceTimer = setTimeout(() => saveState(), 800); }
+        window.applyAutoCaps = (el) => { 
+            const s = el.selectionStart; const e = el.selectionEnd;
+            el.value = el.value.replace(/(^\w|\s\w)/g, m => m.toUpperCase()); 
+            el.setSelectionRange(s, e);
+        };
+        window.handleEnterNav = (e) => { if (e.key === 'Enter') { if (e.target.tagName === 'TEXTAREA' && !e.shiftKey) { e.preventDefault(); moveFocus(e.target); } else if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') { e.preventDefault(); moveFocus(e.target); } } };
+        function moveFocus(current) {
+            const inputs = Array.from(document.querySelectorAll('#form-container input, #form-container select, #form-container textarea'));
+            const idx = inputs.indexOf(current);
+            if (idx < inputs.length - 1) inputs[idx + 1].focus();
+            else window.goToNextSection();
+        }
+
+        // --- SMART EMAIL AUTOCOMPLETE ---
+        function handleEmailInput(el) {
+            const val = el.value;
+            const parent = el.parentNode;
+            let list = parent.querySelector('.autocomplete-suggestions');
+            
+            if (val.includes('@') && !val.includes('.')) {
+                if(!list) {
+                    list = document.createElement('div');
+                    list.className = 'autocomplete-suggestions';
+                    parent.style.position = 'relative';
+                    parent.appendChild(list);
+                }
+                const domainPart = val.split('@')[1] || '';
+                const domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'icloud.com', 'hotmail.com'];
+                const matched = domains.filter(d => d.startsWith(domainPart));
+                
+                list.innerHTML = matched.map(d => `<div onclick="selectEmail('${val.split('@')[0]}@${d}', this)">${val.split('@')[0]}@<strong>${d}</strong></div>`).join('');
+                list.style.display = matched.length ? 'block' : 'none';
+            } else if (list) {
+                list.style.display = 'none';
+            }
+            window.handleInput(() => { resumeData.personal.email = val; renderPreview(); });
+        }
+
+        window.selectEmail = (fullEmail, el) => {
+            const input = el.parentNode.parentNode.querySelector('input');
+            input.value = fullEmail;
+            resumeData.personal.email = fullEmail;
+            el.parentNode.style.display = 'none';
+            renderPreview();
+            saveState();
+        };
+
+        // --- PHONE MASKING ---
+        function handlePhoneInput(el) {
+            let v = el.value.replace(/\D/g, '').substring(0, 10);
+            el.value = v;
+            window.handleInput(() => { resumeData.personal.phone = v; renderPreview(); });
+        }
+
         window.openCustomSectionModal = () => { document.getElementById('modal-overlay').style.display = 'flex'; document.getElementById('modal-input').focus(); };
         window.closeModal = () => { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('modal-input').value = ''; };
+        
         window.confirmAddSection = () => {
             const t = document.getElementById('modal-input').value;
-            if(t.trim()) {
-                const id = 'c' + Date.now(); 
-                resumeData[id] = { type: 'custom', title: t, items: [{}] }; 
-                resumeData.order.push(id); resumeData.visibility[id] = true;
-                setActiveSection(id); closeModal(); renderPreview();
-            }
+            if(t.trim()) { saveState(); const id = 'c' + Date.now(); resumeData[id] = { type: 'custom', title: t, items: [{ fields: [{label: 'Title', value: ''}, {label: 'Dates', value: ''}, {label: 'Details', value: ''}] }] }; resumeData.order.push(id); resumeData.visibility[id] = true; setActiveSection(id); closeModal(); renderPreview(); }
         };
-
-        window.startNewResume = function() {
-            resumeData = JSON.parse(JSON.stringify(INITIAL_DATA));
-            setActiveSection('personal'); switchView('view-editor');
-            document.getElementById('tab-container').style.display = 'none';
-            renderPreview();
-        }
-        window.goToDashboard = () => switchView('view-dashboard');
+        window.removeSection = (id) => { if(id === 'personal') return; saveState(); resumeData.order = resumeData.order.filter(k => k !== id); delete resumeData[id]; setActiveSection('personal'); renderPreview(); };
         
-        window.togglePreview = function(forceDesignPhase) {
-            const p = document.getElementById('right-preview');
-            const btnText = document.getElementById('preview-btn-text');
-            const isCurrentlyOpen = !p.classList.contains('translate-x-full');
-            
-            if(isCurrentlyOpen) { 
+        function forceSwitchToEditor() {
+            document.querySelectorAll('.view-section').forEach(e => {
+                e.classList.remove('view-active');
+                e.classList.add('hidden'); // Force hide dashboard
+            });
+            const editor = document.getElementById('view-editor');
+            editor.classList.remove('hidden'); // Force show editor
+            editor.classList.add('view-active');
+        }
+
+        window.startNewResume = function() { 
+            activeSection = 'personal'; 
+            forceSwitchToEditor(); 
+            renderPreview(); 
+            // Trigger initial render of design lists
+            setTimeout(() => { renderBrandList(); renderPosList(); renderTemplateList(); }, 50);
+        }
+        
+        window.goToDashboard = () => {
+            document.querySelectorAll('.view-section').forEach(e => { e.classList.remove('view-active'); e.classList.add('hidden'); });
+            const dash = document.getElementById('view-dashboard');
+            dash.classList.remove('hidden'); dash.classList.add('view-active');
+        };
+        
+        window.togglePreview = function(forceDesign) {
+            const p = document.getElementById('right-preview'); const isOpen = !p.classList.contains('translate-x-full');
+            if(isOpen) { 
                 p.classList.add('translate-x-full'); 
-                if(btnText) btnText.innerText = "Preview & Style";
-                document.getElementById('tab-container').style.display = 'none';
-                window.switchSidebarTab('content');
-            } else {
-                p.classList.remove('translate-x-full');
-                if(btnText) btnText.innerText = "Hide Preview";
-                if(forceDesignPhase) { 
-                    window.switchSidebarTab('design');
-                    document.getElementById('tab-container').style.display = 'flex';
-                    renderOrderList();
-                }
-                renderPreview(); // Force synchronous render
-                setTimeout(scalePreview, 310);
+                document.getElementById('preview-btn-text').innerText = "Preview & Style"; 
+                window.switchSidebarTab('content'); 
+            } else { 
+                p.classList.remove('translate-x-full'); 
+                document.getElementById('preview-btn-text').innerText = "Hide Preview"; 
+                if(forceDesign) { 
+                    window.switchSidebarTab('design'); 
+                    setTimeout(() => { renderOrderList(); renderBrandList(); renderTemplateList(); renderPosList(); }, 50); 
+                } 
+                renderPreview(); setTimeout(scalePreview, 310); 
             }
         }
-
-        function scalePreview() {
-            const container = document.getElementById('resume-preview');
-            const viewport = document.getElementById('preview-viewport');
-            if(!container || !viewport) return;
-            const scale = Math.min(1, (viewport.clientWidth - 80) / 794);
-            container.style.transform = `scale(${scale})`;
-        }
-
-        window.updateSetting = (k, v) => { resumeData.settings[k] = v; renderPreview(); }
-        window.upd = (s,k,v) => { resumeData[s][k]=v; renderPreview(); }
-        window.updArr = (s,i,k,v) => { 
-            const ds = resumeData[s];
-            if (Array.isArray(ds)) ds[i][k] = v; 
-            else ds.items[i][k] = v;
-            renderPreview(); 
-        }
-        window.addItem = (s) => { (Array.isArray(resumeData[s]) ? resumeData[s] : resumeData[s].items).push({}); renderForm(); renderPreview(); }
-        window.delItem = (s,i) => { (Array.isArray(resumeData[s]) ? resumeData[s] : resumeData[s].items).splice(i,1); renderForm(); renderPreview(); }
         
-        window.switchSidebarTab = (t) => {
-            document.getElementById('sidebar-content').classList.toggle('hidden', t !== 'content');
-            document.getElementById('sidebar-design').classList.toggle('hidden', t !== 'design');
-            document.getElementById('tab-content').className = t === 'content' ? 'ios-tab ios-tab-active' : 'ios-tab ios-tab-inactive';
-            document.getElementById('tab-design').className = t === 'design' ? 'ios-tab ios-tab-active' : 'ios-tab ios-tab-inactive';
+        function scalePreview() { const container = document.getElementById('resume-preview'); const viewport = document.getElementById('preview-viewport'); if(!container || !viewport) return; const scale = Math.min(1, (viewport.clientWidth - 80) / 794); container.style.transform = `scale(${scale})`; }
+
+        window.handlePhoto = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (event) => { const img = document.getElementById('crop-image'); img.src = event.target.result; document.getElementById('crop-modal').style.display = 'flex'; if(cropper) cropper.destroy(); cropper = new Cropper(img, { aspectRatio: 1, viewMode: 1 }); }; reader.readAsDataURL(file); };
+        window.closeCropModal = () => { document.getElementById('crop-modal').style.display = 'none'; if(cropper) cropper.destroy(); };
+        window.finalizeCrop = () => { if(!cropper) return; saveState(); const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 }); resumeData.personal.photo = canvas.toDataURL(); renderForm(); renderPreview(); closeCropModal(); };
+
+        window.addItem = (s) => { saveState(); const sec = resumeData[s]; if(s === 'experience' || s === 'education' || s === 'certifications') sec.push({}); else if(sec.items) { if(sec.type === 'custom') { const f = JSON.parse(JSON.stringify(sec.items[0].fields)).map(v => ({...v, value: ''})); sec.items.push({fields: f}); } else { sec.items.push({name:''}); } } renderForm(); renderPreview(); }
+        window.delItem = (s,i) => { saveState(); (Array.isArray(resumeData[s]) ? resumeData[s] : resumeData[s].items).splice(i,1); renderForm(); renderPreview(); }
+        
+        window.updateSetting = (k, v, extra) => { 
+            saveState(); 
+            resumeData.settings[k] = v; 
+            if(k === 'color' && extra) {
+                resumeData.settings.gradient = extra;
+                document.documentElement.style.setProperty('--accent-color', v);
+                document.documentElement.style.setProperty('--accent-gradient', extra);
+            }
+            renderPreview(); 
+            if(k==='template') renderTemplateList(); 
+            if(k==='logoPos') renderPosList(); 
         }
 
-        window.goToNextSection = () => {
-            const idx = resumeData.order.indexOf(activeSection);
-            if(idx < resumeData.order.length-1) setActiveSection(resumeData.order[idx+1]);
-            else { window.togglePreview(true); }
-        }
-        window.goToPrevSection = () => {
-            const idx = resumeData.order.indexOf(activeSection);
-            if(idx > 0) setActiveSection(resumeData.order[idx-1]);
+        window.switchSidebarTab = (t) => { 
+            const c = document.getElementById('sidebar-content'); 
+            const d = document.getElementById('sidebar-design'); 
+            if (c && d) { 
+                c.classList.toggle('hidden', t !== 'content'); 
+                d.classList.toggle('hidden', t !== 'design'); 
+                
+                const tabC = document.getElementById('tab-content');
+                const tabD = document.getElementById('tab-design');
+                
+                if (t === 'content') {
+                    tabC.classList.add('ios-tab-active'); tabC.classList.remove('ios-tab-inactive');
+                    tabD.classList.add('ios-tab-inactive'); tabD.classList.remove('ios-tab-active');
+                } else {
+                    tabD.classList.add('ios-tab-active'); tabD.classList.remove('ios-tab-inactive');
+                    tabC.classList.add('ios-tab-inactive'); tabC.classList.remove('ios-tab-active');
+                }
+            } 
         }
 
+        window.goToNextSection = () => { const idx = resumeData.order.indexOf(activeSection); if(idx < resumeData.order.length-1) setActiveSection(resumeData.order[idx+1]); else window.togglePreview(true); }
+        window.goToPrevSection = () => { const idx = resumeData.order.indexOf(activeSection); if(idx > 0) setActiveSection(resumeData.order[idx-1]); }
         function setActiveSection(k) { activeSection=k; renderSidebar(); renderForm(); }
-        function switchView(id) { 
-            document.querySelectorAll('.view-section').forEach(e=>e.classList.remove('view-active')); 
-            document.getElementById(id).classList.add('view-active');
-        }
-
-        function renderSidebar() {
-            const list = document.getElementById('section-list'); if(!list) return; list.innerHTML = '';
-            resumeData.order.forEach(key => {
-                const isActive = activeSection === key;
-                const label = resumeData[key]?.type === 'custom' ? resumeData[key].title : key;
-                list.innerHTML += `<div class="px-5 py-3 rounded-2xl cursor-pointer transition-all uppercase text-[10px] tracking-widest ${isActive ? 'bg-black text-white font-bold shadow-lg':'text-black/50 hover:bg-black/5'}" onclick="setActiveSection('${key}')">${label}</div>`;
-            });
-        }
-
+        
+        function renderSidebar() { const list = document.getElementById('section-list'); if(!list) return; list.innerHTML = ''; resumeData.order.forEach(key => { const label = resumeData[key]?.type === 'custom' ? resumeData[key].title : key; const isActive = activeSection === key; list.innerHTML += `<div class="module-item"><div class="module-btn ${isActive ? 'module-btn-active':'module-btn-inactive'}" onclick="setActiveSection('${key}')">${label}</div>${key !== 'personal' ? `<button class="module-delete-tab" onclick="window.removeSection('${key}')"><i class="fa-solid fa-trash-can text-xs"></i></button>` : ''}</div>`; }); }
+        
         function renderForm() {
             const c = document.getElementById('form-container'); if(!c) return;
-            const d = resumeData[activeSection];
-            const friendly = SECTION_LABELS[activeSection] || (d?.type==='custom' ? d.title : activeSection);
-            let h = `<h2 class="text-6xl font-bold tracking-tighter text-black uppercase leading-[0.9]">${friendly}</h2>`;
-            
+            const d = resumeData[activeSection]; const friendly = SECTION_LABELS[activeSection] || d.title;
+            let h = `<h2 class="text-5xl font-black tracking-tighter text-slate-900 uppercase leading-[0.9] text-center mb-4">${friendly}</h2>`;
             if(activeSection === 'personal') {
-                h += `<div class="grid grid-cols-2 gap-8 mt-10">
-                    ${inp('First Name','firstName')} ${inp('Last Name','lastName')}
-                    ${inp('Target Job Title','title','text','col-span-2')}
-                    ${inp('Email Address','email','email')}
-                    <div class="col-span-1"><label class="input-label">Phone</label><div class="flex gap-2">
-                        <select class="ios-input ios-select w-28 font-bold text-black border-none bg-black/5" onchange="upd('personal','countryCode',this.value)">${COUNTRY_CODES.map(c => `<option value="${c.code}" ${resumeData.personal.countryCode === c.code ? 'selected':''}>${c.code}</option>`).join('')}</select>
-                        <input type="tel" class="ios-input flex-1 font-bold text-black" value="${resumeData.personal.phone||''}" oninput="handleSmartInput(this, 'personal', 'phone')">
-                    </div></div></div>`;
+                h += `<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10 text-slate-800"><div class="col-span-full flex items-center gap-6 p-6 bg-slate-50/80 rounded-[24px] border border-slate-100"><div class="photo-preview-container shadow-sm">${d.photo ? `<img src="${d.photo}" class="photo-preview">` : `<i class="fa-solid fa-user-tie placeholder-avatar"></i>`}</div><div class="flex-1"><label class="input-label">Identity Photo</label><button onclick="document.getElementById('file-upload').click()" class="upload-btn">Upload Profile Photo</button><input id="file-upload" type="file" accept="image/*" onchange="handlePhoto(event)" class="hidden"></div></div><div><label class="input-label">First Name</label><input class="ios-input" value="${d.firstName||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.personal.firstName=event.target.value; renderPreview(); })"></div><div><label class="input-label">Last Name</label><input class="ios-input" value="${d.lastName||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.personal.lastName=event.target.value; renderPreview(); })"></div><div class="col-span-full"><label class="input-label">Target Title</label><input class="ios-input" value="${d.title||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.personal.title=event.target.value; renderPreview(); })"></div>
+                <div class="relative"><label class="input-label">Email</label><input class="ios-input" value="${d.email||''}" oninput="handleEmailInput(event.target)"></div>
+                <div class="flex gap-2"><div><label class="input-label">Code</label><select class="ios-input w-24 px-2" onchange="window.handleInput(() => { resumeData.personal.countryCode=event.target.value; renderPreview(); })">${COUNTRY_CODES.map(cc=>`<option value="${cc.code}" ${d.countryCode===cc.code?'selected':''}>${cc.code}</option>`).join('')}</select></div><div class="flex-1"><label class="input-label">Phone</label><input class="ios-input" value="${d.phone||''}" placeholder="10-digit number" maxlength="10" oninput="handlePhoneInput(event.target)"></div></div></div>`;
             } else if (activeSection === 'summary') {
-                h += `<div class="mt-12 p-8 ios-glass rounded-[40px] border border-black/5 shadow-sm focus-within:border-ios-blue transition-all"><label class="input-label mb-4 text-ios-blue uppercase tracking-widest">Impact Bio</label><textarea class="ios-input h-72 resize-none p-6 font-medium leading-relaxed bg-white border-2 text-black shadow-inner" placeholder="Tell your professional story..." oninput="upd('summary','content',this.value)">${d.content||''}</textarea></div>`;
-            } else {
-                const list = Array.isArray(d) ? d : d.items;
-                list.forEach((item, idx) => {
-                    h += `<div class="bg-black/[0.02] p-10 rounded-[45px] border border-black/5 relative mt-10 text-black">
-                        <button onclick="delItem('${activeSection}',${idx})" class="absolute top-8 right-8 w-11 h-11 rounded-full bg-white text-red-500 shadow-xl active:scale-90 border-none focus:outline-none"><i class="fa-solid fa-trash"></i></button>`;
-                    if(activeSection==='languages'||activeSection==='skills') h+=`<div class="grid grid-cols-2 gap-6">${inpItem(activeSection,idx,'name','Name')} ${activeSection==='languages'?inpItem(activeSection,idx,'level','Level'):''}</div>`;
-                    else h+=`<div class="grid grid-cols-2 gap-6">${inpItem(activeSection,idx,'title','Title')} ${inpItem(activeSection,idx,'date','Dates')} ${inpItem(activeSection,idx,'company','Org')} ${inpItem(activeSection,idx,'description','Details','text','col-span-2')}</div>`;
-                    h += `</div>`;
+                h += `<div class="mt-8 p-8 ios-glass rounded-[32px] border border-slate-100 shadow-sm transition-all"><label class="input-label mb-4">Professional Summary</label><textarea class="ios-input h-64 resize-none bg-slate-50 border-none shadow-inner" oninput="window.handleInput(() => { resumeData.summary.content=event.target.value; renderPreview(); })">${d.content||''}</textarea></div>`;
+            } else if (activeSection === 'experience' || activeSection === 'education' || activeSection === 'certifications') {
+                h += `<button onclick="window.removeSection('${activeSection}')" class="w-full py-3 mb-6 bg-red-50 text-red-500 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-red-100 transition-all border-none">Remove Entire Section</button>`;
+                d.forEach((item, idx) => {
+                    h += `<div class="bg-slate-50/80 p-8 rounded-[32px] relative mt-8 border border-slate-100"><button onclick="delItem('${activeSection}',${idx})" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-white text-slate-400 hover:text-red-500 shadow-sm border-none active:scale-90 transition-colors"><i class="fa-solid fa-trash"></i></button><div class="grid grid-cols-2 gap-5">`;
+                    if(activeSection==='experience') h+=`<div class="col-span-2"><label class="input-label">Organization</label><input class="ios-input" value="${item.company||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.experience[${idx}].company=event.target.value; renderPreview(); })"></div><div class="col-span-2"><label class="input-label">Role</label><input class="ios-input" value="${item.title||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.experience[${idx}].title=event.target.value; renderPreview(); })"></div>`;
+                    else if(activeSection==='education') h+=`<div class="col-span-2"><label class="input-label">School/University</label><input class="ios-input" value="${item.school||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.education[${idx}].school=event.target.value; renderPreview(); })"></div><div class="col-span-2"><label class="input-label">Degree</label><input class="ios-input" value="${item.degree||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.education[${idx}].degree=event.target.value; renderPreview(); })"></div>`;
+                    else h+=`<div class="col-span-2"><label class="input-label">Credential Name</label><input class="ios-input" value="${item.name||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.certifications[${idx}].name=event.target.value; renderPreview(); })"></div>`;
+                    h+=`<div><label class="input-label">Start Date</label><input type="date" class="ios-input" value="${item.start||''}" oninput="window.handleInput(() => { resumeData.${activeSection}[${idx}].start=event.target.value; renderPreview(); })"></div><div><label class="input-label">End Date</label><input type="date" class="ios-input" value="${item.end||''}" oninput="window.handleInput(() => { resumeData.${activeSection}[${idx}].end=event.target.value; renderPreview(); })"></div><div class="col-span-2"><label class="input-label">Details</label><textarea class="ios-input h-24" oninput="window.handleInput(() => { resumeData.${activeSection}[${idx}].description=event.target.value; renderPreview(); })">${item.description||''}</textarea></div></div></div>`;
                 });
-                h += `<button onclick="addItem('${activeSection}')" class="w-full py-5 bg-black text-white rounded-3xl font-bold text-[10px] uppercase tracking-widest mt-8 shadow-xl hover:bg-ios-blue transition-all border-none">+ Add Entry</button>`;
+                h += `<button onclick="addItem('${activeSection}')" class="w-full py-5 bg-white border-2 border-dashed border-slate-200 text-slate-500 rounded-[20px] font-bold uppercase text-[10px] mt-6 hover:border-blue-400 hover:text-blue-600 transition-all">+ Add Entry</button>`;
+            } else if (activeSection === 'languages') {
+                d.items.forEach((item, idx) => { h += `<div class="flex gap-4 items-end mt-4 text-slate-800"><div class="flex-1"><label class="input-label">Language</label><input class="ios-input font-bold" value="${item.name||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.languages.items[${idx}].name=event.target.value; renderPreview(); })"></div><div class="w-48"><label class="input-label">Level</label><select class="ios-input border-none bg-slate-100 font-bold" onchange="window.handleInput(() => { resumeData.languages.items[${idx}].level=event.target.value; renderPreview(); saveState(); })">${LANG_LEVELS.map(l => `<option value="${l}" ${item.level===l?'selected':''}>${l}</option>`).join('')}</select></div><button onclick="delItem('languages',${idx})" class="w-12 h-12 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash"></i></button></div>`; });
+                h += `<button onclick="addItem('languages')" class="w-full py-5 bg-white border-2 border-dashed border-slate-200 text-slate-500 rounded-[20px] font-bold uppercase text-[10px] mt-6 hover:border-blue-400 hover:text-blue-600 transition-all">+ Add Language</button>`;
+            } else if (activeSection === 'passport') {
+                h += `<div class="grid grid-cols-2 gap-6 mt-10 text-slate-800"><div><label class="input-label">Passport Number</label><input class="ios-input uppercase" value="${d.number||''}" oninput="window.handleInput(() => { resumeData.passport.number=event.target.value; renderPreview(); })"></div><div><label class="input-label">Expiry Date</label><input type="date" class="ios-input" value="${d.expiry||''}" oninput="window.handleInput(() => { resumeData.passport.expiry=event.target.value; renderPreview(); })"></div></div>`;
+            } else {
+                d.items.forEach((item, idx) => { h += `<div class="flex gap-4 items-end mt-4 text-slate-800"><div class="flex-1"><label class="input-label">Competency</label><input class="ios-input" value="${item.name||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData['${activeSection}'].items[${idx}].name=event.target.value; renderPreview(); })"></div><button onclick="delItem('${activeSection}',${idx})" class="w-12 h-12 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash"></i></button></div>`; });
+                h += `<button onclick="addItem('${activeSection}')" class="w-full py-5 bg-white border-2 border-dashed border-slate-200 text-slate-500 rounded-[20px] font-bold uppercase text-[10px] mt-6 hover:border-blue-400 hover:text-blue-600 transition-all">+ Add Entry</button>`;
             }
             c.innerHTML = h;
         }
 
+        function renderTemplateList() {
+            const list = document.getElementById('template-grid'); if(!list) return;
+            list.innerHTML = TEMPLATES.map(t => `<div onclick="window.updateSetting('template','${t.id}')" class="design-card ${resumeData.settings.template===t.id?'design-card-active':''}"><div class="font-black text-[10px] uppercase text-slate-800">${t.name}</div><div class="text-[8px] text-slate-500 mt-1 uppercase tracking-widest">${t.desc}</div></div>`).join('');
+        }
+        function renderBrandList() {
+            const list = document.getElementById('brand-grid'); if(!list) return;
+            list.innerHTML = SECTORS.map(s => `<div onclick="window.handleInput(()=>{resumeData.personal.sector='${s.id}'; renderPreview(); renderBrandList();})" class="design-card flex items-center gap-2 ${resumeData.personal.sector===s.id?'design-card-active':''}"><i class="fa-solid ${s.icon||'fa-ban'} text-sm" style="color:${resumeData.personal.sector===s.id?resumeData.settings.color:'rgba(0,0,0,0.2)'}"></i><span class="text-[9px] font-bold uppercase text-slate-700">${s.name}</span></div>`).join('');
+        }
+        function renderPosList() {
+            const list = document.getElementById('pos-grid'); if(!list) return;
+            list.innerHTML = POSITIONS.map(p => `<div onclick="window.updateSetting('logoPos','${p.id}')" class="design-card ${resumeData.settings.logoPos===p.id?'design-card-active':''} text-center font-bold text-[9px] uppercase text-slate-700">${p.name}</div>`).join('');
+        }
+
         function renderOrderList() {
-            const list = document.getElementById('order-list'); list.innerHTML = '';
+            const list = document.getElementById('order-list'); if(!list) return; list.innerHTML = '';
             resumeData.order.forEach(k => {
-                if(k === 'personal') return;
-                const actualLabel = resumeData[k]?.type === 'custom' ? resumeData[k].title : k;
-                const isHidden = !resumeData.visibility[k];
-                list.innerHTML += `<div data-id="${k}" class="ios-glass p-3 rounded-xl flex items-center justify-between shadow-sm cursor-move border">
-                    <div class="flex items-center gap-3"><i class="fa-solid fa-grip-vertical text-black/20"></i><span class="text-[10px] font-bold uppercase tracking-widest text-black ${isHidden?'opacity-30 line-through':''}">${actualLabel}</span></div>
-                    <button onclick="toggleVisibility('${k}')" class="w-7 h-7 rounded-full bg-black/5 flex items-center justify-center text-black border-none transition-all focus:outline-none"><i class="fa-solid ${isHidden?'fa-eye-slash text-gray-400':'fa-eye text-ios-blue'} text-xs"></i></button>
-                </div>`;
+                if(k === 'personal') return; const label = resumeData[k]?.type === 'custom' ? resumeData[k].title : k; const isHidden = !resumeData.visibility[k];
+                list.innerHTML += `<div data-id="${k}" class="bg-white p-3 rounded-xl flex items-center justify-between shadow-sm cursor-move border border-slate-100 text-slate-700"><div class="flex items-center gap-3"><i class="fa-solid fa-grip-vertical text-slate-300"></i><span class="text-[10px] font-bold uppercase tracking-widest ${isHidden?'opacity-30 line-through':''}">${label}</span></div><button onclick="toggleVisibility('${k}')" class="w-7 h-7 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-500 border-none focus:outline-none transition-colors"><i class="fa-solid ${isHidden?'fa-eye-slash text-slate-300':'fa-eye text-teal-600'} text-xs"></i></button></div>`;
             });
-            new Sortable(list, { animation: 150, onEnd: () => {
-                resumeData.order = ['personal', ...Array.from(list.children).map(el => el.getAttribute('data-id'))];
-                renderPreview();
-            }});
+            
+            if (sortableInstance) { sortableInstance.destroy(); }
+            sortableInstance = new Sortable(list, { animation: 150, onEnd: () => { saveState(); resumeData.order = ['personal', ...Array.from(list.children).map(el => el.getAttribute('data-id'))]; renderPreview(); }});
         }
-
-        window.toggleVisibility = (k) => { resumeData.visibility[k] = !resumeData.visibility[k]; renderOrderList(); renderPreview(); }
-
-        function inp(l, k, type='text', cls='') { return `<div class="${cls}"><label class="input-label">${l}</label><input type="${type}" class="ios-input" value="${resumeData[activeSection][k]||''}" oninput="handleSmartInput(this, '${activeSection}', '${k}')"></div>`; }
-        function inpItem(s, i, k, l, type='text', cls='') { 
-            const arr = Array.isArray(resumeData[s]) ? resumeData[s] : resumeData[s].items;
-            return `<div class="${cls}"><label class="input-label">${l}</label><input type="${type}" class="ios-input font-bold text-black" value="${arr[i] ? arr[i][k] || '' : ''}" oninput="handleSmartInput(this, '${s}', '${k}', ${i})"></div>`; 
-        }
-
-        function handleSmartInput(el, section, key, index = null) {
-            let val = el.value;
-            if (el.type === 'tel') { val = val.replace(/[^0-9+\-()\s]/g, ''); el.value = val; }
-            if (index === null) upd(section, key, val); else updArr(section, index, key, val);
-        }
+        window.toggleVisibility = (k) => { saveState(); resumeData.visibility[k] = !resumeData.visibility[k]; renderOrderList(); renderPreview(); }
 
         function renderPreview() {
             const p = document.getElementById('resume-preview'); if(!p) return;
-            const d = resumeData; const theme = d.settings.template;
-            p.className = `page-container resume-content tpl-${theme}`;
-            p.style.fontFamily = theme === 'classic' ? 'Playfair Display, serif' : 'Inter, sans-serif';
-            p.style.setProperty('--accent-color', d.settings.color);
-            p.style.setProperty('--spacing-factor', d.settings.spacing);
+            const d = resumeData; const t = d.settings.template;
+            p.className = `page-container resume-content tpl-${t}`;
+            p.style.fontFamily = (t==='classic') ? 'Noto Serif, serif' : 'Inter, sans-serif';
+            if(t==='audit') p.style.fontFamily = 'Roboto Mono, monospace';
             
+            p.style.setProperty('--accent-color', d.settings.color);
+            p.style.setProperty('--accent-gradient', d.settings.gradient || `linear-gradient(135deg, ${d.settings.color} 0%, #1E293B 100%)`);
+            
+            const fD = (s) => { if(!s) return ''; const dt = new Date(s); return dt.toLocaleDateString('en-US', {month:'short', year:'numeric'}); };
+
             const renderSec = (k) => {
-                if(!d.visibility[k]) return '';
-                const sec = d[k]; 
-                const items = Array.isArray(sec) ? sec : (sec?.items || []);
-                if(!items || (k !== 'summary' && items.length === 0)) return '';
-                
-                let html = `<div class="resume-section"><h2 style="color:var(--accent-color)">${d[k]?.title || k}</h2>`;
-                if(k==='summary') {
-                    html += `<p class="font-medium text-[9.5pt] text-black leading-relaxed whitespace-pre-wrap">${sec.content || ''}</p>`;
-                } else {
-                    html += items.map(i => `<div class="mb-4">
-                        <div class="flex justify-between font-bold text-[10pt] text-black"><span>${i.title||i.name||''}</span><span class="opacity-40 text-[8.5pt]">${i.date||''}</span></div>
-                        ${i.company ? `<p class="text-[9pt] font-bold opacity-70 text-black">${i.company}</p>` : ''}
-                        <p class="text-[9pt] leading-snug whitespace-pre-wrap mt-1 opacity-90 text-black">${i.description||''}</p>
-                    </div>`).join('');
+                if(!d.visibility[k] || k==='personal') return ''; const sec = d[k]; let iH = '';
+                if(t==='audit' && k==='summary') return ''; 
+                if(k==='summary' && sec.content) iH = `<p class="font-medium text-[9.5pt] leading-relaxed whitespace-pre-wrap text-slate-800">${sec.content}</p>`;
+                else if(Array.isArray(sec)) {
+                    iH = sec.map(i => `<div class="${t==='clinical' || t==='case'?'entry-box':''} mb-4 text-slate-800"><div class="flex justify-between font-bold text-[10pt]"><span>${i.title || i.degree || i.name || i.school || ''}</span><span class="date-badge">${fD(i.start)} — ${i.end ? fD(i.end) : 'Present'}</span></div><p class="text-[9pt] font-bold opacity-70 text-slate-700">${i.company || i.school || ''}</p><p class="text-[9pt] leading-snug whitespace-pre-wrap mt-2 text-slate-600 opacity-90">${i.description||''}</p></div>`).join('');
                 }
-                return html + `</div>`;
+                else if(k==='languages') iH = `<div class="grid grid-cols-1 gap-y-2 text-slate-800">${sec.items.map(i => `<div class="text-[9.5pt] font-medium text-slate-800">• ${i.name} <span class="opacity-40 italic text-[8pt]">(${i.level})</span></div>`).join('')}</div>`;
+                else if(k==='passport') iH = `<p class="text-[9.5pt] text-slate-800">Passport: <strong>${sec.number}</strong> • Expiry: <strong>${fD(sec.expiry)}</strong></p>`;
+                else if(sec.items) {
+                    iH = `<div class="${t==='matrix' && k==='skills' ? 'skills-grid' : 'flex flex-wrap gap-2'} text-slate-800">${sec.items.map(i => `<span class="${t==='clinical'?'skill-tag':'skill-pill'}">${i.name}</span>`).join('')}</div>`;
+                }
+                if(!iH) return ''; return `<div class="resume-section"><h2 style="background:var(--accent-gradient); color:#fff; padding:6px 14px; border-radius:6px; font-weight:800; letter-spacing:0.1em; display:inline-block; font-size:10pt;">${SECTION_LABELS[k] || sec.title || k}</h2>${iH}</div>`;
             };
 
-            let head = `<div class="preview-header mb-10 pb-8 border-b-2 border-black ${theme==='modern'?'text-center':''}">
-                <h1 style="color:var(--accent-color); font-size: 24pt; font-weight: 900;">${d.personal.firstName||'NAME'} ${d.personal.lastName||''}</h1>
-                <p class="font-bold text-xl opacity-80 text-black uppercase">${d.personal.title||''}</p>
-                <p class="text-[9pt] font-medium opacity-50 mt-2 text-black">${d.personal.email||''} • ${d.personal.countryCode} ${d.personal.phone}</p>
-            </div>`;
-            
-            p.innerHTML = head + d.order.filter(k=>k!=='personal').map(k=>renderSec(k)).join('');
+            let masterOrder = [...d.order];
+            if(t==='audit') masterOrder = ['personal', 'certifications', 'education', 'experience', 'skills', 'languages'];
+            if(t==='matrix') masterOrder = ['personal', 'skills', 'summary', 'experience', 'education'];
+
+            const sectorIcon = SECTORS.find(s=>s.id===d.personal.sector)?.icon;
+            let logoHtml = '';
+            // Only render floating logo if it's NOT the modern template (since Modern builds it into the banner)
+            if(sectorIcon && d.personal.sector !== 'none' && t !== 'modern') {
+                logoHtml = `<div class="brand-logo-fixed pos-${d.settings.logoPos}" style="color:var(--accent-color); opacity: 0.9;"><i class="fa-solid ${sectorIcon}"></i></div>`;
+            }
+
+            if(t==='clinical') {
+                const s = ['personal', 'skills', 'languages', 'passport'].map(k => renderSec(k)).join('');
+                const m = masterOrder.filter(k => !['personal', 'skills', 'languages', 'passport'].includes(k)).map(k => renderSec(k)).join('');
+                // Optimized grid to 220px to save space, reduced padding
+                p.innerHTML = logoHtml + `<div class="tpl-clinical" style="display: grid; grid-template-columns: 220px 1fr; min-height: 297mm; height: 100%;">
+                    <div class="sidebar-col" style="background:var(--accent-gradient); color:#fff; padding: 35px 20px;">
+                        <div class="flex flex-col items-center text-center mb-8 text-white">
+                            <div class="photo-preview-container" style="width:110px; height:110px; border-radius:50%; overflow:hidden; border:4px solid rgba(255,255,255,0.2); margin-bottom:15px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.1);">
+                                ${d.personal.photo ? `<img src="${d.personal.photo}" style="width:100%; height:100%; object-fit:cover;">`: `<i class="fa-solid fa-user-tie text-4xl opacity-50 text-white"></i>`}
+                            </div>
+                            <h1 class="text-[14pt] font-black mt-2 text-white leading-tight uppercase">${d.personal.firstName} <br> ${d.personal.lastName}</h1>
+                            <p class="text-[8pt] font-bold opacity-80 uppercase tracking-widest text-white mt-2">${d.personal.title}</p>
+                            <p class="text-[7.5pt] mt-4 opacity-80 text-center text-white">${d.personal.email}<br>${d.personal.phone}</p>
+                        </div>
+                        ${s}
+                    </div>
+                    <div class="main-col" style="padding: 35px 25px; background:#fff;">
+                        ${renderSec('summary')}
+                        ${m}
+                    </div>
+                </div>`;
+            } else if(t==='modern') {
+                p.innerHTML = `<div class="tpl-modern text-slate-800" style="width: 100%;">
+                    <div class="header-banner" style="background:var(--accent-gradient); color:#fff; padding: 40px; width: 100%; box-sizing: border-box;">
+                        <div class="flex justify-between items-center w-full">
+                            <div>
+                                <h1 class="text-4xl font-black uppercase" style="color:#fff;">${d.personal.firstName} ${d.personal.lastName}</h1>
+                                <p class="text-xl font-bold opacity-90 mt-1" style="color:#fff;">${d.personal.title}</p>
+                                <p class="text-[9pt] mt-3 opacity-80" style="color:#fff; font-weight: 500;">${d.personal.email} • ${d.personal.countryCode} ${d.personal.phone}</p>
+                            </div>
+                            ${sectorIcon && d.personal.sector !== 'none' ? `<div class="brand-logo-container" style="background:rgba(255,255,255,0.1); padding: 15px; border-radius:12px; color:#fff; font-size:32pt;"><i class="fa-solid ${sectorIcon}"></i></div>` : ''}
+                        </div>
+                    </div>
+                    <div style="padding: 0 40px 40px 40px;">
+                        ${masterOrder.filter(k=>k!=='personal').map(k=>renderSec(k)).join('')}
+                    </div>
+                </div>`;
+            } else if(t==='classic') {
+                p.innerHTML = logoHtml + `<div class="p-14 text-slate-900" style="padding: 50px;">
+                    <h1 class="font-serif font-black text-[32pt] text-center mb-2" style="color:var(--accent-color);">${d.personal.firstName} ${d.personal.lastName}</h1>
+                    <div class="text-[9pt] font-medium text-center uppercase tracking-widest opacity-60 mb-10 border-b-2 border-slate-200 pb-8">${d.personal.title} <br> ${d.personal.email} • ${d.personal.countryCode} ${d.personal.phone}</div>
+                    ${masterOrder.filter(k=>k!=='personal').map(k=>renderSec(k)).join('')}
+                </div>`;
+            } else {
+                p.innerHTML = logoHtml + `<div class="p-14 text-slate-800" style="padding: 40px;">
+                    <div class="flex gap-10 items-center mb-10 border-b-2 border-slate-200 pb-8">
+                        <div class="flex-1">
+                            <h1 class="text-4xl font-black uppercase" style="color:var(--accent-color)">${d.personal.firstName} ${d.personal.lastName}</h1>
+                            <p class="text-xl font-bold opacity-70 mt-1">${d.personal.title}</p>
+                            <p class="text-[9pt] mt-3 opacity-70">${d.personal.email} • ${d.personal.countryCode} ${d.personal.phone}</p>
+                        </div>
+                        ${d.personal.photo ? `<img src="${d.personal.photo}" style="width:80pt; height:80pt; border-radius:50%; object-fit:cover; border:4px solid #F1F5F9;">` : ''}
+                    </div>
+                    ${masterOrder.filter(k=>k!=='personal').map(k=>renderSec(k)).join('')}
+                </div>`;
+            }
         }
 
         window.downloadPDF = function() {
-            const el = document.getElementById('resume-preview');
+            const el = document.getElementById('resume-preview'); 
             const clone = el.cloneNode(true);
-            clone.style.transform = 'none';
+            clone.style.transform = 'none'; 
+            
+            // Remove the visual page break lines before saving
+            clone.style.backgroundImage = 'none'; 
+            
             const wrap = document.createElement('div');
             wrap.style.position = 'fixed'; wrap.style.top = '-9999px'; wrap.appendChild(clone);
             document.body.appendChild(wrap);
-            html2pdf().set({ margin:0, filename: 'Artifact.pdf', html2canvas:{scale:3, useCORS:true}, jsPDF:{unit:'mm',format:'a4'} }).from(clone).save().then(() => document.body.removeChild(wrap));
+            
+            html2pdf().set({ 
+                margin: 0, 
+                filename: 'Artifact.pdf', 
+                image: {type: 'jpeg', quality: 0.98}, 
+                html2canvas: {scale: 3, useCORS: true}, 
+                jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'},
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            }).from(clone).save().then(() => document.body.removeChild(wrap));
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('template-grid').innerHTML = TEMPLATES.map(t => `<div onclick="window.updateSetting('template','${t.id}')" class="p-4 bg-black/5 rounded-2xl cursor-pointer hover:bg-black hover:text-white transition-all border-none"><div class="font-bold text-[10px] uppercase">${t.name}</div><div class="text-[8px] opacity-40">${t.desc}</div></div>`).join('');
-            document.getElementById('color-picker').innerHTML = COLORS.map(c => `<div onclick="window.updateSetting('color','${c}')" class="w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-lg hover:scale-125 transition-transform" style="background:${c}"></div>`).join('');
+            renderTemplateList();
+            document.getElementById('color-picker').innerHTML = COLORS.map(c => `<div onclick="window.updateSetting('color','${c.hex}','${c.grad}')" class="w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-sm hover:scale-125 transition-transform" style="background:${c.grad}"></div>`).join('');
             renderSidebar(); renderForm(); renderPreview();
             document.querySelectorAll('.reveal-node').forEach(el => revealObserver.observe(el));
-            window.addEventListener('resize', scalePreview);
+            window.addEventListener('resize', scalePreview); updateUndoRedoUI();
         });
     </script>
 </body>
