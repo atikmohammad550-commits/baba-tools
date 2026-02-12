@@ -59,17 +59,44 @@
         }
 
         /* Dashboard */
-        #view-dashboard { height: 100vh; overflow-y: auto; scroll-behavior: smooth; z-index: 5; scroll-snap-type: y mandatory; }
-        .landing-section { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6rem 2rem; position: relative; scroll-snap-align: start; }
+        #view-dashboard { height: 100vh; overflow-y: auto; scroll-behavior: smooth; z-index: 5; }
+        .landing-section { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6rem 2rem; position: relative; }
         
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob { animation: blob 10s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+        
+        @keyframes float3d {
+            0% { transform: translateY(0px) rotateX(5deg) rotateY(-15deg); }
+            50% { transform: translateY(-20px) rotateX(8deg) rotateY(-12deg); }
+            100% { transform: translateY(0px) rotateX(5deg) rotateY(-15deg); }
+        }
+        .animate-float-3d { animation: float3d 8s ease-in-out infinite; transform-style: preserve-3d; }
+        
+        @keyframes floatBadge {
+            0% { transform: translateY(0px) translateZ(40px); }
+            50% { transform: translateY(-10px) translateZ(60px); }
+            100% { transform: translateY(0px) translateZ(40px); }
+        }
+        .animate-float-badge { animation: floatBadge 5s ease-in-out infinite reverse; transform-style: preserve-3d; }
+        
+        .perspective-1000 { perspective: 1000px; }
+
         /* View Switching */
         .view-section { position: fixed; inset: 0; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; z-index: 0; display: none; }
         .view-active { opacity: 1; pointer-events: auto; display: flex !important; flex-direction: column; z-index: 10; }
         
         /* Gradients */
         .text-gradient { background: linear-gradient(135deg, #2563EB 0%, #9333EA 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .text-gradient-teal { background: linear-gradient(135deg, #0D9488 0%, #2563EB 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .btn-gradient { background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%); color: white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2); transition: all 0.2s; border: none; }
-        .btn-gradient:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4); }
+        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35); }
 
         /* Premium 3D Glassmorphism */
         .ios-glass { 
@@ -109,21 +136,6 @@
         .ios-tab-inactive { color: #64748B; background: transparent; }
         .ios-tab-inactive:hover { color: #334155; transform: translateY(-1px); }
 
-        /* Liquid Sidebar Navigation Items */
-        .module-item { display: flex; align-items: center; gap: 6px; border-radius: 14px; margin-bottom: 8px; padding-right: 6px; perspective: 1000px; }
-        .module-btn { flex: 1; text-align: left; padding: 14px 18px; border-radius: 14px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .module-btn-active { 
-            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%); 
-            color: #ffffff; 
-            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35), inset 0 1px 2px rgba(255,255,255,0.4); 
-            border: none; 
-            transform: scale(1.02) translateZ(10px);
-        }
-        .module-btn-inactive { color: #475569; background: transparent; border: 1px solid transparent; }
-        .module-btn-inactive:hover { background: rgba(255,255,255,0.8); color: #1E293B; border-color: rgba(255,255,255,1); box-shadow: 0 4px 12px rgba(0,0,0,0.04); transform: scale(1.01); }
-        .module-delete-tab { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #94A3B8; cursor: pointer; transition: all 0.2s; background: transparent; border: none; }
-        .module-delete-tab:hover { background: #FEE2E2; color: #EF4444; }
-
         /* Preview Canvas & Typography Variables */
         #preview-viewport { flex: 1; overflow: auto; display: flex; justify-content: center; padding: 40px; }
         .page-container { 
@@ -135,11 +147,7 @@
             box-shadow: 0 30px 80px rgba(0,0,0,0.12); 
             position: relative; 
             overflow: visible; 
-            
-            /* Typography Variables Engine */
             font-family: var(--font-family, 'Inter', sans-serif);
-            
-            /* Visual Page Breaks every A4 length */
             background-image: linear-gradient(to bottom, transparent 296.5mm, #94A3B8 296.5mm, #94A3B8 297.5mm, transparent 297.5mm);
             background-size: 100% 297mm;
             border-radius: 4px;
@@ -148,7 +156,6 @@
         .resume-content { line-height: 1.5; font-size: var(--body-size, 9.5pt); color: #334155; }
         .resume-content strong, .resume-content b { font-weight: 700; color: #0F172A; }
         
-        /* HD Elements & PDF Protection */
         .resume-section { margin-bottom: 24px; page-break-inside: avoid; break-inside: avoid; position: relative; }
         .resume-section h2 { 
             font-size: calc(var(--body-size, 9.5pt) + 1.5pt); 
@@ -198,6 +205,12 @@
 </head>
 <body class="text-slate-800">
 
+    <!-- TOAST NOTIFICATION FOR AUTO-SAVE -->
+    <div id="toast-notification" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl font-bold text-sm z-[1000] transition-all duration-500 opacity-0 -translate-y-full pointer-events-none flex items-center gap-3">
+        <i class="fa-solid fa-circle-check text-teal-400"></i>
+        <span id="toast-message">Session restored successfully.</span>
+    </div>
+
     <!-- MODAL: ADD CUSTOM SECTION -->
     <div id="modal-overlay">
         <div class="ios-glass p-10 rounded-[40px] w-full max-w-md shadow-2xl text-center">
@@ -223,52 +236,142 @@
     </div>
 
     <!-- DASHBOARD -->
-    <div id="view-dashboard" class="view-section view-active">
-        <nav class="fixed top-6 inset-x-6 z-50 flex items-center justify-between px-8 py-4 ios-glass rounded-[24px] max-w-6xl mx-auto shadow-sm">
-            <div class="flex items-center gap-3">
+    <div id="view-dashboard" class="view-section view-active relative overflow-hidden">
+        
+        <!-- Ambient Glowing Deep Space Orbs -->
+        <div class="fixed top-20 left-10 w-[500px] h-[500px] bg-blue-500/20 rounded-full mix-blend-multiply filter blur-[120px] animate-blob pointer-events-none z-0"></div>
+        <div class="fixed top-40 right-10 w-[500px] h-[500px] bg-purple-500/20 rounded-full mix-blend-multiply filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none z-0"></div>
+        <div class="fixed -bottom-20 left-1/2 transform -translate-x-1/2 w-[600px] h-[600px] bg-teal-400/20 rounded-full mix-blend-multiply filter blur-[120px] animate-blob animation-delay-4000 pointer-events-none z-0"></div>
+
+        <nav class="fixed top-6 inset-x-6 z-50 flex items-center justify-between px-8 py-4 ios-glass rounded-[24px] max-w-7xl mx-auto shadow-sm border border-white/60">
+            <div class="flex items-center gap-4">
                 <div class="w-10 h-10 btn-gradient rounded-xl flex items-center justify-center text-white shadow-lg"><i class="fa-solid fa-feather-pointed"></i></div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900 uppercase">BABA Studio</h1>
+                <div class="flex flex-col justify-center">
+                    <h1 class="text-xl font-black tracking-tight text-slate-900 uppercase leading-none">BABA Studio</h1>
+                    <span class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Powered by Baba Tools</span>
+                </div>
             </div>
-            <button onclick="window.startNewResume()" class="btn-gradient text-white px-8 py-3 rounded-full text-xs font-bold hover:scale-105 transition-all shadow-md uppercase tracking-wide border-none">Start Engine</button>
+            <button onclick="window.startNewResume()" class="dash-start-btn btn-gradient text-white px-8 py-3 rounded-full text-xs font-bold hover:scale-105 transition-all shadow-md uppercase tracking-wide border-none">Create Resume</button>
         </nav>
 
-        <section class="landing-section">
-            <div class="max-w-6xl w-full text-center space-y-8 reveal-node visible">
-                <div class="inline-flex items-center gap-2 px-6 py-2 ios-glass rounded-full border border-white text-[10px] font-bold uppercase tracking-widest text-slate-600 shadow-sm">Powered by Baba Tools</div>
-                <h1 class="text-6xl md:text-[8.5rem] font-black tracking-tighter uppercase leading-[0.85] text-gradient">SPEAK FOR <br>YOURSELF.</h1>
-                <p class="text-slate-600 text-xl md:text-4xl font-black tracking-tight leading-tight text-shadow-sm">Create an HD resume that works.</p>
-                <div class="animate-bounce opacity-40 pt-12"><i class="fa-solid fa-chevron-down text-3xl text-blue-600"></i></div>
-            </div>
-        </section>
-
-         <section class="landing-section">
-            <div class="max-w-5xl w-full text-center space-y-10 reveal-node px-6 text-center">
-                <div class="inline-flex items-center px-6 py-2 ios-glass rounded-full border border-white text-[10px] font-bold uppercase tracking-widest text-slate-500 shadow-sm">Authority & Ethics</div>
-                <h2 class="text-5xl md:text-8xl font-black tracking-tighter uppercase text-slate-900 leading-[0.9]">NO SIGNUP DRAMA.<br><span class="text-gradient italic text-4xl md:text-7xl">No pricing. 100% free.</span></h2>
-            </div>
-        </section>
-
-        <section class="landing-section">
-            <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-16 px-12 items-center reveal-node">
-                <div class="space-y-8 text-left">
-                    <div class="inline-flex items-center px-6 py-2 ios-glass rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-600 border border-white shadow-sm">Visual Mastery</div>
-                    <h2 class="text-6xl md:text-7xl font-black tracking-tighter uppercase leading-[0.9] text-slate-900">Technical <br><span class="text-gradient italic text-5xl md:text-6xl">Precision.</span></h2>
-                    <p class="text-lg md:text-xl font-medium text-slate-600 leading-relaxed max-w-md">HD rounded elements, dynamic sidebars, and international branding. Vector-quality exports tailored for elites.</p>
+        <!-- HERO SECTION -->
+        <section class="landing-section relative z-10 w-full py-24 h-auto">
+            <div class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-24 items-center reveal-node visible pt-16">
+                <!-- Left: Typography & CTA -->
+                <div class="text-left space-y-6 lg:space-y-8 z-10">
+                    <div class="inline-flex items-center gap-2 px-5 py-2 ios-glass rounded-full border border-white/80 text-[10px] font-bold uppercase tracking-widest text-slate-600 shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span> Powered by BABA Tools
+                    </div>
+                    <h1 class="text-5xl md:text-6xl xl:text-7xl font-black tracking-tight uppercase leading-[1.05] text-slate-900 drop-shadow-sm">
+                        BUILD WHAT <br><span class="text-gradient">HIRES YOU.</span>
+                    </h1>
+                    <p class="text-slate-600 text-lg md:text-xl xl:text-2xl font-bold leading-relaxed max-w-md">
+                        100% free. No sign-up drama.
+                    </p>
+                    <div class="pt-4 flex flex-wrap gap-4">
+                        <button onclick="window.startNewResume()" class="dash-start-btn btn-gradient px-8 py-4 md:px-10 md:py-4 rounded-[20px] text-sm md:text-base font-bold shadow-xl hover:shadow-blue-500/30 hover:-translate-y-1 transition-all border-none flex items-center gap-3">
+                            Create My Resume <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-4 md:gap-5 pt-4 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        <span class="flex items-center gap-1 md:gap-2"><i class="fa-solid fa-check text-teal-500"></i> Local Storage Save</span>
+                        <span class="flex items-center gap-1 md:gap-2"><i class="fa-solid fa-check text-teal-500"></i> Vector PDF Export</span>
+                    </div>
                 </div>
-                <div class="ios-glass p-14 rounded-[40px] shadow-2xl space-y-10 border border-white font-bold text-slate-800">
-                    <div class="flex gap-6 items-center mb-8"><i class="fa-solid fa-shield-check text-teal-600 text-3xl"></i><span class="font-bold uppercase text-sm tracking-widest">100% Private Work</span></div>
-                    <div class="flex gap-6 items-center"><i class="fa-solid fa-file-pdf text-blue-600 text-3xl"></i><span class="font-bold uppercase text-sm tracking-widest">Vector Quality Export</span></div>
+
+                <!-- Right: 3D Floating Resume Mockup -->
+                <div class="relative hidden lg:flex h-[500px] perspective-1000 items-center justify-center">
+                    <div class="absolute inset-0 flex items-center justify-center animate-float-3d scale-75 xl:scale-100 origin-center">
+                        <!-- Main Glass Card -->
+                        <div class="w-[380px] h-[500px] ios-glass rounded-[40px] border border-white/80 shadow-[0_30px_60px_rgba(0,0,0,0.08)] p-8 flex flex-col gap-6 relative overflow-hidden bg-white/40">
+                            <!-- Header Skeleton -->
+                            <div class="flex gap-5 items-center border-b border-slate-200/50 pb-5">
+                                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 border-4 border-white shadow-sm"></div>
+                                <div class="space-y-3 flex-1">
+                                    <div class="h-4 w-3/4 bg-slate-800/80 rounded-full"></div>
+                                    <div class="h-2 w-1/2 bg-blue-600/60 rounded-full"></div>
+                                    <div class="h-1.5 w-full bg-slate-400/50 rounded-full mt-2"></div>
+                                </div>
+                            </div>
+                            <!-- Body Skeletons -->
+                            <div class="space-y-4 flex-1">
+                                <div class="h-6 w-1/3 bg-teal-600/80 rounded-lg mb-4"></div>
+                                <div class="h-20 w-full ios-glass rounded-2xl border border-white"></div>
+                                <div class="h-20 w-full ios-glass rounded-2xl border border-white"></div>
+                            </div>
+                            
+                            <!-- Floating Badge 1 -->
+                            <div class="absolute -right-4 top-1/4 ios-glass p-3 rounded-2xl shadow-xl border border-white/80 animate-float-badge bg-white/90">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><i class="fa-solid fa-file-pdf text-sm"></i></div>
+                                    <div>
+                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Format</div>
+                                        <div class="text-xs font-black text-slate-800">Vector HD</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Floating Badge 2 -->
+                            <div class="absolute -left-6 bottom-1/4 ios-glass p-3 rounded-2xl shadow-xl border border-white/80 animate-float-badge bg-white/90" style="animation-delay: -2.5s;">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center text-teal-500"><i class="fa-solid fa-shield-check text-sm"></i></div>
+                                    <div>
+                                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Privacy</div>
+                                        <div class="text-xs font-black text-slate-800">Local Save</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="landing-section">
-            <div class="max-w-4xl w-full text-center space-y-10 reveal-node">
-                <div class="inline-flex items-center px-6 py-2 ios-glass rounded-full border border-white text-[10px] font-bold uppercase tracking-widest text-slate-600 shadow-sm">V3.5 Typographic</div>
-                <h2 class="text-7xl md:text-9xl font-black tracking-tighter uppercase leading-[0.8] pb-8 text-slate-900">OWN THE <br><span class="text-gradient italic text-6xl md:text-[8rem]">STUDIO.</span></h2>
-                <button onclick="window.startNewResume()" class="btn-gradient px-14 py-6 rounded-full text-xl font-bold flex items-center gap-5 hover:scale-105 transition-all mx-auto shadow-2xl uppercase border-none">
-                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shadow-inner"><i class="fa-solid fa-bolt-lightning text-lg text-white"></i></div>
-                    <span class="text-white font-black text-xl tracking-wider">Open Studio</span>
+        <!-- BENTO BOX FEATURES -->
+        <section class="landing-section relative z-10 w-full bg-slate-50/30 backdrop-blur-md border-y border-white/50 py-24 h-auto">
+            <div class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10 reveal-node">
+                <!-- Large Box 1 -->
+                <div class="lg:col-span-2 ios-glass p-8 md:p-10 lg:p-14 rounded-[40px] flex flex-col justify-center overflow-hidden relative border border-white hover:shadow-xl transition-shadow duration-500 group">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-400/10 to-transparent rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform duration-700"></div>
+                    <div class="space-y-6 max-w-lg relative z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-sm border border-blue-100"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                        <h3 class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-[1.1]">Studio-Grade<br>Typography.</h3>
+                        <p class="text-base font-medium text-slate-500 leading-relaxed">Instantly switch between pristine sans-serifs, authoritative serifs, and modern tech fonts. Adjust scaling and weight with millimeter precision.</p>
+                    </div>
+                </div>
+                <!-- Small Box 1 -->
+                <div class="ios-glass p-8 md:p-10 rounded-[40px] flex flex-col justify-center border border-white hover:shadow-xl transition-shadow duration-500 group">
+                    <div class="space-y-5 relative z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center text-xl shadow-sm border border-teal-100"><i class="fa-solid fa-lock"></i></div>
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tight leading-[1.1]">Zero<br>Data Track.</h3>
+                        <p class="text-sm font-medium text-slate-500 leading-relaxed">Your data never leaves your device. Silent local auto-saves ensure you never lose your work.</p>
+                    </div>
+                </div>
+                <!-- Small Box 2 -->
+                <div class="ios-glass p-8 md:p-10 rounded-[40px] flex flex-col justify-center border border-white hover:shadow-xl transition-shadow duration-500 group">
+                    <div class="space-y-5 relative z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-sm border border-purple-100"><i class="fa-solid fa-palette"></i></div>
+                        <h3 class="text-2xl font-black text-slate-900 tracking-tight leading-[1.1]">Dynamic<br>Templates.</h3>
+                        <p class="text-sm font-medium text-slate-500 leading-relaxed">From vibrant sidebars to stark minimalist headers. Inject custom gradient accents to match your brand.</p>
+                    </div>
+                </div>
+                 <!-- Large Box 2 -->
+                 <div class="lg:col-span-2 ios-glass p-8 md:p-10 lg:p-14 rounded-[40px] flex flex-col justify-center overflow-hidden relative border border-white hover:shadow-xl transition-shadow duration-500 group bg-slate-900/95 backdrop-blur-xl">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-teal-400/10 to-transparent rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform duration-700"></div>
+                    <div class="space-y-6 max-w-lg relative z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-white/10 text-teal-400 flex items-center justify-center text-xl border border-white/10"><i class="fa-solid fa-file-pdf"></i></div>
+                        <h3 class="text-3xl lg:text-4xl font-black text-white tracking-tight leading-[1.1]">Flawless<br>PDF Export.</h3>
+                        <p class="text-base font-medium text-slate-400 leading-relaxed">Unlike basic web tools, the BABA Engine generates perfectly scaled, text-selectable A4 vector PDFs that sail through Applicant Tracking Systems (ATS).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FINAL CTA -->
+        <section class="landing-section relative z-10 min-h-[60vh] py-20">
+            <div class="max-w-4xl w-full text-center space-y-8 reveal-node">
+                <h2 class="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight uppercase leading-[1.05] text-slate-900">THE WAIT <br><span class="text-gradient">IS OVER.</span></h2>
+                <button onclick="window.startNewResume()" class="dash-start-btn btn-gradient px-10 py-4 md:px-12 md:py-5 rounded-[24px] text-base md:text-lg font-black flex items-center gap-4 hover:scale-105 transition-all mx-auto shadow-xl uppercase border-none">
+                    <i class="fa-solid fa-bolt-lightning text-xl text-white/80"></i> Create Resume
                 </button>
             </div>
         </section>
@@ -327,9 +430,9 @@
             
             <aside id="right-preview" class="absolute inset-y-0 right-0 w-full md:w-[850px] ios-glass shadow-2xl z-50 transform translate-x-full transition-transform duration-500 flex flex-col overflow-hidden">
                 <div class="h-20 flex items-center justify-between px-10 border-b border-white/40 text-slate-800 bg-white/60 backdrop-blur-md z-10">
-                    <div class="flex flex-col">
-                        <span class="text-[12px] font-black text-slate-900 uppercase tracking-[0.15em]">Live Output</span>
-                        <span class="text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em]">HD Rendering Engine</span>
+                    <div class="flex flex-col justify-center">
+                        <span class="text-[12px] font-black text-slate-900 uppercase tracking-[0.15em] leading-none">Live Output</span>
+                        <span class="text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">Powered by Baba Tools</span>
                     </div>
                     <button onclick="window.togglePreview(false)" class="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-slate-50 transition-all text-slate-600 border border-slate-200 focus:outline-none shadow-sm"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
@@ -351,6 +454,16 @@
         ];
         const JOB_TITLES = ['Software Engineer', 'Senior Software Engineer', 'Product Manager', 'Data Scientist', 'Data Analyst', 'Marketing Manager', 'Clinical Nurse', 'Registered Nurse', 'Sales Executive', 'Financial Analyst', 'Operations Manager', 'Project Manager', 'Graphic Designer', 'UX/UI Designer'];
         
+        const SUMMARY_TEMPLATES = {
+            'Tech/Engineering': "Results-driven Software Engineer with [X] years of experience architecting scalable web applications. Proven expertise in [Skill 1], [Skill 2], and driving agile development cycles to deliver high-impact solutions.",
+            'Management/Operations': "Dynamic Operations Manager with a track record of streamlining processes and boosting productivity by [X]%. Adept at leading cross-functional teams, managing $ [X] budgets, and implementing strategic operational improvements.",
+            'Healthcare/Medical': "Dedicated Clinical Professional with [X] years of experience providing top-tier patient care. Strong background in [Specialty], patient advocacy, and collaborating with multidisciplinary medical teams to improve health outcomes.",
+            'Sales/Marketing': "High-performing Sales Executive who consistently exceeds quota by [X]%. Expert in B2B relationship building, strategic market positioning, and driving revenue growth in competitive territories."
+        };
+
+        const QUICK_SKILLS = ['Project Management', 'JavaScript', 'Python', 'Customer Service', 'Data Analysis', 'Agile/Scrum', 'Public Speaking', 'SEO', 'Sales', 'Team Leadership'];
+        const QUICK_LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic'];
+
         const TEMPLATES = [
             {id:'clinical', name:'Clinical Catalyst', desc:'Vibrant Sidebar IA (Optimized Space).'},
             {id:'modern', name:'Modern Pro', desc:'Full-Width Colored Banner IA.'}, 
@@ -391,9 +504,52 @@
         let historyStack = []; let redoStack = []; let activeSection = 'personal'; let cropper; let debounceTimer;
         let sortableInstance = null;
 
-        function saveState() { historyStack.push(JSON.stringify(resumeData)); redoStack = []; updateUndoRedoUI(); }
-        window.undo = () => { if (historyStack.length === 0) return; redoStack.push(JSON.stringify(resumeData)); resumeData = JSON.parse(historyStack.pop()); syncUI(); }
-        window.redo = () => { if (redoStack.length === 0) return; historyStack.push(JSON.stringify(resumeData)); resumeData = JSON.parse(redoStack.pop()); syncUI(); }
+        // --- CORE LOCALSTORAGE ENGINE ---
+        function saveState() { 
+            historyStack.push(JSON.stringify(resumeData)); 
+            redoStack = []; 
+            updateUndoRedoUI(); 
+            
+            // Secure Local Auto-Save
+            try {
+                localStorage.setItem('baba_studio_resume_data', JSON.stringify(resumeData));
+            } catch(e) {
+                console.warn('Local Storage is disabled or full. Autosave skipped.');
+            }
+        }
+
+        function loadFromStorage() {
+            try {
+                const savedData = localStorage.getItem('baba_studio_resume_data');
+                if (savedData) {
+                    resumeData = JSON.parse(savedData);
+                    showToast("Welcome back! Your previous session was restored.");
+                    
+                    // Update Dashboard CTA if data exists
+                    document.querySelectorAll('.dash-start-btn').forEach(btn => {
+                        btn.innerHTML = '<i class="fa-solid fa-play mr-2"></i> Resume Building';
+                    });
+                    return true;
+                }
+            } catch(e) {
+                console.warn('Failed to load from local storage.');
+            }
+            return false;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.remove('opacity-0', '-translate-y-full');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-full');
+            }, 3500);
+        }
+
+        window.undo = () => { if (historyStack.length === 0) return; redoStack.push(JSON.stringify(resumeData)); resumeData = JSON.parse(historyStack.pop()); syncUI(); localStorage.setItem('baba_studio_resume_data', JSON.stringify(resumeData)); }
+        window.redo = () => { if (redoStack.length === 0) return; historyStack.push(JSON.stringify(resumeData)); resumeData = JSON.parse(redoStack.pop()); syncUI(); localStorage.setItem('baba_studio_resume_data', JSON.stringify(resumeData)); }
         function updateUndoRedoUI() { const u = document.getElementById('undo-btn'); const r = document.getElementById('redo-btn'); if(u) u.disabled = historyStack.length === 0; if(r) r.disabled = redoStack.length === 0; }
         function syncUI() { renderSidebar(); renderForm(); renderPreview(); updateUndoRedoUI(); }
 
@@ -421,6 +577,43 @@
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em style="font-style:italic;">$1</em>');
         };
+
+        // --- TEMPLATE VAULT ---
+        window.insertSummaryTemplate = (type) => {
+            if(SUMMARY_TEMPLATES[type]) {
+                resumeData.summary.content = SUMMARY_TEMPLATES[type];
+                renderForm();
+                renderPreview();
+                saveState();
+            }
+        };
+
+        // --- QUICK ADD CHIPS ---
+        window.addQuickItem = (section, val, defaultLevel = 'Professional') => {
+            saveState();
+            const sec = resumeData[section];
+            let added = false;
+            if(sec.items) {
+                if(sec.items.length === 1 && !sec.items[0].name) {
+                    sec.items[0].name = val;
+                    if(section === 'languages') sec.items[0].level = defaultLevel;
+                    added = true;
+                } else {
+                    if(!sec.items.find(i => i.name.toLowerCase() === val.toLowerCase())) {
+                        if(section === 'languages') {
+                            sec.items.push({name: val, level: defaultLevel});
+                        } else {
+                            sec.items.push({name: val});
+                        }
+                        added = true;
+                    }
+                }
+            }
+            if(added) {
+                renderForm();
+                renderPreview();
+            }
+        }
 
         // --- SMART EMAIL AUTOCOMPLETE ---
         window.handleEmailInput = function(el) {
@@ -608,15 +801,39 @@
             if(panel) panel.scrollTo({ top: 0, behavior: 'smooth' });
         }
         
-        function renderSidebar() { const list = document.getElementById('section-list'); if(!list) return; list.innerHTML = ''; resumeData.order.forEach(key => { const label = resumeData[key]?.type === 'custom' ? resumeData[key].title : key; const isActive = activeSection === key; list.innerHTML += `<div class="module-item"><div class="module-btn ${isActive ? 'module-btn-active':'module-btn-inactive'}" onclick="setActiveSection('${key}')">${label}</div>${key !== 'personal' ? `<button class="module-delete-tab" onclick="window.removeSection('${key}')"><i class="fa-solid fa-trash-can text-xs"></i></button>` : ''}</div>`; }); }
+        function renderSidebar() { 
+            const list = document.getElementById('section-list'); 
+            if(!list) return; 
+            list.innerHTML = ''; 
+            resumeData.order.forEach(key => { 
+                const label = resumeData[key]?.type === 'custom' ? resumeData[key].title : key; 
+                const isActive = activeSection === key; 
+                
+                // Pure Tailwind classes for robust layout that won't break in different browser states
+                const activeClasses = "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30 scale-[1.02] border-transparent";
+                const inactiveClasses = "bg-white/50 text-slate-600 hover:bg-white border-transparent hover:border-slate-200 hover:shadow-sm";
+                
+                list.innerHTML += `
+                <div class="flex items-center gap-2 mb-2 w-full">
+                    <button onclick="setActiveSection('${key}')" class="flex-1 text-left px-5 py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 border ${isActive ? activeClasses : inactiveClasses}">
+                        ${label}
+                    </button>
+                    ${key !== 'personal' ? `
+                    <button onclick="window.removeSection('${key}')" class="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-xl bg-white/50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors border border-transparent hover:border-red-100 shadow-sm">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                    ` : '<div class="w-11 h-11 flex-shrink-0"></div>'} 
+                </div>`; 
+            }); 
+        }
         
         function renderForm() {
             const c = document.getElementById('form-container'); if(!c) return;
             const d = resumeData[activeSection]; const friendly = SECTION_LABELS[activeSection] || d.title;
-            let h = `<h2 class="text-5xl font-black tracking-tighter text-slate-900 uppercase leading-[0.9] text-center mb-8" style="text-shadow: 0 2px 10px rgba(255,255,255,0.5);">${friendly}</h2>`;
+            let h = `<h2 class="text-4xl font-black tracking-tighter text-slate-800 uppercase leading-[0.9] text-center mb-8 drop-shadow-sm">${friendly}</h2>`;
             if(activeSection === 'personal') {
                 h += `<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 text-slate-800">
-                    <div class="col-span-full flex items-center gap-6 p-6 bg-white/40 rounded-[24px] border border-white shadow-sm"><div class="photo-preview-container shadow-sm">${d.photo ? `<img src="${d.photo}" style="width:100%; height:100%; object-fit:cover;">` : `<i class="fa-solid fa-user-tie text-2xl text-slate-300"></i>`}</div><div class="flex-1"><label class="input-label">Identity Photo</label><button onclick="document.getElementById('file-upload').click()" class="upload-btn">Upload Profile Photo</button><input id="file-upload" type="file" accept="image/*" onchange="handlePhoto(event)" class="hidden"></div></div>
+                    <div class="col-span-full flex items-center gap-6 p-6 bg-white/60 backdrop-blur-md rounded-[24px] border border-white shadow-sm"><div class="photo-preview-container shadow-sm">${d.photo ? `<img src="${d.photo}" style="width:100%; height:100%; object-fit:cover;">` : `<i class="fa-solid fa-user-tie text-2xl text-slate-300"></i>`}</div><div class="flex-1"><label class="input-label">Identity Photo</label><button onclick="document.getElementById('file-upload').click()" class="upload-btn">Upload Profile Photo</button><input id="file-upload" type="file" accept="image/*" onchange="handlePhoto(event)" class="hidden"></div></div>
                     <div class="field-wrapper group"><label class="input-label">First Name <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, 'personal', null, 'firstName')"></i></label><input class="ios-input" value="${d.firstName||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.personal.firstName=event.target.value; renderPreview(); })"></div>
                     <div class="field-wrapper group"><label class="input-label">Last Name <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, 'personal', null, 'lastName')"></i></label><input class="ios-input" value="${d.lastName||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.personal.lastName=event.target.value; renderPreview(); })"></div>
                     <div class="col-span-full field-wrapper group relative"><label class="input-label">Target Title <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, 'personal', null, 'title')"></i></label><input class="ios-input" value="${d.title||''}" oninput="window.handleTitleInput(event.target)"></div>
@@ -624,11 +841,19 @@
                     <div class="flex gap-3 field-wrapper group"><div><label class="input-label">Code</label><select class="ios-input w-24 px-2 text-center" onchange="window.handleInput(() => { resumeData.personal.countryCode=event.target.value; renderPreview(); })">${COUNTRY_CODES.map(cc=>`<option value="${cc.code}" ${d.countryCode===cc.code?'selected':''}>${cc.code}</option>`).join('')}</select></div><div class="flex-1"><label class="input-label">Phone <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, 'personal', null, 'phone')"></i></label><input class="ios-input" value="${d.phone||''}" placeholder="10-digit number" maxlength="10" oninput="window.handlePhoneInput(event.target)"></div></div>
                 </div>`;
             } else if (activeSection === 'summary') {
-                h += `<div class="mt-4 p-8 bg-white/40 rounded-[32px] border border-white shadow-sm transition-all"><label class="input-label mb-2">Professional Summary</label><textarea class="ios-input h-64 resize-none bg-white/60 shadow-inner" placeholder="E.g., Senior Operations Manager with 10+ years driving cross-functional team productivity..." oninput="window.handleInput(() => { resumeData.summary.content=event.target.value; renderPreview(); })">${d.content||''}</textarea><p class="text-[9px] text-slate-500 font-medium mt-3"><i class="fa-solid fa-circle-info mr-1"></i> Tip: Surround text with **asterisks** to make it **bold**.</p></div>`;
+                h += `<div class="mt-4 p-8 bg-white/60 backdrop-blur-md rounded-[32px] border border-white shadow-sm transition-all">
+                    <div class="flex justify-between items-end mb-4">
+                        <label class="input-label mb-0">Professional Summary</label>
+                        <select class="ios-input py-1 px-2 text-[10px] w-auto bg-white/80 font-bold uppercase tracking-widest text-blue-600 cursor-pointer hover:bg-white" onchange="if(this.value) window.insertSummaryTemplate(this.value); this.value='';">
+                            <option value="">+ Template Vault</option>
+                            ${Object.keys(SUMMARY_TEMPLATES).map(k => `<option value="${k}">${k}</option>`).join('')}
+                        </select>
+                    </div>
+                    <textarea class="ios-input h-64 resize-none shadow-inner" placeholder="E.g., Senior Operations Manager with 10+ years driving cross-functional team productivity..." oninput="window.handleInput(() => { resumeData.summary.content=event.target.value; renderPreview(); })">${d.content||''}</textarea><p class="text-[9px] text-slate-500 font-medium mt-3"><i class="fa-solid fa-circle-info mr-1"></i> Tip: Surround text with **asterisks** to make it **bold**.</p></div>`;
             } else if (activeSection === 'experience' || activeSection === 'education') {
                 h += `<button onclick="window.removeSection('${activeSection}')" class="w-full py-3 mb-6 bg-white/40 text-red-500 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-white transition-all border border-white shadow-sm">Remove Entire Section</button>`;
                 d.forEach((item, idx) => {
-                    h += `<div class="bg-white/40 p-8 rounded-[32px] relative mt-8 border border-white shadow-sm"><button onclick="delItem('${activeSection}',${idx})" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-white text-slate-400 hover:text-red-500 shadow-sm border-none active:scale-90 transition-colors"><i class="fa-solid fa-trash"></i></button><div class="grid grid-cols-2 gap-5">`;
+                    h += `<div class="bg-white/60 backdrop-blur-md p-8 rounded-[32px] relative mt-8 border border-white shadow-sm"><button onclick="delItem('${activeSection}',${idx})" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-white text-slate-400 hover:text-red-500 shadow-sm border-none active:scale-90 transition-colors"><i class="fa-solid fa-trash"></i></button><div class="grid grid-cols-2 gap-5">`;
                     if(activeSection==='experience') h+=`<div class="col-span-2 field-wrapper group"><label class="input-label">Organization <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, '${activeSection}', ${idx}, 'company')"></i></label><input class="ios-input" value="${item.company||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.experience[${idx}].company=event.target.value; renderPreview(); })"></div><div class="col-span-2 field-wrapper group"><label class="input-label">Role <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, '${activeSection}', ${idx}, 'title')"></i></label><input class="ios-input" value="${item.title||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.experience[${idx}].title=event.target.value; renderPreview(); })"></div>`;
                     else h+=`<div class="col-span-2 field-wrapper group"><label class="input-label">School/University <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, '${activeSection}', ${idx}, 'school')"></i></label><input class="ios-input" value="${item.school||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.education[${idx}].school=event.target.value; renderPreview(); })"></div><div class="col-span-2 field-wrapper group"><label class="input-label">Degree <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, '${activeSection}', ${idx}, 'degree')"></i></label><input class="ios-input" value="${item.degree||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.education[${idx}].degree=event.target.value; renderPreview(); })"></div>`;
                     h+=`<div class="field-wrapper group"><label class="input-label">Start Date <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, '${activeSection}', ${idx}, 'start')"></i></label><input type="date" class="ios-input" value="${item.start||''}" oninput="window.handleInput(() => { resumeData.${activeSection}[${idx}].start=event.target.value; renderPreview(); })"></div><div class="field-wrapper group"><label class="input-label">End Date <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, '${activeSection}', ${idx}, 'end')"></i></label><input type="date" class="ios-input" value="${item.end||''}" oninput="window.handleInput(() => { resumeData.${activeSection}[${idx}].end=event.target.value; renderPreview(); })"></div><div class="col-span-2 field-wrapper group"><label class="input-label">Details <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, '${activeSection}', ${idx}, 'description')"></i></label><textarea class="ios-input h-24" oninput="window.handleInput(() => { resumeData.${activeSection}[${idx}].description=event.target.value; renderPreview(); })">${item.description||''}</textarea><p class="text-[9px] text-slate-500 font-medium mt-2"><i class="fa-solid fa-circle-info mr-1"></i> Tip: Surround text with **asterisks** to make it **bold**.</p></div></div></div>`;
@@ -637,7 +862,7 @@
             } else if (activeSection === 'certifications') {
                 h += `<button onclick="window.removeSection('${activeSection}')" class="w-full py-3 mb-6 bg-white/40 text-red-500 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-white transition-all border border-white shadow-sm">Remove Entire Section</button>`;
                 d.forEach((item, idx) => {
-                    h += `<div class="bg-white/40 p-8 rounded-[32px] relative mt-8 border border-white shadow-sm"><button onclick="delItem('${activeSection}',${idx})" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-white text-slate-400 hover:text-red-500 shadow-sm border-none active:scale-90 transition-colors"><i class="fa-solid fa-trash"></i></button><div class="grid grid-cols-2 gap-5">`;
+                    h += `<div class="bg-white/60 backdrop-blur-md p-8 rounded-[32px] relative mt-8 border border-white shadow-sm"><button onclick="delItem('${activeSection}',${idx})" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-white text-slate-400 hover:text-red-500 shadow-sm border-none active:scale-90 transition-colors"><i class="fa-solid fa-trash"></i></button><div class="grid grid-cols-2 gap-5">`;
                     h+=`<div class="col-span-2 field-wrapper group"><label class="input-label">Credential Name <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, '${activeSection}', ${idx}, 'name')"></i></label><input class="ios-input" value="${item.name||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.certifications[${idx}].name=event.target.value; renderPreview(); })"></div>`;
                     h+=`<div class="col-span-2 field-wrapper group"><label class="input-label">Date / Year <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, '${activeSection}', ${idx}, 'date')"></i></label><input type="text" class="ios-input" placeholder="e.g. 2023" value="${item.date||''}" oninput="window.handleInput(() => { resumeData.certifications[${idx}].date=event.target.value; renderPreview(); })"></div><div class="col-span-2 field-wrapper group"><label class="input-label">Details <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, '${activeSection}', ${idx}, 'description')"></i></label><textarea class="ios-input h-24" oninput="window.handleInput(() => { resumeData.certifications[${idx}].description=event.target.value; renderPreview(); })">${item.description||''}</textarea><p class="text-[9px] text-slate-500 font-medium mt-2"><i class="fa-solid fa-circle-info mr-1"></i> Tip: Surround text with **asterisks** to make it **bold**.</p></div></div></div>`;
                 });
@@ -645,11 +870,13 @@
             } else if (activeSection === 'languages') {
                 d.items.forEach((item, idx) => { h += `<div class="flex gap-4 items-end mt-4 text-slate-800"><div class="flex-1 field-wrapper group"><label class="input-label">Language</label><input class="ios-input" value="${item.name||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData.languages.items[${idx}].name=event.target.value; renderPreview(); })"></div><div class="w-48 field-wrapper"><label class="input-label">Level</label><select class="ios-input bg-white" onchange="window.handleInput(() => { resumeData.languages.items[${idx}].level=event.target.value; renderPreview(); saveState(); })">${LANG_LEVELS.map(l => `<option value="${l}" ${item.level===l?'selected':''}>${l}</option>`).join('')}</select></div><button onclick="delItem('languages',${idx})" class="w-12 h-12 rounded-xl bg-white shadow-sm hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors border border-slate-100"><i class="fa-solid fa-trash"></i></button></div>`; });
                 h += `<button onclick="addItem('languages')" class="w-full py-5 bg-white border border-white text-slate-600 rounded-[20px] font-bold uppercase text-[10px] mt-6 shadow-sm hover:border-blue-400 hover:text-blue-600 transition-all">+ Add Language</button>`;
+                h += `<div class="mt-5"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3">Quick Add Languages:</p><div class="flex flex-wrap gap-2">${QUICK_LANGUAGES.map(l => `<button onclick="window.addQuickItem('languages', '${l}', 'Fluent')" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm">+ ${l}</button>`).join('')}</div></div>`;
             } else if (activeSection === 'passport') {
-                h += `<div class="grid grid-cols-2 gap-6 mt-6 text-slate-800 p-8 bg-white/40 rounded-[32px] border border-white shadow-sm"><div class="field-wrapper group"><label class="input-label">Passport Number <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, 'passport', null, 'number')"></i></label><input class="ios-input uppercase" value="${d.number||''}" oninput="window.handleInput(() => { resumeData.passport.number=event.target.value; renderPreview(); })"></div><div class="field-wrapper group"><label class="input-label">Expiry Date <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, 'passport', null, 'expiry')"></i></label><input type="date" class="ios-input" value="${d.expiry||''}" oninput="window.handleInput(() => { resumeData.passport.expiry=event.target.value; renderPreview(); })"></div></div>`;
+                h += `<div class="grid grid-cols-2 gap-6 mt-6 text-slate-800 p-8 bg-white/60 backdrop-blur-md rounded-[32px] border border-white shadow-sm"><div class="field-wrapper group"><label class="input-label">Passport Number <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, 'passport', null, 'number')"></i></label><input class="ios-input uppercase" value="${d.number||''}" oninput="window.handleInput(() => { resumeData.passport.number=event.target.value; renderPreview(); })"></div><div class="field-wrapper group"><label class="input-label">Expiry Date <i class="fa-solid fa-xmark cursor-pointer opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-opacity" onclick="hideField(this, 'passport', null, 'expiry')"></i></label><input type="date" class="ios-input" value="${d.expiry||''}" oninput="window.handleInput(() => { resumeData.passport.expiry=event.target.value; renderPreview(); })"></div></div>`;
             } else {
                 d.items.forEach((item, idx) => { h += `<div class="flex gap-4 items-end mt-4 text-slate-800"><div class="flex-1 field-wrapper group"><label class="input-label">Competency</label><input class="ios-input" value="${item.name||''}" oninput="window.handleInput(() => { window.applyAutoCaps(event.target); resumeData['${activeSection}'].items[${idx}].name=event.target.value; renderPreview(); })"></div><button onclick="delItem('${activeSection}',${idx})" class="w-12 h-12 rounded-xl bg-white shadow-sm hover:bg-red-50 text-slate-400 hover:text-red-500 border border-slate-100 transition-colors"><i class="fa-solid fa-trash"></i></button></div>`; });
                 h += `<button onclick="addItem('${activeSection}')" class="w-full py-5 bg-white border border-white text-slate-600 shadow-sm rounded-[20px] font-bold uppercase text-[10px] mt-6 hover:border-blue-400 hover:text-blue-600 transition-all">+ Add Entry</button>`;
+                h += `<div class="mt-5"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3">Quick Add Skills:</p><div class="flex flex-wrap gap-2">${QUICK_SKILLS.map(s => `<button onclick="window.addQuickItem('${activeSection}', '${s}')" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm">+ ${s}</button>`).join('')}</div></div>`;
             }
             c.innerHTML = h;
         }
@@ -846,7 +1073,7 @@
                 };
 
                 function dragLogo(e) {
-                    if(!isDragging) return;
+                    if(!isemakersDragging) return;
                     const rect = container.getBoundingClientRect();
                     let dx = e.clientX - startX;
                     let dy = e.clientY - startY;
@@ -892,6 +1119,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
             renderTemplateList();
             document.getElementById('color-picker').innerHTML = COLORS.map(c => `<div onclick="window.updateSetting('color','${c.hex}','${c.grad}')" class="w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-sm hover:scale-125 transition-transform" style="background:${c.grad}"></div>`).join('');
             renderSidebar(); renderForm(); renderPreview();
