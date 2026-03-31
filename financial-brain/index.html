@@ -218,10 +218,6 @@
     .animate-bounce-subtle { animation: bounce-subtle 2s infinite ease-in-out; }
 
     /* HD Presentation Typography & Effects */
-    .text-glow-teal { text-shadow: 0 0 24px rgba(20, 184, 166, 0.5); }
-    .text-glow-indigo { text-shadow: 0 0 24px rgba(99, 102, 241, 0.5); }
-    .text-glow-rose { text-shadow: 0 0 24px rgba(225, 29, 72, 0.5); }
-    .text-glow-amber { text-shadow: 0 0 24px rgba(245, 158, 11, 0.5); }
     .number-pop { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .number-pop:hover { transform: scale(1.05); }
     .narration-box { background: rgba(255,255,255,0.6); border: 1px solid rgba(226, 232, 240, 0.6); padding: 8px 12px; border-radius: 8px; margin-top: 10px; }
@@ -347,14 +343,14 @@
     const calculateStepUpSip = (targetValue, years, returns, stepUp, lumpsum = 0) => {
       if (years <= 0 || targetValue <= 0) return 0;
       const r = (returns / 100) / 12, g = (stepUp || 0) / 100, n = years * 12;
-      const fvLumpsum = lumpsum * Math.pow(1 + r, n);
+      const fvLumpsum = r === 0 ? lumpsum : lumpsum * Math.pow(1 + r, n);
       const needed = Math.max(0, targetValue - fvLumpsum);
       if (needed <= 0) return 0;
-      let low = 0, high = needed * 2;
-      for (let i = 0; i < 40; i++) {
+      let low = 0, high = Math.max(needed, targetValue, needed / (n || 1) * 2); 
+      for (let i = 0; i < 50; i++) { 
         let mid = (low + high) / 2, total = 0, curSip = mid;
         for (let m = 1; m <= n; m++) {
-          total = (total + curSip) * (1 + r);
+          total = r === 0 ? (total + curSip) : (total + curSip) * (1 + r);
           if (m % 12 === 0) curSip *= (1 + g);
         }
         if (total < needed) low = mid; else high = mid;
@@ -1432,6 +1428,9 @@
       const [showRealValue, setShowRealValue] = useState(false);
       const [showPostTax, setShowPostTax] = useState(false);
       const [showRawNumbers, setShowRawNumbers] = useState(false);
+      const [taxHarvesting, setTaxHarvesting] = useState(false);
+      const [glidePath, setGlidePath] = useState(false);
+      const [sequenceRisk, setSequenceRisk] = useState(false);
       const [blackSwan, setBlackSwan] = useState(false);
       const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
       const [inlineEdit, setInlineEdit] = useState({ id: null, cost: '' });
@@ -1623,15 +1622,39 @@
       const masterSimulationData = useMemo(() => {
         let legacyBal = unallocatedData.remaining + totalIlliquidAssets; legacyBal += safeNumber(masterLumpsum);
         let buckets = plan.filter(g => !g.isPaused).map(g => ({ id: g.id, name: g.name, horizon: g.horizon, bal: safeNumber(g.lumpsum) + safeNumber(g.allocAmt), sip: g.sip, returnRateBase: g.returns, stepUp: (g.stepUp || 0) / 100, target: g.target }));
-        let yearlyData = []; let totalPrincipal = legacyBal + buckets.reduce((acc, b) => acc + b.bal, 0);
+        let yearlyData = []; let totalPrincipal = legacyBal + buckets.reduce((acc, b) => acc + b.bal, 0); let cumulativeTaxPaid = 0;
+        
         for (let yr = 1; yr <= planningHorizon; yr++) {
           const age = safeNumber(mathProfile.age) + yr; let yearSip = 0, yearGrowth = 0, yearRedemptions = 0; let redemptionNames = [];
           let monthlyFlows = Array.from({length: 12}).map((_, i) => ({ m: i+1, opening: 0, sip: 0, growth: 0, withdrawal: 0, closing: 0 }));
-          let legacyReturn = getScenarioReturn(portfolioWeightedReturn, yr, age) / 100;
-          buckets.forEach(b => { b.currentReturnRate = getScenarioReturn(b.returnRateBase, yr, age) / 100; });
+          
+          let dynamicLegacyYield = portfolioWeightedReturn;
+          if (glidePath) {
+             let yrsToRet = safeNumber(mathProfile.retireAge) - age;
+             if (yrsToRet <= 0) dynamicLegacyYield = 7;
+             else if (yrsToRet <= 5) dynamicLegacyYield = 7 + ((portfolioWeightedReturn - 7) * (yrsToRet / 5));
+          }
+          if (sequenceRisk && age >= safeNumber(mathProfile.retireAge) && age <= safeNumber(mathProfile.retireAge) + 2) {
+             dynamicLegacyYield = -10;
+          }
+
+          let legacyReturn = getScenarioReturn(dynamicLegacyYield, yr, age) / 100;
+          
+          buckets.forEach(b => { 
+             let bYield = b.returnRateBase;
+             if (glidePath) {
+                let yrsToRet = safeNumber(mathProfile.retireAge) - age;
+                if (yrsToRet <= 0) bYield = 7;
+                else if (yrsToRet <= 5) bYield = 7 + ((b.returnRateBase - 7) * (yrsToRet / 5));
+             }
+             if (sequenceRisk && age >= safeNumber(mathProfile.retireAge) && age <= safeNumber(mathProfile.retireAge) + 2) bYield = -10;
+             b.currentReturnRate = getScenarioReturn(bYield, yr, age) / 100; 
+          });
+
           const isRetirementPhase = age > safeNumber(mathProfile.retireAge); const currentRetirementYear = yr - retireYrs; let yearlyFreedomPaycheck = 0;
           if (isRetirementPhase && currentRetirementYear > 0) { yearlyFreedomPaycheck = (futureLife * 12) * Math.pow(infMultiplier, currentRetirementYear - 1); redemptionNames.push("Freedom Paycheck"); }
           const monthlyFreedomPaycheck = yearlyFreedomPaycheck / 12;
+          
           for (let m = 0; m < 12; m++) {
             let monthOpening = legacyBal + buckets.reduce((acc, b) => acc + b.bal, 0); let monthSip = 0, monthGrowth = 0, monthWithdrawal = 0;
             if (legacyBal > 0) { let legGrowth = legacyBal * (Math.pow(1 + legacyReturn, 1/12) - 1); legacyBal += legGrowth; monthGrowth += legGrowth; }
@@ -1647,14 +1670,36 @@
             monthlyFlows[m] = { m: m + 1, opening: monthOpening, sip: monthSip, growth: monthGrowth, withdrawal: monthWithdrawal, closing: Math.max(0, monthClosing) };
             yearSip += monthSip; yearGrowth += monthGrowth;
           }
+
+          let estimatedTax = 0;
+          if (yearRedemptions > 0) {
+             let totalGainPct = Math.max(0, legacyBal + buckets.reduce((acc,b)=>acc+b.bal,0) + yearRedemptions - totalPrincipal) / (legacyBal + buckets.reduce((acc,b)=>acc+b.bal,0) + yearRedemptions || 1); 
+             let withdrawnGains = yearRedemptions * totalGainPct;
+             let totalEqAlloc = 0; let totalDebtAlloc = 0; assetMix.forEach(a => { if (a.id === 'debt') totalDebtAlloc += safeNumber(a.pct); else totalEqAlloc += safeNumber(a.pct); });
+             let totalAlloc = totalEqAlloc + totalDebtAlloc || 1; let eqRatio = totalEqAlloc / totalAlloc; let debtRatio = totalDebtAlloc / totalAlloc;
+             let eqGains = withdrawnGains * eqRatio; let debtGains = withdrawnGains * debtRatio; 
+             
+             let harvestExemption = taxHarvesting ? 125000 * yr : 125000;
+             let taxableEqGains = Math.max(0, eqGains - harvestExemption);
+             
+             if (yr <= 1) { estimatedTax = (eqGains * 0.20) + (debtGains * 0.30); } 
+             else { estimatedTax = (taxableEqGains * 0.125) + (debtGains * 0.30); }
+             
+             if (showPostTax) { legacyBal -= estimatedTax; }
+             cumulativeTaxPaid += estimatedTax;
+          }
+
           const overrideStepUp = safeNumber(masterStepUp) > 0;
           buckets.forEach(b => { if (yr < b.horizon) b.sip *= (1 + (overrideStepUp ? safeNumber(masterStepUp) / 100 : b.stepUp)); });
           totalPrincipal += yearSip; totalPrincipal -= yearRedemptions; if (totalPrincipal < 0) totalPrincipal = 0;
           let goalsClosing = buckets.reduce((acc, b) => acc + b.bal, 0);
-          yearlyData.push({ yr, age, sip: yearSip, growth: yearGrowth, withdrawals: yearRedemptions, withdrawalNames: [...new Set(redemptionNames)], legacyClosing: Math.max(0, legacyBal), goalsClosing: Math.max(0, goalsClosing), closing: Math.max(0, legacyBal + goalsClosing), totalPrincipal, monthlyFlows, monthlyFreedomPaycheck });
+          
+          if (legacyBal < 0) legacyBal = 0;
+          
+          yearlyData.push({ yr, age, sip: yearSip, growth: yearGrowth, withdrawals: yearRedemptions, withdrawalNames: [...new Set(redemptionNames)], legacyClosing: Math.max(0, legacyBal), goalsClosing: Math.max(0, goalsClosing), closing: Math.max(0, legacyBal + goalsClosing), totalPrincipal, monthlyFlows, monthlyFreedomPaycheck, estimatedTax, cumulativeTaxPaid });
         }
         return yearlyData;
-      }, [plan, planningHorizon, mathProfile, unallocatedData, totalIlliquidAssets, portfolioWeightedReturn, scenario, futureLife, retireYrs, infMultiplier, masterLumpsum, masterStepUp]);
+      }, [plan, planningHorizon, mathProfile, unallocatedData, totalIlliquidAssets, portfolioWeightedReturn, scenario, futureLife, retireYrs, infMultiplier, masterLumpsum, masterStepUp, glidePath, sequenceRisk, taxHarvesting, showPostTax, assetMix]);
 
       const freeCashflow = totals.income - monthlyBurn - totalSIPRequired;
       const freeCashflowPct = totals.income > 0 ? (freeCashflow / totals.income) * 100 : 0;
@@ -1717,6 +1762,11 @@ const lifeCoverAnalysis = useMemo(() => {
       }, [debouncedAssetMix, totalAssets, unallocatedData.remaining, totalSIPRequired, retireYrs, monthlyBurn, infMultiplier, planningHorizon]);
 
       const swanYears = monthlyBurn > 0 ? (totalLiquidAssets / (monthlyBurn * 12)).toFixed(1) : '∞';
+
+      const depletionYear = useMemo(() => {
+          const bankruptRow = masterSimulationData.find(d => d.closing <= 0 && d.age > safeNumber(mathProfile.age));
+          return bankruptRow ? bankruptRow.age : null;
+      }, [masterSimulationData, mathProfile.age]);
 
       const keyMilestones = useMemo(() => {
          let milestones = [];
@@ -1853,11 +1903,12 @@ const lifeCoverAnalysis = useMemo(() => {
       };
       
       const verdict = useMemo(() => {
+        if (depletionYear) return { title: `Bankrupt at Age ${depletionYear}`, color: "text-rose-700", desc: "Corpus runs out completely. Strategy recalibration is mandatory." };
         const sipGap = totalSIPRequired - safeNumber(profile.currentSip);
         if (sipGap <= 0) return { title: "Thriving", color: "text-emerald-700", desc: "You are on a golden path." };
         if (sipGap < 10000) return { title: "On Track", color: "text-indigo-700", desc: "You are close. Optimize your spending." };
         return { title: "Critical Action Needed", color: "text-rose-700", desc: "Significant gap detected. Strategy recalibration required." };
-      }, [totalSIPRequired, profile.currentSip]);
+      }, [totalSIPRequired, profile.currentSip, depletionYear]);
 
       const scrollRef = useRef(null); useEffect(() => { if (showFullPreview && scrollRef.current) scrollRef.current.scrollTo(0,0); }, [showFullPreview]);
       
@@ -2176,21 +2227,42 @@ const lifeCoverAnalysis = useMemo(() => {
                 <div className="grid grid-cols-2 gap-3 mt-1">
                   <div className="bento-card p-4 shadow-sm border-white/60 bg-white/80 group">
                      <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5 mb-1"><Icon name="arrow-down-circle" size={12} className="text-teal-600"/> Monthly Inflow</p>
-                     <p className="text-3xl lg:text-4xl font-black text-teal-700 tracking-tighter number-pop text-glow-teal">{formatCurrency(totals.income)}</p>
+                     <p className="text-3xl lg:text-4xl font-black text-teal-700 tracking-tighter number-pop">{formatCurrency(totals.income)}</p>
                   </div>
                   <div className="bento-card p-4 shadow-sm border-white/60 bg-white/80 group">
                      <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5 mb-1"><Icon name="flame" size={12} className="text-rose-600"/> Lifestyle Burn</p>
-                     <p className="text-3xl lg:text-4xl font-black text-rose-600 tracking-tighter number-pop text-glow-rose">{formatCurrency(monthlyBurn)}</p>
+                     <p className="text-3xl lg:text-4xl font-black text-rose-600 tracking-tighter number-pop">{formatCurrency(monthlyBurn)}</p>
                   </div>
                   <div className="bento-card p-4 shadow-sm border-white/60 bg-white/80 group">
                      <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5 mb-1"><Icon name="landmark" size={12} className="text-indigo-600"/> Total Assets</p>
-                     <p className="text-3xl lg:text-4xl font-black text-indigo-700 tracking-tighter number-pop text-glow-indigo">{formatCurrency(totalAssets)}</p>
+                     <p className="text-3xl lg:text-4xl font-black text-indigo-700 tracking-tighter number-pop">{formatCurrency(totalAssets)}</p>
                   </div>
                   <div className="bento-card p-4 shadow-sm border-white/60 bg-white/80 group">
                      <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5 mb-1"><Icon name="refresh-cw" size={12} className="text-teal-600"/> Current SIP Flow</p>
                      <p className="text-3xl lg:text-4xl font-black text-teal-700 tracking-tighter number-pop">{formatCurrency(profile.currentSip)}</p>
                   </div>
                 </div>
+
+                {debtInsight && (
+                  <div className="col-span-12 mt-4 bg-slate-900 rounded-[20px] p-5 shadow-xl border border-slate-800 text-white break-inside-avoid print-block">
+                    <div className="flex items-center gap-3 mb-3 border-b border-slate-700 pb-3">
+                      <Icon name="bar-chart-2" size={20} className="text-emerald-400"/>
+                      <h3 className="text-sm font-black uppercase tracking-widest text-emerald-400">Debt Optimization Advisory</h3>
+                    </div>
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
+                       <div className="flex-1">
+                         <p className="text-lg font-black uppercase tracking-wide mb-1.5">{debtInsight.isArbitrageFavorable ? 'Debt Arbitrage (Hold)' : 'Debt Snowball Activation'}</p>
+                         <p className="text-xs font-medium text-slate-300 leading-relaxed text-justify">{debtInsight.text || (debtInsight.isArbitrageFavorable ? `Market yield > loan cost. Do not prepay your loan. Invest all surplus into equities to capture the spread.` : `Increase EMI by ${formatCurrency(debtInsight.bumpAmount)}/mo to aggressively shave ${debtInsight.yearsSaved} yrs off tenure.`)}</p>
+                       </div>
+                       {!debtInsight.isArbitrageFavorable && (
+                         <div className="bg-emerald-900/50 p-3 rounded-xl border border-emerald-700/50 shrink-0 text-center min-w-[120px]">
+                           <p className="text-[9px] font-bold text-emerald-300 uppercase tracking-widest mb-1">Interest Saved</p>
+                           <p className="text-xl font-black text-emerald-400">{formatCurrency(debtInsight.interestSaved)}</p>
+                         </div>
+                       )}
+                    </div>
+                  </div>
+                )}
               </div>
               
               {/* BUG FIX: Re-separated Liquidity & Asset Matrix into beautifully packed cards to eliminate blank vertical space */}
@@ -2276,13 +2348,13 @@ const lifeCoverAnalysis = useMemo(() => {
                   </div>
                   <div className="bento-card flex flex-col justify-center p-4 border-rose-200/50 bg-rose-50/60 shadow-sm group">
                     <p className="text-[10px] font-black uppercase text-rose-600 tracking-widest mb-1.5 flex items-center gap-1.5"><Icon name="flame" size={12}/> 2. The Inflation Thief</p>
-                    <p className="text-2xl lg:text-3xl font-black text-rose-800 tracking-tighter mb-1 number-pop text-glow-rose">{formatCurrency(futureLife)}<span className="text-[10px] text-rose-600/50 font-bold ml-0.5">/mo</span></p>
+                    <p className="text-2xl lg:text-3xl font-black text-rose-800 tracking-tighter mb-1 number-pop">{formatCurrency(futureLife)}<span className="text-[10px] text-rose-600/50 font-bold ml-0.5">/mo</span></p>
                     <div className="narration-box !bg-rose-100/50 !border-rose-200/50"><p className="text-[10px] text-rose-800/80 font-medium leading-relaxed text-justify">The silent tax. At {effectiveInflation}% inflation, the exact same lifestyle will cost exponentially more when your active income stops.</p></div>
                   </div>
                   <div className="bento-card flex flex-col justify-center p-4 border-teal-200/50 bg-teal-50/60 relative overflow-hidden shadow-sm group">
                     <div className="absolute right-[-20%] top-[-20%] w-24 h-24 bg-teal-500/20 rounded-full blur-2xl"></div>
                     <p className="text-[10px] font-black uppercase text-teal-700 tracking-widest mb-1.5 flex items-center gap-1.5 relative z-10"><Icon name="database" size={12}/> 3. Target Corpus</p>
-                    <p className="text-2xl lg:text-3xl font-black text-teal-950 tracking-tighter mb-1 relative z-10 truncate number-pop text-glow-teal" title={formatCurrency(retireCorpus)}>{formatCurrency(retireCorpus)}</p>
+                    <p className="text-2xl lg:text-3xl font-black text-teal-950 tracking-tighter mb-1 relative z-10 truncate number-pop" title={formatCurrency(retireCorpus)}>{formatCurrency(retireCorpus)}</p>
                     <div className="narration-box !bg-teal-100/50 !border-teal-200/50 relative z-10"><p className="text-[10px] text-teal-900 font-medium leading-relaxed text-justify">Your ultimate mountain. This safely sustains your inflated lifestyle forever, <strong className="text-teal-950 font-black">grossed up by 12.5% to absorb future LTCG tax drag.</strong></p></div>
                   </div>
                   <div className="bento-card flex flex-col justify-center p-4 border-emerald-200/50 bg-emerald-50/60 shadow-sm group">
@@ -2607,13 +2679,13 @@ const lifeCoverAnalysis = useMemo(() => {
                 <div className="bento-card bg-emerald-50/70 border-white/60 shadow-sm relative overflow-hidden group p-5">
                   <div className="absolute right-[-10%] top-[-10%] w-24 h-24 bg-emerald-500/15 rounded-full blur-3xl"></div>
                   <h4 className="text-[10px] font-black text-emerald-900 uppercase tracking-widest mb-2 flex items-center gap-1.5 relative z-10"><Icon name="shield-check" size={16}/> Tax Alpha Yield</h4>
-                  <p className="text-4xl font-black text-emerald-800 tracking-tighter relative z-10 mb-2 number-pop text-glow-teal">+1.2% <span className="text-[10px] font-bold text-emerald-700/70 uppercase tracking-widest ml-1">Annual Boost</span></p>
+                  <p className="text-4xl font-black text-emerald-800 tracking-tighter relative z-10 mb-2 number-pop">+1.2% <span className="text-[10px] font-bold text-emerald-700/70 uppercase tracking-widest ml-1">Annual Boost</span></p>
                   <div className="narration-box !bg-emerald-100/40 !border-emerald-200/50 relative z-10"><p className="text-[10px] font-medium text-emerald-950 leading-relaxed text-justify">Smart asset location mathematically avoids capital gains drag, adding massive <strong>"invisible" returns</strong> over a 30-year horizon.</p></div>
                 </div>
                 <div className="bento-card bg-purple-50/70 border-white/60 shadow-sm relative overflow-hidden group p-5">
                   <div className="absolute right-[-10%] top-[-10%] w-24 h-24 bg-purple-500/15 rounded-full blur-3xl"></div>
                   <h4 className="text-[10px] font-black text-purple-900 uppercase tracking-widest mb-2 flex items-center gap-1.5 relative z-10"><Icon name="castle" size={16}/> Estate Transfer Estimate</h4>
-                  <p className="text-4xl font-black text-purple-800 tracking-tighter relative z-10 mb-2 number-pop text-glow-indigo">{formatCurrency(retireCorpus * 1.45)}</p>
+                  <p className="text-4xl font-black text-purple-800 tracking-tighter relative z-10 mb-2 number-pop">{formatCurrency(retireCorpus * 1.45)}</p>
                   <div className="narration-box !bg-purple-100/40 !border-purple-200/50 relative z-10"><p className="text-[10px] font-medium text-purple-950 leading-relaxed text-justify">At a safe 4% withdrawal, your capital likely continues compounding indefinitely to leave a <strong>multi-generational legacy.</strong></p></div>
                 </div>
               </div>
@@ -2645,39 +2717,7 @@ const lifeCoverAnalysis = useMemo(() => {
             </div>
           </PhaseWrapper>
 
-          <PhaseWrapper num={6} title="Goal Action Plan" layout={blueprintLayout} gridClasses={blueprintLayout === 'compact' ? 'col-span-12 md:col-span-6' : blueprintLayout === 'bento' ? 'col-span-12 xl:col-span-6' : 'col-span-12'} delayClass="stagger-6" themeClass="bg-amber-50/50 border-amber-200/50">
-            <div className="mb-5 text-left border-b border-amber-300/50 pb-5 break-inside-avoid print-block">
-              <p className="text-base font-medium text-slate-700 leading-relaxed text-justify mb-4 w-full">Projections and beautiful dashboards are completely meaningless without <span className="text-slate-900 font-black text-lg">ruthless execution</span>. This is your immediate tactical mandate. Execute these precision steps over the next <span className="text-amber-600 font-black text-lg">30 days</span> to formally lock in your wealth trajectory.</p>
-              
-              <div className="bg-rose-50/80 border border-rose-200 p-4 rounded-xl shadow-sm flex gap-3 items-start">
-                 <div className="mt-0.5"><Icon name="clock" size={18} className="text-rose-600"/></div>
-                 <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-rose-900 mb-1">The Mathematical Cost of Delay</h4>
-                    <p className="text-xs font-semibold text-rose-800 leading-relaxed text-justify">If you wait exactly 12 months to execute this plan, your required monthly SIP will permanently increase from <strong className="text-rose-950 font-black">{formatCurrency(totalSIPRequired)}</strong> to <strong className="text-rose-950 font-black">{formatCurrency(totalSIPRequiredDelayed)}</strong> just to hit the exact same targets. <span className="underline decoration-rose-300">Time is your most expensive asset.</span></p>
-                 </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 break-inside-avoid print-block">
-              <div className="bento-card bg-white/80 border-white/60 flex gap-3 items-start shadow-sm cursor-pointer group hover:bg-white hover:border-amber-300 transition-all p-4">
-                <div className="w-8 h-8 rounded-lg border border-amber-200 shrink-0 group-hover:border-amber-500 transition-colors relative mt-0.5 bg-amber-50 flex items-center justify-center"><Icon name="check" size={14} className="text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" /></div>
-                <div><p className="font-black text-slate-900 text-[10px] uppercase tracking-widest mb-1">Establish Protection Core</p><p className="text-[10px] text-slate-600 font-medium leading-relaxed text-justify">Secure your <strong>{formatCurrency(healthAnalysis.shortfall || 1500000)}</strong> Super Top-up Health Policy within 48 hours to eliminate catastrophic medical wipeout.</p></div>
-              </div>
-              <div className="bento-card bg-white/80 border-white/60 flex gap-3 items-start shadow-sm cursor-pointer group hover:bg-white hover:border-amber-300 transition-all p-4">
-                <div className="w-8 h-8 rounded-lg border border-amber-200 shrink-0 group-hover:border-amber-500 transition-colors relative mt-0.5 bg-amber-50 flex items-center justify-center"><Icon name="check" size={14} className="text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" /></div>
-                <div><p className="font-black text-slate-900 text-[10px] uppercase tracking-widest mb-1">Deploy Idle Liquidity</p><p className="text-[10px] text-slate-600 font-medium leading-relaxed text-justify">Shift excess cash (anything above the <strong>{formatCurrency(monthlyBurn * 6)}</strong> reserve) into the market to stop severe inflation decay immediately.</p></div>
-              </div>
-              <div className="bento-card bg-white/80 border-white/60 flex gap-3 items-start shadow-sm cursor-pointer group hover:bg-white hover:border-amber-300 transition-all p-4">
-                <div className="w-8 h-8 rounded-lg border border-amber-200 shrink-0 group-hover:border-amber-500 transition-colors relative mt-0.5 bg-amber-50 flex items-center justify-center"><Icon name="check" size={14} className="text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" /></div>
-                <div><p className="font-black text-slate-900 text-[10px] uppercase tracking-widest mb-1">Initiate Wealth Engine</p><p className="text-[10px] text-slate-600 font-medium leading-relaxed text-justify">Set up automated SIP mandates totaling <strong>{formatCurrency(totalSIPRequired)}/mo</strong>. {totalSIPRequired > safeNumber(profile.currentSip) ? <span className="text-rose-600 font-bold block mt-1.5">You are {formatCurrency(totalSIPRequired - safeNumber(profile.currentSip))} short.</span> : <span className="text-emerald-700 font-bold block mt-1.5">Fully funded. Keep running.</span>}</p></div>
-              </div>
-              {debtInsight && (<div className="bento-card bg-white/80 border-white/60 flex gap-3 items-start shadow-sm cursor-pointer group hover:bg-white hover:border-amber-300 transition-all p-4">
-                <div className="w-8 h-8 rounded-lg border border-amber-200 shrink-0 group-hover:border-amber-500 transition-colors relative mt-0.5 bg-amber-50 flex items-center justify-center"><Icon name="check" size={14} className="text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" /></div>
-                <div><p className="font-black text-slate-900 text-[10px] uppercase tracking-widest mb-1">{debtInsight.isArbitrageFavorable ? 'Debt Arbitrage (Hold)' : 'Debt Snowball Activation'}</p><p className="text-[10px] text-slate-600 font-medium leading-relaxed text-justify">{debtInsight.isArbitrageFavorable ? `Market yield > loan cost. Do not prepay your loan. Invest all surplus into equities to capture the spread.` : `Increase EMI by ${formatCurrency(debtInsight.bumpAmount)}/mo to aggressively shave ${debtInsight.yearsSaved} yrs off tenure.`}</p></div>
-              </div>)}
-            </div>
-          </PhaseWrapper>
-
-          <PhaseWrapper num={7} title="Strategy Dashboard" layout={blueprintLayout} gridClasses={blueprintLayout === 'compact' ? 'col-span-12 md:col-span-6' : blueprintLayout === 'bento' ? 'col-span-12 xl:col-span-6' : 'col-span-12'} delayClass="stagger-7" themeClass="bg-cyan-50/50 border-cyan-200/50">
+          <PhaseWrapper num={6} title="Strategy Dashboard" layout={blueprintLayout} gridClasses={blueprintLayout === 'compact' ? 'col-span-12 md:col-span-6' : blueprintLayout === 'bento' ? 'col-span-12 xl:col-span-6' : 'col-span-12'} delayClass="stagger-7" themeClass="bg-cyan-50/50 border-cyan-200/50">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 mb-5 break-inside-avoid print-block">
                <p className="text-[11px] font-medium text-slate-600 leading-relaxed text-justify w-full">Your tactical command center. Tap any goal card below to override return assumptions or dynamically inject lumpsum capital.</p>
                <div className="bg-white/80 backdrop-blur-md border border-white/80 rounded-xl px-5 py-3 shadow-sm flex items-center gap-5 shrink-0"><div className="text-center pr-5 border-r border-slate-300/50"><p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Total Goals</p><p className="text-2xl font-black text-slate-900 leading-none">{plan.length}</p></div><div><p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Total SIP Required</p><p className="text-2xl font-black text-teal-700 leading-none tracking-tight">{formatCurrency(totalSIPRequired)}<span className="text-[9px] text-slate-400 font-bold ml-1 uppercase">/mo</span></p></div></div>
@@ -2802,8 +2842,11 @@ const lifeCoverAnalysis = useMemo(() => {
                              <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2 hidden md:block">Filters:</div>
                              <div className="flex gap-1.5 shrink-0 flex-wrap justify-end">
                                <button onClick={() => setShowPostTax(!showPostTax)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${showPostTax ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}><div className={`w-1.5 h-1.5 rounded-full ${showPostTax ? 'bg-white' : 'bg-slate-400'}`}></div>Tax Mode</button>
-                               <button onClick={() => setShowRealValue(!showRealValue)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${showRealValue ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}><div className={`w-1.5 h-1.5 rounded-full ${showRealValue ? 'bg-white' : 'bg-slate-400'}`}></div>Real Value</button>
+                               <button onClick={() => setTaxHarvesting(!taxHarvesting)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${taxHarvesting ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}><div className={`w-1.5 h-1.5 rounded-full ${taxHarvesting ? 'bg-white' : 'bg-slate-400'}`}></div>Tax Harvest</button>
+                               <button onClick={() => setShowRealValue(!showRealValue)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${showRealValue ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}><div className={`w-1.5 h-1.5 rounded-full ${showRealValue ? 'bg-white' : 'bg-slate-400'}`}></div>Real Value</button>
                                <div className="w-px bg-slate-300 mx-1 my-1"></div>
+                               <button onClick={() => setGlidePath(!glidePath)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${glidePath ? 'bg-amber-600 text-white shadow-md border border-amber-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}><div className={`w-1.5 h-1.5 rounded-full ${glidePath ? 'bg-white' : 'bg-slate-400'}`}></div>Glide Path</button>
+                               <button onClick={() => setSequenceRisk(!sequenceRisk)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${sequenceRisk ? 'bg-orange-600 text-white shadow-md border border-orange-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}><div className={`w-1.5 h-1.5 rounded-full ${sequenceRisk ? 'bg-white' : 'bg-slate-400'}`}></div>Seq. Risk</button>
                                <button onClick={() => setBlackSwan(!blackSwan)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${blackSwan ? 'bg-rose-900 text-white shadow-[0_0_10px_rgba(225,29,72,0.5)] border border-rose-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}>🦢 Black Swan</button>
                              </div>
                            </div>
@@ -2826,9 +2869,24 @@ const lifeCoverAnalysis = useMemo(() => {
                                <Icon name="calculator" size={14} className="text-indigo-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Net Tax Mode Active:</strong> Dynamically deducting STCG/LTCG and Debt slab taxes strictly during redemption events.</span>
                              </div>
                            )}
-                           {showRealValue && (
+                           {taxHarvesting && (
                              <div className="py-1.5 px-3 bg-teal-50 border border-teal-200 rounded-lg text-teal-800 text-[10px] flex items-center gap-2 shadow-sm">
-                               <Icon name="eye" size={14} className="text-teal-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Real Value Mode Active:</strong> Discounting future wealth back to today's purchasing power (adjusted for {effectiveInflation}% inflation).</span>
+                               <Icon name="scissors" size={14} className="text-teal-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Tax Harvesting Active:</strong> Simulating annual booking of ₹1.25L tax-free equity gains to structurally optimize LTCG liability.</span>
+                             </div>
+                           )}
+                           {showRealValue && (
+                             <div className="py-1.5 px-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-[10px] flex items-center gap-2 shadow-sm">
+                               <Icon name="eye" size={14} className="text-blue-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Real Value Mode Active:</strong> Discounting future wealth back to today's purchasing power (adjusted for {effectiveInflation}% inflation).</span>
+                             </div>
+                           )}
+                           {glidePath && (
+                             <div className="py-1.5 px-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[10px] flex items-center gap-2 shadow-sm">
+                               <Icon name="trending-down" size={14} className="text-amber-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Dynamic Glide Path:</strong> Progressively shifting portfolio yields toward safe debt (7%) during the 5 years leading up to retirement.</span>
+                             </div>
+                           )}
+                           {sequenceRisk && (
+                             <div className="py-1.5 px-3 bg-orange-50 border border-orange-200 rounded-lg text-orange-800 text-[10px] flex items-center gap-2 shadow-sm">
+                               <Icon name="activity" size={14} className="text-orange-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Sequence of Returns Risk:</strong> Applying a -10% market contraction during the fragile first 3 years of retirement.</span>
                              </div>
                            )}
                            {showRawNumbers && (
@@ -2842,6 +2900,15 @@ const lifeCoverAnalysis = useMemo(() => {
                              </div>
                            )}
                         </div>
+                        
+                        {depletionYear && (
+                           <div className="py-2.5 px-4 bg-rose-600 border border-rose-700 rounded-xl text-white flex items-center justify-between shadow-lg mb-3 animate-in slide-in-from-top-2">
+                             <div className="flex items-center gap-3">
+                               <Icon name="alert-triangle" size={20} className="shrink-0"/> 
+                               <span className="font-medium text-xs"><strong className="uppercase tracking-wide mr-1 font-black">CRITICAL BANKRUPTCY ALERT:</strong> Corpus completely depletes at <strong>Age {depletionYear}</strong>. Strategy recalibration is mandatory.</span>
+                             </div>
+                           </div>
+                        )}
 
                         {keyMilestones.find(m => m.title === "Portfolio Outearns Burn") && (
                            <div className="py-2.5 px-4 bg-gradient-to-r from-amber-100 to-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] flex items-center justify-between shadow-sm mb-3 animate-in slide-in-from-top-2">
@@ -2964,39 +3031,41 @@ const lifeCoverAnalysis = useMemo(() => {
                       </div>
                     </div>
 
-                    {/* SCROLLING TABLE AREA - Fixed Large Height, Closes Tuners on Click */}
-                    <div className="px-4 sm:px-6 pb-12 mt-2 shrink-0" onClick={() => { setIsTunerExpanded(false); setIsGoalTunerExpanded(false); }}>
-                       <div className="w-full h-[70vh] bg-white border border-slate-200 rounded-xl shadow-sm overflow-auto custom-scrollbar relative cursor-default">
-                           
-                           {/* FROZEN EXACT ₹ TOGGLE (CUTE EXCEL UTILITY) */}
-                           <div className="sticky top-0 z-[70] bg-slate-100/90 backdrop-blur-md border-b border-slate-300 py-1.5 px-3 flex justify-end shadow-sm">
-                              <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(!showRawNumbers); }} className="pointer-events-auto whitespace-nowrap px-3 py-1 rounded text-[9px] font-black uppercase transition-all flex items-center gap-1.5 bg-slate-800 text-white shadow-inner hover:bg-slate-700 border border-slate-600">
-                                 <div className={`w-1.5 h-1.5 rounded-full ${showRawNumbers ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-slate-500'}`}></div> {showRawNumbers ? 'Format: Exact ₹' : 'Format: Abbreviated'}
-                              </button>
-                           </div>
+                    {/* NUMBER FORMAT TAB UI (MOVED OUTSIDE SCROLL AREA TO FREE UP TABLE SPACE) */}
+                    <div className="px-4 sm:px-6 mt-4 shrink-0 flex justify-end items-center mb-3 no-print">
+                      <div className="flex items-center gap-3 bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner">
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-3">Format:</span>
+                        <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(false); }} className={`px-6 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${!showRawNumbers ? 'bg-white text-indigo-700 shadow-md border border-slate-200 scale-100' : 'text-slate-500 hover:text-slate-800 scale-95 hover:bg-slate-200/50'}`}>Abbreviated</button>
+                        <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(true); }} className={`px-6 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${showRawNumbers ? 'bg-white text-emerald-700 shadow-md border border-slate-200 scale-100' : 'text-slate-500 hover:text-slate-800 scale-95 hover:bg-slate-200/50'}`}>Exact ₹</button>
+                      </div>
+                    </div>
 
-                           <table className="w-full text-left border-collapse font-sans bg-white tabular-nums text-xs border border-slate-300 min-w-[900px]">
-                                 <thead className="sticky top-8 z-50 shadow-sm outline outline-1 outline-slate-300 bg-slate-100">
+                    {/* MASSIVE SCROLLING TABLE AREA - Flexible Maximum Height, Closes Tuners on Click */}
+                    <div className="px-4 sm:px-6 pb-12 mt-2 flex-1 flex flex-col min-h-[60vh] md:min-h-[75vh]" onClick={() => { setIsTunerExpanded(false); setIsGoalTunerExpanded(false); }}>
+                       <div className="w-full h-full max-h-[85vh] bg-white border border-slate-200 rounded-xl shadow-sm overflow-auto custom-scrollbar relative cursor-default">
+                           <table className="w-full text-left border-collapse font-sans bg-white tabular-nums text-xs min-w-[1000px]">
+                                 <thead className="sticky top-0 z-50 shadow-sm outline outline-1 outline-slate-300 bg-slate-100">
                                    <tr>
-                                     <th className="py-2 px-3 border border-slate-300 text-[10px] font-black uppercase text-slate-600 text-center bg-slate-200 w-16 sticky left-0 z-[60] shadow-[1px_0_0_#cbd5e1]">Yr</th>
-                                     <th className="py-2 px-3 border border-slate-300 text-[10px] font-black uppercase text-slate-600 text-center bg-slate-200 w-16 sticky left-16 z-[60] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Age</th>
-                                     <th className="py-2 px-3 border border-slate-300 text-[10px] font-black uppercase text-slate-700 text-right bg-slate-100">Total SIP Flow</th>
-                                     <th className="py-2 px-3 border border-slate-300 text-[10px] font-black uppercase text-emerald-700 text-right bg-emerald-50">Market Growth</th>
-                                     <th className="py-2 px-3 border border-slate-300 text-[10px] font-black uppercase text-indigo-700 text-right bg-indigo-50" title="Compounding of Unallocated Base Wealth">Legacy Pot</th>
-                                     <th className="py-2 px-3 border border-slate-300 text-[10px] font-black uppercase text-teal-700 text-right bg-teal-50" title="Compounding of Mapped Goals & SIPs">Active Goals</th>
-                                     <th className="py-2 px-3 border border-slate-300 text-[10px] font-black uppercase text-rose-700 text-right bg-rose-50">Redemptions</th>
-                                     <th className="py-2 px-3 border border-slate-300 text-[11px] font-black uppercase text-slate-900 text-right bg-emerald-100">Closing Corpus</th>
+                                     <th style={{ minWidth: '64px', left: 0 }} className="py-3 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-600 text-center bg-slate-200 sticky z-[60] shadow-[1px_0_0_#cbd5e1]">Yr</th>
+                                     <th style={{ minWidth: '64px', left: '64px' }} className="py-3 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-600 text-center bg-slate-200 sticky z-[60] shadow-[1px_0_0_#cbd5e1]">Age</th>
+                                     <th style={{ minWidth: '140px', left: '128px' }} className="py-3 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-700 text-right bg-slate-100 sticky z-[60] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Total SIP Flow</th>
+                                     <th className="py-3 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-emerald-700 text-right bg-emerald-50 min-w-[120px]">Market Growth</th>
+                                     <th className="py-3 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-indigo-700 text-right bg-indigo-50 min-w-[120px]" title="Compounding of Unallocated Base Wealth">Legacy Pot</th>
+                                     <th className="py-3 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-teal-700 text-right bg-teal-50 min-w-[120px]" title="Compounding of Mapped Goals & SIPs">Active Goals</th>
+                                     <th className="py-3 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-rose-700 text-right bg-rose-50 min-w-[120px]">Redemptions</th>
+                                     <th className="py-3 px-4 border-b border-slate-300 text-[12px] font-black uppercase text-slate-900 text-right bg-emerald-100 min-w-[140px]">Closing Corpus</th>
                                    </tr>
                                  </thead>
                                  <tbody className="text-slate-700 font-medium text-[11px]">
                                    <tr className="bg-emerald-50/20 border-b border-slate-300">
-                                     <td className="py-1 px-3 border border-slate-300 text-center font-bold text-slate-500 sticky left-0 bg-slate-50 z-30 shadow-[1px_0_0_#cbd5e1]">DAY 0</td>
-                                     <td className="py-1 px-3 border border-slate-300 text-center font-bold text-slate-500 sticky left-16 bg-slate-50 z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">--</td>
-                                     <td colSpan="2" className="py-1 px-3 border border-slate-300 text-right text-slate-500 italic text-[11px] tracking-widest">Initial Allocation Baseline &rarr;</td>
-                                     <td className="py-1 px-3 border border-slate-300 text-right font-bold text-indigo-800 bg-indigo-50/30">{showRawNumbers ? '₹' + Math.round(unallocatedData.remaining + totalIlliquidAssets).toLocaleString('en-IN') : formatCurrency(unallocatedData.remaining + totalIlliquidAssets)}</td>
-                                     <td className="py-1 px-3 border border-slate-300 text-right font-bold text-teal-800 bg-teal-50/30">{showRawNumbers ? '₹' + Math.round(totalAssets - (unallocatedData.remaining + totalIlliquidAssets)).toLocaleString('en-IN') : formatCurrency(totalAssets - (unallocatedData.remaining + totalIlliquidAssets))}</td>
-                                     <td className="py-1 px-3 border border-slate-300 text-right text-slate-400">—</td>
-                                     <td className="py-1 px-3 border border-slate-300 text-right font-black text-slate-900 bg-emerald-50 text-[12px]">{showRawNumbers ? '₹' + Math.round(totals.assets).toLocaleString('en-IN') : formatCurrency(totals.assets)}</td>
+                                     <td style={{ minWidth: '64px', left: 0 }} className="py-2 px-4 border-r border-slate-300 text-center font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[1px_0_0_#cbd5e1]">D-0</td>
+                                     <td style={{ minWidth: '64px', left: '64px' }} className="py-2 px-4 border-r border-slate-300 text-center font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[1px_0_0_#cbd5e1]">--</td>
+                                     <td style={{ minWidth: '140px', left: '128px' }} className="py-2 px-4 border-r border-slate-300 text-right font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">--</td>
+                                     <td className="py-2 px-4 border-b border-slate-300 text-right text-slate-500 italic text-[11px] tracking-widest">Baseline &rarr;</td>
+                                     <td className="py-2 px-4 border-b border-slate-300 text-right font-bold text-indigo-800 bg-indigo-50/30">{showRawNumbers ? '₹' + Math.round(unallocatedData.remaining + totalIlliquidAssets).toLocaleString('en-IN') : formatCurrency(unallocatedData.remaining + totalIlliquidAssets)}</td>
+                                     <td className="py-2 px-4 border-b border-slate-300 text-right font-bold text-teal-800 bg-teal-50/30">{showRawNumbers ? '₹' + Math.round(totalAssets - (unallocatedData.remaining + totalIlliquidAssets)).toLocaleString('en-IN') : formatCurrency(totalAssets - (unallocatedData.remaining + totalIlliquidAssets))}</td>
+                                     <td className="py-2 px-4 border-b border-slate-300 text-right text-slate-400">—</td>
+                                     <td className="py-2 px-4 border-b border-slate-300 text-right font-black text-slate-900 bg-emerald-50 text-[12px]">{showRawNumbers ? '₹' + Math.round(totals.assets).toLocaleString('en-IN') : formatCurrency(totals.assets)}</td>
                                    </tr>
 
                                    {masterSimulationData.map((row, i) => {
@@ -3019,10 +3088,10 @@ const lifeCoverAnalysis = useMemo(() => {
                                      return (
                                        <React.Fragment key={i}>
                                          <tr onClick={() => setExpandedSimYear(expandedSimYear === i ? null : i)} className={`border-b hover:bg-slate-50 cursor-pointer transition-colors ${displayBal <= 0 ? 'bg-rose-50 border-rose-200' : 'border-slate-300'}`}>
-                                           <td className={`py-1 px-3 border text-center font-bold sticky left-0 z-20 shadow-[1px_0_0_#cbd5e1] ${displayBal <= 0 ? 'border-rose-200 text-rose-800 bg-rose-100/80' : 'border-slate-300 text-slate-500 bg-slate-50'}`}>Y-{row.yr}</td>
-                                           <td className={`py-1 px-3 border text-center font-bold sticky left-16 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] ${displayBal <= 0 ? 'border-rose-200 text-rose-900 bg-rose-100/80' : 'border-slate-300 text-slate-800 bg-slate-50'}`}>{row.age}Y</td>
-                                           <td className={`py-1 px-3 border text-right font-semibold ${displayBal <= 0 ? 'border-rose-200 text-rose-800/70' : 'border-slate-300 text-teal-800'}`}>{displaySip > 0 ? formatCell(displaySip) : '—'}</td>
-                                           <td className={`py-1 px-3 border text-right font-semibold ${displayBal <= 0 ? 'border-rose-200 text-rose-700/70' : 'border-slate-300 text-emerald-600'}`}>{displayInterest>0?`+${formatCell(displayInterest)}`:'—'}</td>
+                                           <td style={{ minWidth: '64px', left: 0 }} className={`py-2 px-4 border-r text-center font-bold sticky z-30 shadow-[1px_0_0_#cbd5e1] ${displayBal <= 0 ? 'border-rose-200 text-rose-800 bg-rose-100/90' : 'border-slate-300 text-slate-500 bg-slate-50'}`}>Y-{row.yr}</td>
+                                           <td style={{ minWidth: '64px', left: '64px' }} className={`py-2 px-4 border-r text-center font-bold sticky z-30 shadow-[1px_0_0_#cbd5e1] ${displayBal <= 0 ? 'border-rose-200 text-rose-900 bg-rose-100/90' : 'border-slate-300 text-slate-800 bg-slate-50'}`}>{row.age}Y</td>
+                                           <td style={{ minWidth: '140px', left: '128px' }} className={`py-2 px-4 border-r text-right font-semibold sticky z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] ${displayBal <= 0 ? 'border-rose-200 text-rose-800/70 bg-rose-50/90' : 'border-slate-300 text-teal-800 bg-teal-50/90'}`}>{displaySip > 0 ? formatCell(displaySip) : '—'}</td>
+                                           <td className={`py-2 px-4 border-r font-semibold text-right ${displayBal <= 0 ? 'border-rose-200 text-rose-700/70' : 'border-slate-300 text-emerald-600'}`}>{displayInterest>0?`+${formatCell(displayInterest)}`:'—'}</td>
                                            <td className={`py-1 px-3 border text-right font-medium ${displayBal <= 0 ? 'border-rose-200 text-rose-800/70 bg-rose-50/50' : 'border-slate-300 text-indigo-700 bg-indigo-50/10'}`}>{formatCell(displayLegacy)}</td>
                                            <td className={`py-1 px-3 border text-right font-medium ${displayBal <= 0 ? 'border-rose-200 text-rose-800/70 bg-rose-50/50' : 'border-slate-300 text-teal-700 bg-teal-50/10'}`}>{formatCell(displayGoals)}</td>
                                            <td className={`py-1 px-3 border text-right align-middle ${displayBal <= 0 ? 'border-rose-200' : 'border-slate-300'}`}>
@@ -3064,12 +3133,16 @@ const lifeCoverAnalysis = useMemo(() => {
                                      );
                                    })}
                                  </tbody>
-                                 <tfoot className="sticky bottom-0 z-20 bg-slate-900 text-white shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1),0_-4px_6px_-2px_rgba(0,0,0,0.05)]">
+                                 <tfoot className="sticky bottom-0 z-[40] bg-slate-900 text-white shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.3)]">
                                    <tr>
-                                     <td colSpan="2" className="py-3 px-4 border border-slate-700 text-center font-black uppercase text-teal-400 text-xs tracking-widest bg-slate-950">Terminal Wealth (Age {safeNumber(profile.age) + planningHorizon})</td>
-                                     <td className="py-3 px-4 border border-slate-700 text-right font-black text-slate-300 bg-slate-900 text-sm">{formatCurrency(masterSimulationData[masterSimulationData.length-1]?.totalPrincipal)} <span className="text-[9px] text-slate-500 font-bold block mt-1 uppercase tracking-widest">Total Capital Inv.</span></td>
-                                     <td colSpan="4" className="py-3 px-4 border border-slate-700 text-right font-bold text-slate-400 text-[11px] bg-slate-900 uppercase tracking-widest">Final Projected Portfolio Value &rarr;</td>
-                                     <td className="py-3 px-4 border border-slate-700 text-right font-black text-emerald-400 text-lg bg-slate-800 tracking-tighter">{formatCurrency(masterSimulationData[masterSimulationData.length-1]?.closing)}</td>
+                                     <td style={{ minWidth: '64px', left: 0 }} className="py-3 px-2 border-t border-r border-slate-700 text-center font-black uppercase text-teal-400 text-[9px] tracking-widest bg-slate-950 sticky z-[50] shadow-[1px_0_0_#334155]">Terminal</td>
+                                     <td style={{ minWidth: '64px', left: '64px' }} className="py-3 px-2 border-t border-r border-slate-700 text-center font-black uppercase text-teal-400 text-[9px] tracking-widest bg-slate-950 sticky z-[50] shadow-[1px_0_0_#334155]">Age {safeNumber(profile.age) + planningHorizon}</td>
+                                     <td style={{ minWidth: '140px', left: '128px' }} className="py-3 px-4 border-t border-r border-slate-700 text-right font-black text-slate-300 bg-slate-900 text-sm sticky z-[50] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.5)]">
+                                       {formatCurrency(masterSimulationData[masterSimulationData.length-1]?.totalPrincipal)} 
+                                       <span className="text-[9px] text-slate-500 font-bold block mt-1 uppercase tracking-widest">Total Cap. Inv.</span>
+                                     </td>
+                                     <td colSpan="4" className="py-3 px-4 border-t border-slate-700 text-right font-bold text-slate-400 text-[11px] bg-slate-900 uppercase tracking-widest">Final Projected Portfolio Value &rarr;</td>
+                                     <td className="py-3 px-4 border-t border-slate-700 text-right font-black text-emerald-400 text-lg bg-slate-800 tracking-tighter">{formatCurrency(masterSimulationData[masterSimulationData.length-1]?.closing)}</td>
                                    </tr>
                                  </tfoot>
                                </table>
