@@ -897,6 +897,64 @@
                </div>
             </div>
           </div>
+
+          {/* PAGE 4: UHNW Action Plan & 3-Bucket Strategy */}
+          <div className="pdf-page-break" style={{ padding: '60px', backgroundColor: '#ffffff' }}>
+            <div className="border-b-2 border-slate-100 pb-4 mb-8">
+               <h2 className="text-3xl font-black text-slate-900">Master Action Plan & Decumulation</h2>
+            </div>
+            
+            <h3 className="text-xl font-black text-slate-800 mb-4 border-b border-slate-100 pb-2">Immediate Execution Steps</h3>
+            <div className="grid grid-cols-2 gap-4 mb-10">
+               <div className="p-5 border border-slate-200 rounded-xl bg-slate-50">
+                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-xs mb-3">1</div>
+                  <h4 className="font-black text-slate-900 text-sm uppercase tracking-widest mb-2">Protection Core</h4>
+                  <p className="text-sm text-slate-700">Secure <strong>{formatCurrency(healthAnalysis.recommended)}</strong> in comprehensive health cover to defend capital against medical inflation.</p>
+               </div>
+               <div className="p-5 border border-slate-200 rounded-xl bg-slate-50">
+                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-xs mb-3">2</div>
+                  <h4 className="font-black text-slate-900 text-sm uppercase tracking-widest mb-2">Liquid Reserve</h4>
+                  <p className="text-sm text-slate-700">Lock <strong>{formatCurrency(totals.burn * 6)}</strong> (6 months of burn) in safe liquid assets or FDs immediately.</p>
+               </div>
+               <div className="p-5 border border-slate-200 rounded-xl bg-slate-50">
+                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-xs mb-3">3</div>
+                  <h4 className="font-black text-slate-900 text-sm uppercase tracking-widest mb-2">Tax Optimization</h4>
+                  <p className="text-sm text-slate-700">{(totals.income * 12) >= 10000000 ? "Restructure via HUF or Family Trust to optimize high-bracket income." : "Maximize 80C & NPS to minimize current income tax drag. Route refunds to equities."}</p>
+               </div>
+               <div className="p-5 border border-slate-200 rounded-xl bg-slate-50">
+                  <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-xs mb-3">4</div>
+                  <h4 className="font-black text-slate-900 text-sm uppercase tracking-widest mb-2">Estate & Legacy</h4>
+                  <p className="text-sm text-slate-700">Draft a registered Will and verify nominees for all <strong>{formatCurrency(totals.assets)}</strong> of current assets to ensure smooth transition.</p>
+               </div>
+            </div>
+
+            <h3 className="text-xl font-black text-slate-800 mb-4 border-b border-slate-100 pb-2 mt-8">The 3-Bucket Retirement Decumulation Strategy</h3>
+            <p className="text-sm text-slate-600 mb-6">At retirement age ({profile.retireAge}), your target corpus of <strong>{formatCurrency(plan.find(g => g.id === 'retire')?.target || 0)}</strong> will be strategically divided to eliminate sequence-of-returns risk:</p>
+            
+            <div className="flex flex-col gap-4">
+               <div className="p-6 border border-blue-200 rounded-xl bg-blue-50 flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-full bg-blue-200 text-blue-700 flex items-center justify-center font-black text-xl shrink-0">B1</div>
+                  <div>
+                     <h4 className="font-black text-blue-900 text-sm uppercase tracking-widest mb-1">Bucket 1: Safety (Years 1-3)</h4>
+                     <p className="text-sm text-blue-800">3 Years of inflated living expenses held in ultra-safe liquid funds or FDs. This ensures you never sell equities during a crash.</p>
+                  </div>
+               </div>
+               <div className="p-6 border border-amber-200 rounded-xl bg-amber-50 flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center font-black text-xl shrink-0">B2</div>
+                  <div>
+                     <h4 className="font-black text-amber-900 text-sm uppercase tracking-widest mb-1">Bucket 2: Stability (Years 4-8)</h4>
+                     <p className="text-sm text-amber-800">5 Years of living expenses held in high-quality debt and bonds, yielding stable interest to replenish Bucket 1.</p>
+                  </div>
+               </div>
+               <div className="p-6 border border-emerald-200 rounded-xl bg-emerald-50 flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-full bg-emerald-200 text-emerald-700 flex items-center justify-center font-black text-xl shrink-0">B3</div>
+                  <div>
+                     <h4 className="font-black text-emerald-900 text-sm uppercase tracking-widest mb-1">Bucket 3: Growth (Years 9+)</h4>
+                     <p className="text-sm text-emerald-800">The remaining corpus invested in diversified equities to outpace inflation and generate long-term wealth.</p>
+                  </div>
+               </div>
+            </div>
+          </div>
         </div>
       );
     };
@@ -1157,10 +1215,10 @@
       }, [profile, totals.assets]);
 
       return (
-        <div key={step} className="w-full px-8 xl:px-12 grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12 cinematic-enter text-left">
+        <div key={step} className="w-full px-4 sm:px-6 xl:px-12 grid grid-cols-1 lg:grid-cols-12 gap-5 pb-8 cinematic-enter text-left">
           <div className="lg:col-span-8 xl:col-span-9">
-            <div className="premium-card p-6 text-left print-block break-inside-avoid">
-              <h2 className="text-[14px] font-black heading-font text-slate-900 uppercase tracking-widest border-b border-slate-200/50 pb-4 mb-6">
+            <div className="premium-card p-4 sm:p-5 text-left print-block break-inside-avoid">
+              <h2 className="text-[14px] font-black heading-font text-slate-900 uppercase tracking-widest border-b border-slate-200/50 pb-3 mb-4">
                 {step === 1 ? '1. Personal Profile' : step === 2 ? '2. Burn Rate Audit' : step === 3 ? '3. Asset Reservoirs' : '4. Target Strategy'}
               </h2>
 
@@ -1177,6 +1235,16 @@
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 text-left">
                     <InputField label="Monthly Salary (Net)" prefix="₹" value={profile.salary} type="number" onChange={v => setProfile({...profile, salary: v})} fact={safeNumber(profile.salary) > 0 ? getIncomeComment('salary', profile.salary) : null} />
                     <InputField label="Monthly Business Income" prefix="₹" value={profile.businessIncome} type="number" onChange={v => setProfile({...profile, businessIncome: v})} fact={safeNumber(profile.businessIncome) > 0 ? getIncomeComment('business', profile.businessIncome) : null} />
+                    <div className="input-wrapper space-y-2 group relative text-left">
+                      <div className="flex justify-between items-end px-1 mb-1.5">
+                        <label className="text-xs font-black text-slate-600 uppercase tracking-widest">Risk Profile</label>
+                      </div>
+                      <select className="premium-input outline-none cursor-pointer relative z-10" value={profile.riskTolerance || 'moderate'} onChange={e => setProfile({...profile, riskTolerance: e.target.value})}>
+                        <option value="conservative">Conservative (Preservation)</option>
+                        <option value="moderate">Moderate (Balanced)</option>
+                        <option value="aggressive">Aggressive (Growth)</option>
+                      </select>
+                    </div>
                   </div>
                   
                   <div className="pt-4 mt-4 border-t border-slate-100 space-y-4 text-left max-w-4xl">
@@ -1394,13 +1462,13 @@
 
           {/* Intelligence FinBar */}
           {step < 5 && (
-            <div className="lg:col-span-4 xl:col-span-3 h-fit sticky top-6 no-print text-left">
-              <div className="premium-card p-6 space-y-6 text-left print-block">
-                <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
+            <div className="lg:col-span-4 xl:col-span-3 h-fit sticky top-4 no-print text-left">
+              <div className="premium-card p-4 sm:p-5 space-y-5 text-left print-block">
+                <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
                   <div className="p-2 bg-slate-900 text-white rounded-lg flex items-center justify-center shadow-md"><Icon name="brain" size={20} /></div>
                   <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">FinBar</h3>
                 </div>
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div className="space-y-2">
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Income Streams</p>
                     <div className="grid grid-cols-2 gap-4">
@@ -1548,14 +1616,23 @@
         return { income, burn: monthlyBurn, assets: totalAssets };
       }, [profile, monthlyBurn, totalAssets]);
 
+      const mappableSources = useMemo(() => {
+         const sources = liquidAssetsList.map(a => ({ ...a, isSip: false }));
+         if (safeNumber(profile.currentSip) > 0) {
+             sources.push({ id: 'activeSip', label: 'Ongoing Monthly SIP', val: safeNumber(profile.currentSip), yield: portfolioWeightedReturn, isSip: true });
+         }
+         return sources;
+      }, [liquidAssetsList, profile.currentSip, portfolioWeightedReturn]);
+
       const strategyTiers = useMemo(() => {
         const a = Number(profile.age) || 30;
-        if (a <= 30) return { title: "🧒 Aggressive Growth Phase (Age 20-30)", desc: "Goal: Wealth creation, long time horizon", mixMap: { lc: 30, fc: 30, mc: 20, sc: 10, debt: 10 }, mix: [ { label: 'Large Cap', val: 30, color: 'bg-teal-500' }, { label: 'Flexi Cap', val: 30, color: 'bg-indigo-500' }, { label: 'Mid Cap', val: 20, color: 'bg-amber-500' }, { label: 'Small Cap', val: 10, color: 'bg-rose-500' }, { label: 'Debt', val: 10, color: 'bg-slate-500' } ], targetEq: 90, bullets: ["✅ High risk capacity", "✅ Focus on SIPs", "✅ Ignore short-term volatility"] };
-        else if (a <= 40) return { title: "👨 Growth + Stability Phase (Age 31-40)", desc: "Goal: Continue growth but start balancing risk", mixMap: { lc: 35, fc: 25, mc: 15, sc: 5, debt: 20 }, mix: [ { label: 'Large Cap', val: 35, color: 'bg-teal-500' }, { label: 'Flexi Cap', val: 25, color: 'bg-indigo-500' }, { label: 'Mid Cap', val: 15, color: 'bg-amber-500' }, { label: 'Small Cap', val: 5, color: 'bg-rose-500' }, { label: 'Debt', val: 20, color: 'bg-slate-500' } ], targetEq: 80, bullets: ["✅ Start goal-based investing", "✅ Reduce small-cap exposure slowly", "✅ Increase debt gradually"] };
-        else if (a <= 50) return { title: "👨‍💼 Balanced Phase (Age 41-50)", desc: "Goal: Protect wealth + moderate growth", mixMap: { lc: 40, fc: 15, mc: 5, debt: 40 }, mix: [ { label: 'Large Cap', val: 40, color: 'bg-teal-500' }, { label: 'Flexi Cap', val: 15, color: 'bg-indigo-500' }, { label: 'Mid Cap', val: 5, color: 'bg-amber-500' }, { label: 'Debt/Bonds', val: 40, color: 'bg-slate-500' } ], targetEq: 60, bullets: ["✅ Capital protection becomes important", "✅ Avoid heavy small-cap bets", "✅ Start retirement-focused funds"] };
-        else if (a <= 60) return { title: "👴 Pre-Retirement Phase (Age 51-60)", desc: "Goal: Capital safety + income planning", mixMap: { lc: 40, debt: 60 }, mix: [ { label: 'Large Cap', val: 40, color: 'bg-teal-500' }, { label: 'Debt', val: 60, color: 'bg-slate-500' } ], targetEq: 40, bullets: ["✅ Reduce volatility", "✅ Focus on income funds", "✅ Review portfolio yearly"] };
-        else return { title: "👴 Retirement Phase (Age 60+)", desc: "Goal: Income + capital preservation", mixMap: { lc: 20, debt: 80 }, mix: [ { label: 'Large Cap', val: 20, color: 'bg-teal-500' }, { label: 'Debt', val: 80, color: 'bg-slate-500' } ], targetEq: 20, bullets: ["✅ Avoid high-risk categories", "✅ Prefer SWP strategy", "✅ Keep liquidity high"] };
-      }, [profile.age]);
+        const riskOffset = profile.riskTolerance === 'aggressive' ? 15 : profile.riskTolerance === 'conservative' ? -15 : 0;
+        if (a <= 30) return { title: "🧒 Aggressive Growth Phase", desc: "Goal: Wealth creation, long time horizon", mixMap: { lc: 30, fc: 30, mc: 20, sc: 10, debt: 10 }, mix: [ { label: 'Large Cap', val: 30, color: 'bg-teal-500' }, { label: 'Flexi Cap', val: 30, color: 'bg-indigo-500' }, { label: 'Mid Cap', val: 20, color: 'bg-amber-500' }, { label: 'Small Cap', val: 10, color: 'bg-rose-500' }, { label: 'Debt', val: 10, color: 'bg-slate-500' } ], targetEq: Math.min(95, Math.max(10, 90 + riskOffset)), bullets: ["✅ High risk capacity", "✅ Focus on SIPs", "✅ Ignore short-term volatility"] };
+        else if (a <= 40) return { title: "👨 Growth + Stability Phase", desc: "Goal: Continue growth but start balancing risk", mixMap: { lc: 35, fc: 25, mc: 15, sc: 5, debt: 20 }, mix: [ { label: 'Large Cap', val: 35, color: 'bg-teal-500' }, { label: 'Flexi Cap', val: 25, color: 'bg-indigo-500' }, { label: 'Mid Cap', val: 15, color: 'bg-amber-500' }, { label: 'Small Cap', val: 5, color: 'bg-rose-500' }, { label: 'Debt', val: 20, color: 'bg-slate-500' } ], targetEq: Math.min(95, Math.max(10, 80 + riskOffset)), bullets: ["✅ Start goal-based investing", "✅ Reduce small-cap exposure slowly", "✅ Increase debt gradually"] };
+        else if (a <= 50) return { title: "👨‍💼 Balanced Phase", desc: "Goal: Protect wealth + moderate growth", mixMap: { lc: 40, fc: 15, mc: 5, debt: 40 }, mix: [ { label: 'Large Cap', val: 40, color: 'bg-teal-500' }, { label: 'Flexi Cap', val: 15, color: 'bg-indigo-500' }, { label: 'Mid Cap', val: 5, color: 'bg-amber-500' }, { label: 'Debt/Bonds', val: 40, color: 'bg-slate-500' } ], targetEq: Math.min(95, Math.max(10, 60 + riskOffset)), bullets: ["✅ Capital protection becomes important", "✅ Avoid heavy small-cap bets", "✅ Start retirement-focused funds"] };
+        else if (a <= 60) return { title: "👴 Pre-Retirement Phase", desc: "Goal: Capital safety + income planning", mixMap: { lc: 40, debt: 60 }, mix: [ { label: 'Large Cap', val: 40, color: 'bg-teal-500' }, { label: 'Debt', val: 60, color: 'bg-slate-500' } ], targetEq: Math.min(95, Math.max(10, 40 + riskOffset)), bullets: ["✅ Reduce volatility", "✅ Focus on income funds", "✅ Review portfolio yearly"] };
+        else return { title: "👴 Retirement Phase", desc: "Goal: Income + capital preservation", mixMap: { lc: 20, debt: 80 }, mix: [ { label: 'Large Cap', val: 20, color: 'bg-teal-500' }, { label: 'Debt', val: 80, color: 'bg-slate-500' } ], targetEq: Math.min(95, Math.max(10, 20 + riskOffset)), bullets: ["✅ Avoid high-risk categories", "✅ Prefer SWP strategy", "✅ Keep liquidity high"] };
+      }, [profile.age, profile.riskTolerance]);
 
       const currentAllocStats = useMemo(() => {
         const eq = safeNumber(profile.mfPool) + safeNumber(profile.stockPool);
@@ -1617,6 +1694,7 @@
           
           let totalGoalAllocAmt = 0;
           let mappedAssetsFV = 0;
+          let mappedSipAmt = 0;
           const isGoalPaused = !!pausedGoals[g.id];
           
           if (isWealthAllocated && !isGoalPaused) { 
@@ -1628,12 +1706,16 @@
               const assetReturn = getScenarioReturn(a.yield || 8, 1) / 100;
               mappedAssetsFV += allocatedPV * Math.pow(1 + assetReturn, g.horizon);
             }); 
+            const sipPct = allocMap['activeSip']?.[g.id] || 0;
+            mappedSipAmt = safeNumber(profile.currentSip) * (sipPct / 100);
           }
           
           const remainingTargetToFund = Math.max(0, g.target - mappedAssetsFV);
-          const sip = isGoalPaused ? 0 : calculateStepUpSip(remainingTargetToFund, g.horizon, effectiveReturn, p.stepUp, safeNumber(p.lumpsum)); 
+          const calculatedSip = isGoalPaused ? 0 : calculateStepUpSip(remainingTargetToFund, g.horizon, effectiveReturn, p.stepUp, safeNumber(p.lumpsum)); 
+          const sip = Math.max(0, calculatedSip - mappedSipAmt);
+          const totalSip = sip + mappedSipAmt;
           
-          return { ...g, ...p, returns: baseReturnToUse, sip, allocAmt: totalGoalAllocAmt, mappedAssetsFV, remainingTarget: remainingTargetToFund, isEdited: !!localParams[g.id], isPaused: isGoalPaused };
+          return { ...g, ...p, returns: baseReturnToUse, sip, totalSip, mappedSip: mappedSipAmt, allocAmt: totalGoalAllocAmt, mappedAssetsFV, remainingTarget: remainingTargetToFund, isEdited: !!localParams[g.id], isPaused: isGoalPaused };
         });
       }, [profile, retireCorpus, retireYrs, isWealthAllocated, allocMap, localParams, globalSimParams, liquidAssetsList, scenario, showFullPreview, projectionTab, engineBlendedReturn, currentInflation, infMultiplier, futureLife, retirementDuration, pausedGoals]);
 
@@ -1674,8 +1756,11 @@
         let illiquidVal = totalIlliquidAssets;
         let illiquidRate = 0.08; // default real estate return
 
-        // FIX: Remove ongoing SIP from the legacy unmapped engine if wealth is mapped
-        let annualSip = isWealthAllocated ? 0 : safeNumber(profile.currentSip) * 12;
+        // FIX: Remove mapped SIP from the legacy unmapped engine if wealth is mapped
+        let totalMappedSip = 0;
+        if (isWealthAllocated) { totalMappedSip = Object.values(allocMap['activeSip'] || {}).reduce((a,b)=>a+(safeNumber(profile.currentSip)*(Number(b)/100)), 0); }
+        let annualSip = isWealthAllocated ? Math.max(0, safeNumber(profile.currentSip) - totalMappedSip) * 12 : Math.max(0, safeNumber(profile.currentSip) - totalSIPRequired) * 12;
+        
         let sipPot = 0;
         let sipRate = safeNumber(portfolioWeightedReturn) / 100 || 0.078; 
 
@@ -1712,7 +1797,15 @@
 
       const masterSimulationData = useMemo(() => {
         let legacyBal = unallocatedData.remaining + totalIlliquidAssets; legacyBal += safeNumber(masterLumpsum);
-        let buckets = plan.filter(g => !g.isPaused).map(g => ({ id: g.id, name: g.name, horizon: g.horizon, bal: safeNumber(g.lumpsum) + safeNumber(g.allocAmt), sip: g.sip, returnRateBase: g.returns, stepUp: (g.stepUp || 0) / 100, target: g.target }));
+        // FIX: Do not delete paused goals if they have mapped capital. Just freeze their SIP.
+        let buckets = plan.filter(g => !g.isPaused || safeNumber(g.lumpsum) > 0 || safeNumber(g.allocAmt) > 0 || safeNumber(g.mappedSip) > 0).map(g => ({ id: g.id, name: g.name, horizon: g.horizon, bal: safeNumber(g.lumpsum) + safeNumber(g.allocAmt), sip: g.isPaused ? 0 : g.totalSip, returnRateBase: g.returns, stepUp: (g.stepUp || 0) / 100, target: g.target }));
+        
+        // FIX: Calculate Surplus SIP and inject it into the Legacy Pot
+        let totalMappedSip = 0;
+        if (isWealthAllocated) { totalMappedSip = Object.values(allocMap['activeSip'] || {}).reduce((a,b)=>a+(safeNumber(mathProfile.currentSip)*(Number(b)/100)), 0); }
+        const initialSurplusSip = isWealthAllocated ? Math.max(0, safeNumber(mathProfile.currentSip) - totalMappedSip) : Math.max(0, safeNumber(mathProfile.currentSip) - totalSIPRequired);
+        let currentSurplusSip = initialSurplusSip;
+
         let yearlyData = []; let totalPrincipal = legacyBal + buckets.reduce((acc, b) => acc + b.bal, 0); let cumulativeTaxPaid = 0;
         
         for (let yr = 1; yr <= planningHorizon; yr++) {
@@ -1743,11 +1836,24 @@
           });
 
           const isRetirementPhase = age > safeNumber(mathProfile.retireAge); const currentRetirementYear = yr - retireYrs; let yearlyFreedomPaycheck = 0;
-          if (isRetirementPhase && currentRetirementYear > 0) { yearlyFreedomPaycheck = (futureLife * 12) * Math.pow(infMultiplier, currentRetirementYear - 1); redemptionNames.push("Freedom Paycheck"); }
+          if (isRetirementPhase && currentRetirementYear > 0) { 
+             // UHNW FEATURE: Go-Go, Slow-Go, No-Go Retirement Spending Eras
+             let eraMultiplier = 1.0; // Go-Go Years (Active Lifestyle)
+             if (age > 70 && age <= 80) eraMultiplier = 0.85; // Slow-Go Years (-15% travel/lifestyle burn)
+             else if (age > 80) eraMultiplier = 0.75; // No-Go Years (-25% lifestyle burn)
+             
+             yearlyFreedomPaycheck = (futureLife * 12) * Math.pow(infMultiplier, currentRetirementYear - 1) * eraMultiplier; 
+             redemptionNames.push(`Freedom Paycheck (${eraMultiplier === 1 ? 'Go-Go' : eraMultiplier === 0.85 ? 'Slow-Go' : 'No-Go'})`); 
+          }
           const monthlyFreedomPaycheck = yearlyFreedomPaycheck / 12;
           
           for (let m = 0; m < 12; m++) {
             let monthOpening = legacyBal + buckets.reduce((acc, b) => acc + b.bal, 0); let monthSip = 0, monthGrowth = 0, monthWithdrawal = 0;
+            
+            // FIX: Inject Surplus SIP into Legacy Pot during active accumulation phase
+            let activeSurplusSip = (yr <= retireYrs) ? currentSurplusSip : 0;
+            legacyBal += activeSurplusSip; monthSip += activeSurplusSip;
+
             if (legacyBal > 0) { let legGrowth = legacyBal * (Math.pow(1 + legacyReturn, 1/12) - 1); legacyBal += legGrowth; monthGrowth += legGrowth; }
             buckets.forEach(b => { if (b.bal > 0) { let bGrowth = b.bal * (Math.pow(1 + b.currentReturnRate, 1/12) - 1); b.bal += bGrowth; monthGrowth += bGrowth; } if (yr <= b.horizon) { b.bal += b.sip; monthSip += b.sip; } });
             if (m === 11) { buckets.forEach(b => { if (yr === b.horizon && b.id !== 'retire') { let wAmt = b.bal; b.bal = 0; yearRedemptions += wAmt; monthWithdrawal += wAmt; redemptionNames.push(b.name); } }); }
@@ -1782,6 +1888,10 @@
 
           const overrideStepUp = safeNumber(masterStepUp) > 0;
           buckets.forEach(b => { if (yr < b.horizon) b.sip *= (1 + (overrideStepUp ? safeNumber(masterStepUp) / 100 : b.stepUp)); });
+          
+          // FIX: Step-up the surplus SIP using the global SIP step-up profile if applicable
+          if (yr < retireYrs) currentSurplusSip *= (1 + safeNumber(mathProfile.sipStepUp) / 100);
+
           totalPrincipal += yearSip; totalPrincipal -= yearRedemptions; if (totalPrincipal < 0) totalPrincipal = 0;
           let goalsClosing = buckets.reduce((acc, b) => acc + b.bal, 0);
           
@@ -1803,19 +1913,41 @@ const healthAnalysis = useMemo(() => {
 const lifeCoverAnalysis = useMemo(() => {
   const age = safeNumber(profile.age) || 30;
   let multiplier = 5;
-  if (age >= 18 && age <= 35) multiplier = 30;
-  else if (age >= 36 && age <= 40) multiplier = 25;
-  else if (age >= 41 && age <= 45) multiplier = 20;
-  else if (age >= 46 && age <= 50) multiplier = 15;
-  else if (age >= 51 && age <= 55) multiplier = 10;
+  if (age >= 18 && age <= 35) multiplier = 20;
+  else if (age >= 36 && age <= 45) multiplier = 15;
+  else if (age >= 46 && age <= 55) multiplier = 10;
   else if (age >= 56 && age <= 65) multiplier = 5;
   
-  const annualIncome = totals.income * 12;
-  const required = annualIncome * multiplier;
-  // Heuristic: Estimate existing cover if they provided premium (approx 500x premium)
+  const incomeReplacement = (totals.income * 12) * multiplier;
+  const debtLiability = safeNumber(profile.loanOutstanding);
+  
+  // PV of all future goals (excluding retirement as income replacement covers baseline)
+  let goalsPV = 0;
+  plan.filter(g => g.id !== 'retire').forEach(g => { goalsPV += g.baseCost; });
+
+  let absoluteLiability = debtLiability + goalsPV;
+  let rawRequired = Math.max(incomeReplacement, absoluteLiability);
+  
+  // UHNW Fiduciary Rule: Deduct current liquid assets because they immediately serve as estate value
+  let required = Math.max(0, rawRequired - totalLiquidAssets);
+  
   const estimatedExisting = safeNumber(profile.lifePremium) > 0 ? safeNumber(profile.lifePremium) * 500 : 0;
-  return { required, eligible: required, multiplier, existing: estimatedExisting, shortfall: Math.max(0, required - estimatedExisting) };
-}, [profile.age, totals.income, profile.lifePremium]);      
+  return { required, eligible: rawRequired, multiplier, existing: estimatedExisting, shortfall: Math.max(0, required - estimatedExisting), liability: absoluteLiability, incomeRepl: incomeReplacement };
+}, [profile.age, totals.income, profile.lifePremium, plan, totalLiquidAssets, profile.loanOutstanding]);      
+
+const rebalanceMandate = useMemo(() => {
+    if (totalLiquidAssets <= 0) return { text: "Fund your portfolio.", action: "Awaiting Capital", amt: 0 };
+    const targetEqPct = strategyTiers.targetEq / 100;
+    const currentEqPct = currentAllocStats.eqPct / 100;
+    const targetEqAmt = totalLiquidAssets * targetEqPct;
+    const currentEqAmt = totalLiquidAssets * currentEqPct;
+    const shiftAmt = targetEqAmt - currentEqAmt;
+    
+    if (Math.abs(shiftAmt) < totalLiquidAssets * 0.05) return { text: "Portfolio is perfectly balanced.", action: "Hold Steady", amt: 0 }; 
+    if (shiftAmt > 0) return { text: `Shift ${formatCurrency(shiftAmt)} from Debt/Cash to Equity.`, action: "Buy Equity", amt: shiftAmt };
+    return { text: `Harvest ${formatCurrency(Math.abs(shiftAmt))} from Equity to Debt/Cash.`, action: "Sell Equity", amt: Math.abs(shiftAmt) };
+}, [strategyTiers.targetEq, currentAllocStats.eqPct, totalLiquidAssets]);
+
       const strategyHealthScore = useMemo(() => { let score = 0; const sipGapPct = totalSIPRequired > 0 ? (safeNumber(profile.currentSip) / totalSIPRequired) : 1; score += Math.min(40, sipGapPct * 40); const insuranceScore = profile.insuranceActive ? (safeNumber(profile.existingHealthCover) >= 1500000 ? 15 : 7) : 0; const emgFundScore = totalAssets >= (monthlyBurn * 6) ? 15 : (totalAssets >= monthlyBurn * 3 ? 7 : 0); score += (insuranceScore + emgFundScore); const allocationScore = isWealthAllocated ? 30 : 15; score += allocationScore; return Math.round(score); }, [totalSIPRequired, profile, totalAssets, monthlyBurn, isWealthAllocated]);
       
       const rCoast = portfolioWeightedReturn / 100; let coastYears = 0; if (totalAssets > 0 && rCoast > 0 && retireCorpus > totalAssets) coastYears = Math.log(retireCorpus / totalAssets) / Math.log(1 + rCoast);
@@ -2121,14 +2253,15 @@ const lifeCoverAnalysis = useMemo(() => {
       
       const handleShare = (method) => {
         const advisor = profile.advisorName || 'your Advisor'; const client = profile.name || 'Valued Client';
-        let msg = `*Strategic Wealth Blueprint for ${client}*\n_Prepared by ${advisor}_\n\n`;
-        msg += `📊 *CURRENT BASELINE*\n• Current Age: ${profile.age} Years\n• Target Retirement Age: ${profile.retireAge} Years\n• Monthly Income: ${formatCurrency(totals.income)}\n• Monthly Lifestyle Burn: ${formatCurrency(monthlyBurn)}\n• Current Liquid Assets: ${formatCurrency(totalLiquidAssets)}\n`;
-        if (safeNumber(profile.emi) > 0) msg += `• Monthly EMI: ${formatCurrency(profile.emi)} (Ends ${profile.emiEndYear})\n`;
-        msg += `\n🎯 *STRATEGIC GOALS & EXECUTION PLAN*\n1. Retirement Freedom Corpus\n   - Target: ${formatCurrency(retireCorpus)}\n   - Required SIP: ${formatCurrency(retirementSIP)}/mo\n`;
-        let counter = 2; plan.forEach(g => { if (g.id !== 'retire') { msg += `${counter}. ${g.name}\n   - Target: ${formatCurrency(g.target)} (in ${g.horizon} Years)\n   - Required SIP: ${formatCurrency(g.sip)}/mo\n`; counter++; } });
-        msg += `\n💡 *STRATEGY SYNTHESIS*\n• Total Monthly SIP Needed: ${formatCurrency(totalSIPRequired)}\n• Current SIP: ${formatCurrency(profile.currentSip)}\n`;
-        const gap = totalSIPRequired - safeNumber(profile.currentSip); if (gap > 0) msg += `• Action Required: Bridge gap of ${formatCurrency(gap)}/mo.\n`; else msg += `• Status: Thriving. Investments meet requirements! ✅\n`;
-        msg += `\n🛡️ *RISK & PROTECTION SHIELD*\n• Recommended Health Cover: ${formatCurrency(healthAnalysis.recommended)}\n• Recommended Term Life Cover: ${formatCurrency(totals.income * 12 * 20)}\n\nBest Regards,\n${advisor}`;
+        let msg = `🌟 *Strategic Wealth Blueprint for ${client}*\n_Prepared by ${advisor}_\n\n`;
+        msg += `📊 *1. BASELINE REALITY*\n• Current Age: ${profile.age} Years\n• Target Freedom Age: ${profile.retireAge} Years\n• Monthly Income: ${formatCurrency(totals.income)}\n• Current Lifestyle Cost: ${formatCurrency(monthlyBurn)}\n• Investable Liquid Assets: ${formatCurrency(totalLiquidAssets)}\n`;
+        if (safeNumber(profile.emi) > 0) msg += `• Monthly EMI Load: ${formatCurrency(profile.emi)} (Ends ${profile.emiEndYear})\n`;
+        msg += `\n🔥 *2. THE INFLATION IMPACT*\n• Assumed Inflation: ${currentInflation}%\n• Projected Lifestyle Cost at Age ${profile.retireAge}: ${formatCurrency(futureLife)}/mo\n   _(This is what you will need monthly just to maintain today's lifestyle!)_\n`;
+        msg += `\n🎯 *3. CORE EXECUTION MANDATE*\n1. Retirement Freedom Corpus\n   - Target to accumulate: ${formatCurrency(retireCorpus)}\n   - Required SIP: ${formatCurrency(retirementSIP)}/mo\n`;
+        let counter = 2; plan.forEach(g => { if (g.id !== 'retire' && !g.isPaused) { msg += `${counter}. ${g.name}\n   - Target: ${formatCurrency(g.target)} (in ${g.horizon} Years)\n   - Required SIP: ${formatCurrency(g.sip)}/mo\n`; counter++; } });
+        msg += `\n💡 *4. STRATEGY SYNTHESIS*\n• Total Monthly SIP Needed: ${formatCurrency(totalSIPRequired)}\n• Current Active SIP: ${formatCurrency(profile.currentSip)}\n`;
+        const gap = totalSIPRequired - safeNumber(profile.currentSip); if (gap > 0) msg += `• ⚠️ Action Required: Bridge investment gap of ${formatCurrency(gap)}/mo to stay on track.\n`; else msg += `• 🏆 Status: Thriving. Current investments meet requirements!\n`;
+        msg += `\n🛡️ *5. MOAT & RISK SHIELD*\n• Required Health Cover: ${formatCurrency(healthAnalysis.recommended)}\n• Required Term Life Cover: ${formatCurrency(lifeCoverAnalysis.required)} (Based on ${lifeCoverAnalysis.multiplier}x income)\n\n🚀 Let's execute this master plan.\nBest Regards,\n${advisor}`;
         if (method === 'whatsapp') { window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank'); } else if (method === 'mail') { window.open(`mailto:?subject=${encodeURIComponent(`Your Financial Blueprint - ${client}`)}&body=${encodeURIComponent(msg)}`, '_blank'); } 
       };
 
@@ -2142,7 +2275,7 @@ const lifeCoverAnalysis = useMemo(() => {
       };
 
       return (
-        <div id="blueprint-root" className={`w-full mx-auto transition-all duration-500 ${blueprintLayout === 'list' ? 'flex flex-col gap-8' : blueprintLayout === 'micro' ? 'grid grid-cols-12 gap-6' : blueprintLayout === 'compact' ? 'grid grid-cols-12 gap-8' : 'grid grid-cols-12 gap-8'} text-left blueprint-container relative z-10 px-8 xl:px-12 pb-24`}>
+        <div id="blueprint-root" className={`w-full mx-auto transition-all duration-500 ${blueprintLayout === 'list' ? 'flex flex-col gap-4 sm:gap-5' : blueprintLayout === 'micro' ? 'grid grid-cols-12 gap-4' : blueprintLayout === 'compact' ? 'grid grid-cols-12 gap-4 sm:gap-5' : 'grid grid-cols-12 gap-4 sm:gap-5'} text-left blueprint-container relative z-10 px-4 sm:px-6 xl:px-12 pb-24`}>
           {isPresenting && document.getElementById('root') ? ReactDOM.createPortal(
             <div className="fixed inset-0 z-[999999] bg-[#F5F5F7] flex flex-col no-print text-slate-900 pt-6 pb-6">
               <div className="absolute top-4 left-4 sm:top-8 sm:left-8 z-[999999] group no-print mt-2 ml-2"><button onClick={() => setIsConsoleOpen(!isConsoleOpen)} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 backdrop-blur-md ${isConsoleOpen ? 'bg-slate-200 text-slate-800 rotate-90' : 'bg-transparent text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-800'}`}><Icon name="settings" size={20} /></button><div className={`absolute top-12 left-0 w-80 bg-white/90 backdrop-blur-xl border border-slate-200 rounded-3xl p-6 shadow-2xl transition-all duration-500 origin-top-left ${isConsoleOpen ? 'scale-100 opacity-100 visible' : 'scale-95 opacity-0 invisible'}`}><h4 className="text-slate-900 text-sm font-bold uppercase tracking-widest border-b border-slate-100 pb-4 mb-6 flex items-center gap-3"><Icon name="sliders" size={16} className="text-teal-600" /> Stealth Console</h4><div className="space-y-4"><div><div className="flex justify-between items-end mb-3"><label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Retirement Age</label><span className="text-base font-bold text-slate-900">{profile.retireAge} Yrs</span></div><input type="range" min={safeNumber(profile.age) + 1} max={safeNumber(profile.horizonAge) - 1} value={profile.retireAge} onChange={(e) => setProfile({...profile, retireAge: e.target.value})} className="w-full accent-teal-500" /></div><div><div className="flex justify-between items-end mb-3"><label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">Burn Trim (Optimize)</label><span className="text-base font-bold text-slate-900">-{burnTrim}%</span></div><input type="range" min="0" max="30" step="5" value={burnTrim} onChange={(e) => setBurnTrim(Number(e.target.value))} className="w-full accent-amber-500" /></div></div></div></div>
@@ -2178,24 +2311,24 @@ const lifeCoverAnalysis = useMemo(() => {
                   <button onClick={() => { setCurrentSlide(0); setIsPresenting(true); }} className="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-black text-[9px] uppercase tracking-widest shadow-sm active:scale-95 transition-all flex items-center gap-1.5 hover:bg-indigo-100 hover:shadow-md border border-indigo-200"><Icon name="monitor-play" size={12}/> Present</button>
                 </div>
               </header>
-              <div className="w-full p-4 bg-white/90 backdrop-blur-md border border-white/80 rounded-xl shadow-md flex flex-col xl:flex-row items-center justify-between text-left mt-4 gap-5 break-inside-avoid no-print">
+              <div className="w-full p-3 bg-white/90 backdrop-blur-md border border-white/80 rounded-xl shadow-md flex flex-col xl:flex-row items-center justify-between text-left mt-3 gap-4 break-inside-avoid no-print">
                 <div className="flex gap-4 items-center text-left relative z-10 w-full xl:w-auto px-2">
                   <div className="relative">
-                    <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">
+                    <svg viewBox="0 0 36 36" className="w-10 h-10 -rotate-90">
                       <circle cx="18" cy="18" r="16" fill="none" stroke="#f1f5f9" strokeWidth="4" />
                       <circle cx="18" cy="18" r="16" fill="none" stroke={vitalityScore > 75 ? '#10b981' : vitalityScore > 50 ? '#f59e0b' : '#ef4444'} strokeWidth="4" strokeDasharray={`${(vitalityScore / 100) * 100} 100`} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
                     </svg>
-                    <div className="absolute inset-0 flex items-center justify-center font-black text-[12px] text-slate-900">{vitalityScore}</div>
+                    <div className="absolute inset-0 flex items-center justify-center font-black text-[10px] text-slate-900">{vitalityScore}</div>
                   </div>
-                  <div className="text-left flex-1"><p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">Wealth Vitality Index</p><p className="text-base font-black text-slate-900 leading-tight">{vitalityScore > 75 ? 'Optimal Health' : vitalityScore > 50 ? 'Needs Optimization' : 'Critical Action Needed'}</p><p className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${verdict.color}`}>Verdict: {verdict.title}</p></div>
+                  <div className="text-left flex-1"><p className="text-[8px] font-bold uppercase tracking-widest text-slate-500 mb-0.5">Wealth Vitality Index</p><p className="text-sm font-black text-slate-900 leading-tight">{vitalityScore > 75 ? 'Optimal Health' : vitalityScore > 50 ? 'Needs Optimization' : 'Critical Action Needed'}</p><p className={`text-[8px] font-bold uppercase tracking-widest mt-0.5 ${verdict.color}`}>Verdict: {verdict.title}</p></div>
                 </div>
                 <div className="flex flex-wrap gap-3 w-full xl:w-auto flex-1 xl:justify-end">
-                  <div className="bg-gradient-to-r from-amber-50 to-white border border-amber-200/80 rounded-xl px-4 py-3 flex-1 min-w-[280px] max-w-lg shadow-sm flex items-start gap-3">
-                    <Icon name="zap" size={20} className="text-amber-500 shrink-0 mt-1" />
+                  <div className="bg-gradient-to-r from-amber-50 to-white border border-amber-200/80 rounded-xl px-3 py-2 flex-1 min-w-[280px] max-w-lg shadow-sm flex items-center gap-2.5">
+                    <Icon name="zap" size={16} className="text-amber-500 shrink-0" />
                     <div>
-                      <p className="text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1.5">Advisor Intelligence</p>
-                      <p className="text-xs font-semibold text-slate-800 leading-relaxed">
-                        {freeCashflow > 0 ? <>Invest your <strong className="text-lg md:text-xl font-black text-amber-950 bg-amber-200/50 px-2 py-0.5 rounded-lg border border-amber-300 shadow-sm mx-1">₹{Math.round(freeCashflow).toLocaleString()}/mo</strong> surplus systematically to accelerate your absolute freedom.</> : <>A <strong className="text-lg md:text-xl font-black text-rose-800 bg-rose-100 px-2 py-0.5 rounded-lg border border-rose-200 shadow-sm mx-1">₹{Math.round(Math.abs(freeCashflow)).toLocaleString()}/mo</strong> gap exists. Review your lifestyle burn carefully.</>}
+                      <p className="text-[9px] font-black text-amber-900 uppercase tracking-widest mb-1">Advisor Intelligence</p>
+                      <p className="text-[11px] font-semibold text-slate-800 leading-relaxed">
+                        {freeCashflow > 0 ? <>Invest your <strong className="text-base font-black text-amber-950 bg-amber-200/50 px-1.5 py-0.5 rounded-lg border border-amber-300 shadow-sm mx-1">₹{Math.round(freeCashflow).toLocaleString()}/mo</strong> surplus systematically to accelerate absolute freedom.</> : <>A <strong className="text-base font-black text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded-lg border border-rose-200 shadow-sm mx-1">₹{Math.round(Math.abs(freeCashflow)).toLocaleString()}/mo</strong> gap exists. Review your lifestyle burn carefully.</>}
                       </p>
                     </div>
                   </div>
@@ -2209,7 +2342,7 @@ const lifeCoverAnalysis = useMemo(() => {
              <div className="grid grid-cols-1 xl:grid-cols-12 gap-3">
                  {/* Left Panel: Confidence & SWAN */}
                  <div className="xl:col-span-4 flex flex-col gap-3">
-                    <div className="bg-slate-900 rounded-xl p-4 shadow-lg relative overflow-hidden flex-1 border border-slate-800 group hover:shadow-xl transition-all cursor-default">
+                    <div className="bg-slate-900 rounded-xl p-3.5 shadow-lg relative overflow-hidden flex-1 border border-slate-800 group hover:shadow-xl transition-all cursor-default">
                        <div className="absolute right-[-10%] top-[-10%] w-32 h-32 bg-teal-500/20 blur-2xl rounded-full group-hover:bg-teal-500/30 transition-all duration-700"></div>
                        <h3 className="text-[9px] font-black uppercase tracking-widest text-teal-400 mb-1.5 relative z-10 flex items-center gap-1.5"><Icon name="shield-check" size={12}/> Master Plan Confidence</h3>
                        <div className="flex items-end gap-2 relative z-10">
@@ -2288,8 +2421,8 @@ const lifeCoverAnalysis = useMemo(() => {
           </div>
           
           <PhaseWrapper num={1} title="Executive Summary" layout={blueprintLayout} gridClasses="col-span-12" delayClass="stagger-1" themeClass="bg-blue-50/50 border-blue-200/50">
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 relative z-10">
-              <div className="col-span-12 xl:col-span-5 flex flex-col gap-4 break-inside-avoid print-block">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 relative z-10">
+              <div className="col-span-12 lg:col-span-5 flex flex-col gap-4 break-inside-avoid print-block">
                 {safeNumber(profile.age) > 0 && ageFact && (
                   <div className="bento-card border-blue-200/60 bg-white/60 p-4 shadow-sm">
                     <p className="text-[10px] font-black text-blue-700 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><Icon name="book-open" size={14}/> Age {profile.age} Intelligence</p>
@@ -2343,7 +2476,7 @@ const lifeCoverAnalysis = useMemo(() => {
                     <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
                        <div className="flex-1">
                          <p className="text-lg font-black uppercase tracking-wide mb-1.5">{debtInsight.isArbitrageFavorable ? 'Debt Arbitrage (Hold)' : 'Debt Snowball Activation'}</p>
-                         <p className="text-xs font-medium text-slate-300 leading-relaxed text-justify">{debtInsight.text || (debtInsight.isArbitrageFavorable ? `Market yield > loan cost. Do not prepay your loan. Invest all surplus into equities to capture the spread.` : `Increase EMI by ${formatCurrency(debtInsight.bumpAmount)}/mo to aggressively shave ${debtInsight.yearsSaved} yrs off tenure.`)}</p>
+                         <p className="text-xs font-medium text-slate-300 leading-relaxed text-justify">{debtInsight.text || (debtInsight.isArbitrageFavorable ? `Market yield > loan cost (assumed 9%). Do not prepay your loan. Invest all surplus into equities to capture the spread.` : `Assuming a 9% loan interest rate, increase EMI by ${formatCurrency(debtInsight.bumpAmount)}/mo to aggressively shave ${debtInsight.yearsSaved} yrs off tenure.`)}</p>
                        </div>
                        {!debtInsight.isArbitrageFavorable && (
                          <div className="bg-emerald-900/50 p-3 rounded-xl border border-emerald-700/50 shrink-0 text-center min-w-[120px]">
@@ -2357,7 +2490,7 @@ const lifeCoverAnalysis = useMemo(() => {
               </div>
               
               {/* BUG FIX: Re-separated Liquidity & Asset Matrix into beautifully packed cards to eliminate blank vertical space */}
-              <div className="col-span-12 xl:col-span-7 flex flex-col lg:flex-row gap-4 break-inside-avoid print-block h-full">
+              <div className="col-span-12 lg:col-span-7 flex flex-col xl:flex-row gap-4 break-inside-avoid print-block h-full">
                 
                 {/* Left Card: Liquidity Reality */}
                 <div className="bento-card flex-1 flex flex-col p-6 shadow-sm border-white/60 justify-start">
@@ -2440,7 +2573,7 @@ const lifeCoverAnalysis = useMemo(() => {
                   <div className="bento-card flex flex-col justify-center p-3 border-rose-200/50 bg-rose-50/60 shadow-sm group">
                     <p className="text-[10px] font-black uppercase text-rose-700 tracking-widest mb-1.5 flex items-center gap-1.5"><Icon name="flame" size={14}/> 2. The Inflation Thief</p>
                     <p className="text-xl lg:text-2xl font-black text-rose-800 tracking-tighter mb-1.5 number-pop">{formatCurrency(futureLife)}<span className="text-[10px] text-rose-600/70 font-bold ml-1">/mo</span></p>
-                    <div className="narration-box !bg-rose-100/50 !border-rose-200/50"><p className="text-[10px] text-rose-950 font-semibold leading-relaxed text-justify">The silent tax. At {effectiveInflation}% inflation, the exact same lifestyle will cost exponentially more when your active income stops.</p></div>
+                    <div className="narration-box !bg-rose-100/50 !border-rose-200/50"><p className="text-[10px] text-rose-950 font-semibold leading-relaxed text-justify">The silent tax. After exactly <strong>{retireYrs} years</strong> of retirement at age <strong>{profile.retireAge}</strong>, you will need exactly <strong>{formatCurrency(futureLife)}/mo</strong> to maintain today's lifestyle. 💡 <em>Use the Inflation Model toggle above to test this.</em></p></div>
                   </div>
                   <div className="bento-card flex flex-col justify-center p-3 border-teal-200/50 bg-teal-50/60 relative overflow-hidden shadow-sm group">
                     <div className="absolute right-[-20%] top-[-20%] w-24 h-24 bg-teal-500/20 rounded-full blur-2xl"></div>
@@ -2512,6 +2645,33 @@ const lifeCoverAnalysis = useMemo(() => {
                   </div>
                 </div>
 
+                {/* NEW: 3-Bucket Retirement Strategy Visualization */}
+                <div className="bento-card p-5 border-indigo-200 shadow-sm bg-indigo-50/40 relative overflow-hidden group mt-2">
+                   <h4 className="text-xs font-black text-indigo-900 uppercase tracking-widest flex items-center gap-2 mb-4 border-b border-indigo-100 pb-2"><Icon name="layers" size={16} className="text-indigo-600"/> The 3-Bucket Decumulation Strategy</h4>
+                   <p className="text-[10px] text-indigo-800 font-medium leading-relaxed text-justify mb-4">To ensure you never sell equities during a market crash, your <strong className="font-black">{formatCurrency(retireCorpus)}</strong> Freedom Corpus will be structured into three distinct risk-adjusted buckets upon retirement.</p>
+                   
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-white p-4 rounded-xl border border-blue-200 shadow-sm relative">
+                         <div className="absolute top-0 right-0 w-12 h-12 bg-blue-50 rounded-bl-full z-0"></div>
+                         <p className="text-[9px] font-black uppercase text-blue-600 tracking-widest mb-1 relative z-10">Bucket 1: Safety</p>
+                         <p className="text-lg font-black text-slate-900 relative z-10 mb-2">{formatCurrency((futureLife * 12) * 3)}</p>
+                         <p className="text-[10px] font-semibold text-slate-600 leading-relaxed"><strong className="text-slate-800">3 Years</strong> of living expenses held in liquid funds/FDs to weather immediate market storms.</p>
+                      </div>
+                      <div className="bg-white p-4 rounded-xl border border-amber-200 shadow-sm relative">
+                         <div className="absolute top-0 right-0 w-12 h-12 bg-amber-50 rounded-bl-full z-0"></div>
+                         <p className="text-[9px] font-black uppercase text-amber-600 tracking-widest mb-1 relative z-10">Bucket 2: Stability</p>
+                         <p className="text-lg font-black text-slate-900 relative z-10 mb-2">{formatCurrency((futureLife * 12) * 5)}</p>
+                         <p className="text-[10px] font-semibold text-slate-600 leading-relaxed"><strong className="text-slate-800">5 Years</strong> of living expenses held in high-quality debt/bonds yielding stable interest.</p>
+                      </div>
+                      <div className="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm relative">
+                         <div className="absolute top-0 right-0 w-12 h-12 bg-emerald-50 rounded-bl-full z-0"></div>
+                         <p className="text-[9px] font-black uppercase text-emerald-600 tracking-widest mb-1 relative z-10">Bucket 3: Growth</p>
+                         <p className="text-lg font-black text-slate-900 relative z-10 mb-2">{formatCurrency(Math.max(0, retireCorpus - ((futureLife * 12) * 8)))}</p>
+                         <p className="text-[10px] font-semibold text-slate-600 leading-relaxed"><strong className="text-slate-800">Remaining</strong> corpus heavily invested in equities to outpace inflation.</p>
+                      </div>
+                   </div>
+                </div>
+
                 {/* Advisor Talking Point - Phase 2 */}
                 <div className="mt-2 p-4 bg-amber-50/60 border border-amber-200/60 rounded-xl text-amber-900 text-xs leading-relaxed shadow-sm flex gap-3">
                   <div className="pt-0.5 shrink-0"><Icon name="mic" size={18} className="text-amber-600"/></div>
@@ -2577,7 +2737,17 @@ const lifeCoverAnalysis = useMemo(() => {
            </div>
            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Required Term Life Cover</p>
            <p className="text-5xl font-black text-indigo-700 tracking-tighter mb-5 inline-block px-4 py-2 bg-white border border-indigo-100 rounded-2xl shadow-sm">{formatCurrency(lifeCoverAnalysis.required)}</p>
-           <p className="text-[11px] font-medium text-slate-700 leading-relaxed text-justify bg-white/80 p-4 rounded-xl border border-slate-200 shadow-sm">If you do not wake up tomorrow, your family instantly loses this exact economic value. Term Life Insurance is mathematically required to ensure their lifestyle never downgrades. <span className="block mt-2 text-indigo-800 font-bold">Based on {lifeCoverAnalysis.multiplier}x current annual income.</span></p>
+           
+           <div className="mt-2 mb-4 bg-white/60 rounded-xl p-3 border border-indigo-100 shadow-sm">
+             <p className="text-[9px] font-black text-indigo-800 uppercase tracking-widest mb-2 border-b border-indigo-100 pb-1">Estate Solvency Breakdown</p>
+             <div className="grid grid-cols-3 gap-2 text-center">
+                <div><p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Goal Liability</p><p className="text-xs font-black text-rose-700">{formatCurrency(lifeCoverAnalysis.liability)}</p></div>
+                <div><p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Income Repl.</p><p className="text-xs font-black text-indigo-700">{formatCurrency(lifeCoverAnalysis.incomeRepl)}</p></div>
+                <div><p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Current Assets</p><p className="text-xs font-black text-emerald-700">-{formatCurrency(totalLiquidAssets)}</p></div>
+             </div>
+           </div>
+           
+           <p className="text-[11px] font-medium text-slate-700 leading-relaxed text-justify bg-white/80 p-4 rounded-xl border border-slate-200 shadow-sm">If you do not wake up tomorrow, your family instantly loses this exact economic value. Term Life Insurance is mathematically required to ensure their lifestyle never downgrades.</p>
          </div>
          <div className="mt-8 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <div className="flex justify-between text-xs font-black text-slate-700 uppercase tracking-widest mb-3">
@@ -2635,15 +2805,15 @@ const lifeCoverAnalysis = useMemo(() => {
 
               {/* Right Column: Execution Mapping */}
               <div className="lg:col-span-2 flex flex-col gap-4 break-inside-avoid print-block">
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bento-card p-4 shadow-sm bg-white border-slate-200 shrink-0">
-                  <div className="flex items-center gap-3"><Icon name="git-merge" size={18} className="text-indigo-600"/><p className="text-xs font-black text-slate-800 uppercase tracking-widest">Map Wealth to Goals?</p></div>
-                  <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <div className="flex bg-slate-100 p-1.5 rounded-lg flex-1 sm:flex-none border border-slate-200 shadow-inner">
-                      <button onClick={() => setIsWealthAllocated(false)} className={`flex-1 px-4 py-2 rounded-md text-xs font-black uppercase transition-all ${!isWealthAllocated ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:bg-white'}`}>Legacy Pot</button>
-                      <button onClick={() => setIsWealthAllocated(true)} className={`flex-1 px-4 py-2 rounded-md text-xs font-black uppercase transition-all ${isWealthAllocated ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-white'}`}>Direct Map</button>
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bento-card p-4 shadow-sm bg-white border-slate-200 shrink-0 ring-1 ring-indigo-500/20">
+                  <div className="flex items-center gap-3"><div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg shrink-0"><Icon name="git-merge" size={20}/></div><div><p className="text-sm font-black text-slate-900 uppercase tracking-widest">🎯 Allocate Existing Wealth to Goals?</p><p className="text-[9px] font-semibold text-slate-500 uppercase tracking-widest mt-0.5">Highly recommended to lower your required SIPs.</p></div></div>
+                  <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                    <div className="flex bg-slate-100 p-1.5 rounded-xl flex-1 sm:flex-none border border-slate-200 shadow-inner">
+                      <button onClick={() => setIsWealthAllocated(false)} className={`flex-1 px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${!isWealthAllocated ? 'bg-slate-900 text-white shadow-md border border-slate-700' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}>🏺 Keep as Legacy Pot</button>
+                      <button onClick={() => setIsWealthAllocated(true)} className={`flex-1 px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${isWealthAllocated ? 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)] border border-indigo-500' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}>⚡ Direct Map</button>
                     </div>
                     {isWealthAllocated && (
-                      <button onClick={handleMagicMap} className="px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-black uppercase shadow-sm hover:bg-indigo-100 transition-all flex items-center gap-2 shrink-0"><Icon name="wand-2" size={14}/> Auto Map</button>
+                      <button onClick={handleMagicMap} className="px-5 py-2.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm hover:bg-indigo-100 transition-all flex items-center gap-2 shrink-0"><Icon name="wand-2" size={16}/> Auto Map</button>
                     )}
                   </div>
                 </div>
@@ -2658,7 +2828,7 @@ const lifeCoverAnalysis = useMemo(() => {
                         <span className="text-xs font-black text-slate-600 w-20 text-right">{Math.round(((totalLiquidAssets - unallocatedData.remaining) / (totalLiquidAssets || 1)) * 100)}% Mapped</span>
                       </div>
                       <div className="w-full flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-4">
-                        {liquidAssetsList.length === 0 && <p className="text-xs font-bold text-slate-500 text-center py-6 bg-white rounded-xl border border-slate-200">No assets available to map.</p>}
+                        {mappableSources.length === 0 && <p className="text-xs font-bold text-slate-500 text-center py-6 bg-white rounded-xl border border-slate-200">No assets available to map.</p>}
                         
                         {/* FIX: Yield Drag Advisory */}
                         {liquidAssetsList.some(a => (a.yield || 8) < 10 && Object.values(allocMap[a.id] || {}).some(v => Number(v) > 0)) && (
@@ -2674,17 +2844,18 @@ const lifeCoverAnalysis = useMemo(() => {
                             </div>
                         )}
 
-                        {liquidAssetsList.map((asset, i) => {
+                        {mappableSources.map((asset, i) => {
                           const assetAllocMap = allocMap[asset.id] || {}; const totalAllocatedPct = Object.values(assetAllocMap).reduce((sum, p) => sum + Number(p), 0);
                           const availableGoals = plan.filter(g => g.id !== 'retire').sort((a,b) => a.horizon - b.horizon); const retireG = plan.find(g => g.id === 'retire'); if(retireG) availableGoals.push(retireG);
                           return (
-                            <div key={asset.id} className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
-                              <div className="flex justify-between items-center mb-3"><div><h5 className="text-sm font-black text-slate-800 uppercase tracking-widest">{asset.label} - {formatCurrency(asset.val)}</h5></div><span className={`text-xs font-black uppercase px-2.5 py-1 rounded-md ${totalAllocatedPct > 100 ? 'bg-rose-100 text-rose-800' : totalAllocatedPct === 100 ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-600'}`}>{Math.round(totalAllocatedPct)}%</span></div>
+                            <div key={asset.id} className={`p-4 bg-white border rounded-xl shadow-sm ${asset.isSip ? 'border-teal-300 ring-1 ring-teal-500/10' : 'border-slate-200'}`}>
+                              <div className="flex justify-between items-center mb-3"><div><h5 className={`text-sm font-black uppercase tracking-widest flex items-center gap-2 ${asset.isSip ? 'text-teal-800' : 'text-slate-800'}`}>{asset.isSip ? <Icon name="refresh-cw" size={14}/> : null} {asset.label} - {formatCurrency(asset.val)}{asset.isSip ? '/mo' : ''}</h5></div><span className={`text-xs font-black uppercase px-2.5 py-1 rounded-md ${totalAllocatedPct > 100 ? 'bg-rose-100 text-rose-800' : totalAllocatedPct === 100 ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-600'}`}>{Math.round(totalAllocatedPct)}%</span></div>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{availableGoals.map(g => { 
                                 const pct = assetAllocMap[g.id] || ''; 
                                 const pv = asset.val * (Number(pct) / 100);
                                 const assetRet = (getScenarioReturn(asset.yield || 8, 1) || (asset.yield || 8)) / 100;
-                                const fv = pv * Math.pow(1 + assetRet, g.horizon);
+                                const r = assetRet / 12; const n = g.horizon * 12;
+                                const fv = asset.isSip ? (r === 0 ? pv * n : pv * ((Math.pow(1 + r, n) - 1) / r) * (1+r)) : pv * Math.pow(1 + assetRet, g.horizon);
                                 return ( 
                                   <div key={g.id} className={`flex flex-col p-2.5 rounded-lg border transition-colors ${pct > 0 ? 'bg-indigo-50 border-indigo-200 shadow-sm' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'}`}>
                                     <div className="flex justify-between items-center mb-1">
@@ -2696,8 +2867,8 @@ const lifeCoverAnalysis = useMemo(() => {
                                     </div>
                                     {pct > 0 && (
                                       <div className="flex justify-between items-center text-[9px] bg-white/80 p-1.5 rounded border border-indigo-100 mt-1">
-                                        <span className="font-semibold text-slate-500">PV: <strong className="text-slate-800">{formatCurrency(pv)}</strong></span>
-                                        <span className="font-semibold text-emerald-700 flex items-center gap-1">FV: <strong className="font-black text-emerald-800">{formatCurrency(fv)}</strong></span>
+                                        <span className="font-semibold text-slate-500">{asset.isSip ? 'Flow' : 'PV'}: <strong className="text-slate-800">{formatCurrency(pv)}{asset.isSip ? '/mo' : ''}</strong></span>
+                                        <span className="font-semibold text-emerald-700 flex items-center gap-1">FV: <strong className="font-black text-emerald-800">~{formatCurrency(fv)}</strong></span>
                                       </div>
                                     )}
                                   </div>
@@ -2721,36 +2892,76 @@ const lifeCoverAnalysis = useMemo(() => {
             </div>
           </PhaseWrapper>
           
-          
-
-          <PhaseWrapper num={6} title="Action Plan" layout={blueprintLayout} gridClasses={blueprintLayout === 'compact' ? 'col-span-12 md:col-span-6' : blueprintLayout === 'bento' ? 'col-span-12 xl:col-span-6' : 'col-span-12'} delayClass="stagger-6" themeClass="bg-amber-50/40 border-amber-200/50 p-4">
+          <PhaseWrapper num={5} title="Action Plan" layout={blueprintLayout} gridClasses={blueprintLayout === 'compact' ? 'col-span-12 md:col-span-6' : blueprintLayout === 'bento' ? 'col-span-12 xl:col-span-6' : 'col-span-12'} delayClass="stagger-5" themeClass="bg-amber-50/40 border-amber-200/50 p-4">
             <div className="flex flex-col gap-3 break-inside-avoid print-block">
               {/* Horizontal Process Flow replacing the massive text blocks */}
               <div className="flex flex-col md:flex-row items-stretch justify-between gap-3 w-full">
-                <div className="bento-card bg-white p-3 flex-1 flex flex-col gap-1 items-start border-slate-200 shadow-sm relative group hover:border-amber-300">
-                  <div className="w-6 h-6 rounded-full bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-black text-[10px]">1</div>
-                  <p className="font-black text-slate-900 text-[9px] uppercase tracking-widest mt-1">Protection Core</p>
-                  <p className="text-[9px] text-slate-600 font-medium">Secure {formatCurrency(healthAnalysis.shortfall || 1500000)} health cover.</p>
+                <div className="bento-card bg-white p-4 flex-1 flex flex-col gap-2 items-start border-slate-200 shadow-sm relative group hover:border-amber-300 transition-all">
+                  <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-black text-xs shadow-sm">1</div>
+                  <p className="font-black text-slate-900 text-xs uppercase tracking-widest mt-1">Protection Core</p>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">Secure <strong className="text-slate-900">{formatCurrency(healthAnalysis.shortfall || 1500000)}</strong> health cover to defend capital.</p>
                 </div>
                 
-                <div className="hidden md:flex items-center justify-center text-amber-300"><Icon name="arrow-right" size={14} /></div>
+                <div className="hidden md:flex items-center justify-center text-amber-300"><Icon name="arrow-right" size={18} /></div>
                 
-                <div className="bento-card bg-white p-3 flex-1 flex flex-col gap-1 items-start border-slate-200 shadow-sm relative group hover:border-amber-300">
-                  <div className="w-6 h-6 rounded-full bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-black text-[10px]">2</div>
-                  <p className="font-black text-slate-900 text-[9px] uppercase tracking-widest mt-1">Deploy Cash</p>
-                  <p className="text-[9px] text-slate-600 font-medium">Shift excess cash above {formatCurrency(monthlyBurn * 6)}.</p>
+                <div className="bento-card bg-white p-4 flex-1 flex flex-col gap-2 items-start border-slate-200 shadow-sm relative group hover:border-amber-300 transition-all">
+                  <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-black text-xs shadow-sm">2</div>
+                  {debtInsight && !debtInsight.isArbitrageFavorable ? (
+                    <React.Fragment>
+                      <p className="font-black text-rose-700 text-xs uppercase tracking-widest mt-1">Kill Toxic Debt</p>
+                      <p className="text-xs text-slate-600 font-medium leading-relaxed">Increase EMI by <strong className="text-rose-700">{formatCurrency(debtInsight.bumpAmount)}/mo</strong> to mathematically eliminate your loan {debtInsight.yearsSaved} yrs early.</p>
+                    </React.Fragment>
+                  ) : (
+                    <React.Fragment>
+                      <p className="font-black text-slate-900 text-xs uppercase tracking-widest mt-1">Liquid Reserve</p>
+                      <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                        {totalLiquidAssets < monthlyBurn * 6 
+                          ? <React.Fragment>Pause aggressive investments. Build your cash buffer to <strong className="text-slate-900">{formatCurrency(monthlyBurn * 6)}</strong> immediately.</React.Fragment>
+                          : <React.Fragment>Shift excess cash above <strong className="text-slate-900">{formatCurrency(monthlyBurn * 6)}</strong> into productive compounding assets.</React.Fragment>}
+                      </p>
+                    </React.Fragment>
+                  )}
                 </div>
 
-                <div className="hidden md:flex items-center justify-center text-amber-300"><Icon name="arrow-right" size={14} /></div>
+                <div className="hidden md:flex items-center justify-center text-amber-300"><Icon name="arrow-right" size={18} /></div>
 
-                <div className="bento-card bg-white p-3 flex-1 flex flex-col gap-1 items-start border-slate-200 shadow-sm relative group hover:border-amber-300">
-                  <div className="w-6 h-6 rounded-full bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-black text-[10px]">3</div>
-                  <p className="font-black text-slate-900 text-[9px] uppercase tracking-widest mt-1">Start Engine</p>
-                  <p className="text-[9px] text-slate-600 font-medium">Automate SIPs: {formatCurrency(totalSIPRequired)}/mo.</p>
+                <div className="bento-card bg-white p-4 flex-1 flex flex-col gap-2 items-start border-slate-200 shadow-sm relative group hover:border-amber-300 transition-all">
+                  <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-black text-xs shadow-sm">3</div>
+                  <p className="font-black text-slate-900 text-xs uppercase tracking-widest mt-1">Start The Engine</p>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">Automate goal SIPs totaling <strong className="text-teal-700">{formatCurrency(totalSIPRequired)}/mo</strong> immediately{safeNumber(profile.sipStepUp) > 0 ? <React.Fragment>, stepping up by <strong className="text-teal-700">{profile.sipStepUp}%</strong> annually.</React.Fragment> : '.'}</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between bg-rose-50 border border-rose-200 p-2.5 rounded-lg shadow-sm mt-1">
-                 <p className="text-[9px] font-semibold text-rose-900 leading-snug flex items-center gap-2"><Icon name="clock" size={12} className="text-rose-600"/><strong className="uppercase tracking-widest">Cost of Delay:</strong> Waiting 12 months increases required SIP to <strong className="font-black">{formatCurrency(totalSIPRequiredDelayed)}/mo</strong>.</p>
+              
+              <div className="flex flex-col md:flex-row items-stretch justify-between gap-3 w-full mt-1">
+                <div className="bento-card bg-white p-4 flex-1 flex flex-col gap-2 items-start border-slate-200 shadow-sm relative group hover:border-amber-300 transition-all">
+                  <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-black text-xs shadow-sm">4</div>
+                  <p className="font-black text-slate-900 text-xs uppercase tracking-widest mt-1">Tax Optimization</p>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                    {(totals.income * 12) >= 10000000 
+                      ? "Explore HUF structures, Family Trusts, or Corporate Treasury routing to optimize and shield high-bracket income." 
+                      : "Maximize 80C & NPS to minimize current income tax drag. Route refunds to equities."}
+                  </p>
+                </div>
+                
+                <div className="hidden md:flex items-center justify-center text-amber-300"><Icon name="arrow-right" size={18} /></div>
+                
+                <div className="bento-card bg-white p-4 flex-1 flex flex-col gap-2 items-start border-slate-200 shadow-sm relative group hover:border-amber-300 transition-all">
+                  <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center font-black text-xs shadow-sm">5</div>
+                  <p className="font-black text-slate-900 text-xs uppercase tracking-widest mt-1">Estate & Legacy</p>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">Draft a registered Will and verify nominees for all <strong className="text-purple-700">{formatCurrency(totalAssets)}</strong> of current assets.</p>
+                </div>
+
+                <div className="hidden md:flex items-center justify-center text-amber-300"><Icon name="arrow-right" size={18} /></div>
+
+                <div className="bento-card bg-white p-4 flex-1 flex flex-col gap-2 items-start border-slate-200 shadow-sm relative group hover:border-amber-300 transition-all">
+                  <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-black text-xs shadow-sm">6</div>
+                  <p className="font-black text-slate-900 text-xs uppercase tracking-widest mt-1">Rebalance Mandate</p>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed"><strong className="text-blue-700">{rebalanceMandate?.action || "Hold Steady"}:</strong> {rebalanceMandate?.text || "Portfolio is aligned."}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between bg-rose-50 border border-rose-200 p-4 rounded-xl shadow-sm mt-2">
+                 <p className="text-xs font-semibold text-rose-900 leading-snug flex items-center gap-3"><Icon name="clock" size={18} className="text-rose-600"/><strong className="uppercase tracking-widest text-rose-950">Cost of Delay:</strong> Waiting 12 months increases required SIP to <strong className="font-black text-rose-700 bg-white px-2 py-0.5 rounded shadow-sm border border-rose-100">{formatCurrency(totalSIPRequiredDelayed)}/mo</strong> permanently.</p>
               </div>
               
               {debtInsight && (
@@ -2762,7 +2973,7 @@ const lifeCoverAnalysis = useMemo(() => {
                   <div className="p-3 flex items-center gap-4">
                      <div className="flex-1">
                        <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-1">{debtInsight.isArbitrageFavorable ? 'Debt Arbitrage (Hold)' : 'Debt Snowball Activation'}</p>
-                       <p className="text-[10px] text-slate-600 font-medium">{debtInsight.text || (debtInsight.isArbitrageFavorable ? `Market yield > loan cost. Do not prepay your loan. Invest all surplus into equities to capture the spread.` : `Increase EMI by ${formatCurrency(debtInsight.bumpAmount)}/mo to aggressively shave ${debtInsight.yearsSaved} yrs off tenure.`)}</p>
+                       <p className="text-[10px] text-slate-600 font-medium">{debtInsight.text || (debtInsight.isArbitrageFavorable ? `Market yield > loan cost (assumed 9%). Do not prepay your loan. Invest all surplus into equities to capture the spread.` : `Assuming a 9% loan interest rate, increase EMI by ${formatCurrency(debtInsight.bumpAmount)}/mo to aggressively shave ${debtInsight.yearsSaved} yrs off tenure.`)}</p>
                      </div>
                   </div>
                 </div>
@@ -2770,7 +2981,7 @@ const lifeCoverAnalysis = useMemo(() => {
             </div>
           </PhaseWrapper>
           
-          <PhaseWrapper num={5} title="Advanced Wealth Testing" layout={blueprintLayout} gridClasses="col-span-12" delayClass="stagger-5" themeClass="bg-white/70 border-white/60" titleColor="text-slate-900">
+          <PhaseWrapper num={6} title="Advanced Wealth Testing" layout={blueprintLayout} gridClasses="col-span-12" delayClass="stagger-6" themeClass="bg-white/70 border-white/60" titleColor="text-slate-900">
             {/* NEW: VISUAL COMPOUNDING CHART INJECTION */}
             <div className="mb-5 break-inside-avoid print-block bg-white p-4 sm:p-5 rounded-[20px] border border-slate-200 shadow-sm relative z-10">
               <div className="flex justify-between items-center mb-4 px-1">
@@ -2793,8 +3004,8 @@ const lifeCoverAnalysis = useMemo(() => {
               <ProjectionChart data={masterSimulationData} profile={profile} />
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 relative z-10">
-              <div className="flex flex-col gap-5 border-b xl:border-b-0 xl:border-r border-slate-200/80 pb-5 xl:pb-0 xl:pr-5 break-inside-avoid print-block">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 relative z-10">
+              <div className="flex flex-col gap-5 border-b lg:border-b-0 lg:border-r border-slate-200/80 pb-5 lg:pb-0 lg:pr-5 break-inside-avoid print-block">
                 <div>
                   <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-1.5 mb-3"><Icon name="cpu" size={16} className="text-indigo-600"/> Monte Carlo Survival Test</h4>
                   <p className="text-sm font-semibold leading-relaxed text-justify mb-2 text-slate-700">Straight-line, linear returns are a myth. <span className="text-rose-600 font-black text-base">Markets are chaotic.</span> We subjected your proposed portfolio to <span className="text-indigo-600 font-black text-base">200 randomized Monte Carlo simulations</span> to rigorously test its structural integrity against severe volatility crashes and sequence-of-returns risk.</p>
@@ -2852,16 +3063,46 @@ const lifeCoverAnalysis = useMemo(() => {
             </div>
           </PhaseWrapper>
 
-          <PhaseWrapper num={6} title="Strategy Dashboard" layout={blueprintLayout} gridClasses={blueprintLayout === 'compact' ? 'col-span-12 md:col-span-6' : blueprintLayout === 'bento' ? 'col-span-12 xl:col-span-6' : 'col-span-12'} delayClass="stagger-7" themeClass="bg-cyan-50/50 border-cyan-200/50">
+          <PhaseWrapper num={7} title="Strategy Dashboard" layout={blueprintLayout} gridClasses={blueprintLayout === 'compact' ? 'col-span-12 md:col-span-6' : blueprintLayout === 'bento' ? 'col-span-12 xl:col-span-6' : 'col-span-12'} delayClass="stagger-7" themeClass="bg-cyan-50/50 border-cyan-200/50">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 mb-5 break-inside-avoid print-block">
                <p className="text-[11px] font-medium text-slate-600 leading-relaxed text-justify w-full">Your tactical command center. Tap any goal card below to override return assumptions or dynamically inject lumpsum capital.</p>
                <div className="bg-white/80 backdrop-blur-md border border-white/80 rounded-xl px-5 py-3 shadow-sm flex items-center gap-5 shrink-0"><div className="text-center pr-5 border-r border-slate-300/50"><p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Total Goals</p><p className="text-2xl font-black text-slate-900 leading-none">{plan.length}</p></div><div><p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Total SIP Required</p><p className="text-2xl font-black text-teal-700 leading-none tracking-tight">{formatCurrency(totalSIPRequired)}<span className="text-[9px] text-slate-400 font-bold ml-1 uppercase">/mo</span></p></div></div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 relative z-10 mb-8 break-inside-avoid print-block">
+            {/* NEW: Stark Reality Check Summary */}
+            <div className="mb-6 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden break-inside-avoid print-block">
+               <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
+                 <Icon name="eye" size={16} className="text-slate-600" />
+                 <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">The Inflation Reality Check</h4>
+               </div>
+               <div className="overflow-x-auto">
+                 <table className="w-full text-left text-xs tabular-nums">
+                   <thead className="bg-slate-50 text-[9px] font-black uppercase text-slate-500 tracking-widest">
+                     <tr>
+                       <th className="py-3 px-5 border-b border-slate-100">Financial Goal</th>
+                       <th className="py-3 px-5 border-b border-slate-100 text-right">Horizon</th>
+                       <th className="py-3 px-5 border-b border-slate-100 text-right">Cost Today</th>
+                       <th className="py-3 px-5 border-b border-slate-100 text-right text-rose-700">Inflated Target Cost</th>
+                     </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-50">
+                     {plan.map((g) => (
+                       <tr key={`summary-${g.id}`} className="hover:bg-slate-50/50 transition-colors">
+                         <td className="py-3 px-5 font-bold text-slate-800 flex items-center gap-2"><Icon name={g.icon || "target"} size={14} className="text-slate-400"/> {g.name}</td>
+                         <td className="py-3 px-5 text-right font-medium text-slate-600">{g.horizon} Yrs</td>
+                         <td className="py-3 px-5 text-right font-medium text-slate-600">{formatCurrency(g.baseCost || g.target / Math.pow(1+(g.inflation||6)/100, g.horizon))}</td>
+                         <td className="py-3 px-5 text-right font-black text-rose-700 bg-rose-50/30">{formatCurrency(g.target)}</td>
+                       </tr>
+                     ))}
+                   </tbody>
+                 </table>
+               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10 mb-5 break-inside-avoid print-block">
               {plan.filter(g => g.id === 'retire').map(g => (
                 <div key={g.id} className={`group relative border rounded-2xl overflow-hidden transition-all duration-500 break-inside-avoid print-block md:col-span-2 lg:col-span-3 ${expandedGoal === g.id ? 'bg-white shadow-xl border-cyan-400 ring-2 ring-cyan-500/10' : 'bg-gradient-to-r from-slate-900 to-slate-800 border-slate-700 hover:shadow-lg'}`}>
-                  <div onClick={() => setExpandedGoal(expandedGoal === g.id ? null : g.id)} className="p-5 cursor-pointer flex justify-between items-center gap-4 transition-colors relative z-10"><div className="absolute right-0 top-0 w-40 h-40 bg-teal-500/10 blur-3xl rounded-full pointer-events-none"></div><div className="flex items-center gap-4 min-w-0 pr-4"><div className={`w-12 h-12 rounded-xl shrink-0 flex items-center justify-center border shadow-sm ${expandedGoal === g.id ? 'bg-cyan-50 border-cyan-200 text-cyan-700' : 'bg-slate-800/80 border-slate-600/80 text-teal-400'}`}><Icon name={g.icon || "target"} size={20}/></div><div className="min-w-0"><h4 className={`text-sm font-black uppercase tracking-widest truncate ${expandedGoal === g.id ? 'text-slate-900' : 'text-white'}`} title={g.name}>{g.name}</h4><p className={`text-[10px] font-bold mt-1 uppercase tracking-wider truncate ${expandedGoal === g.id ? 'text-slate-500' : 'text-slate-400'}`}>Anchor Goal • Tgt: <span className={expandedGoal === g.id ? 'text-slate-800' : 'text-white'}>{formatCurrency(g.target)}</span>{safeNumber(g.allocAmt) > 0 && <span className="text-teal-400 ml-2 font-black bg-teal-900/50 px-1.5 py-0.5 rounded border border-teal-800/50">Mapped: {formatCurrency(g.allocAmt)}</span>}</p></div></div><div className="text-right flex items-center gap-5 shrink-0"><div className="text-right"><p className={`text-[11px] font-black uppercase tracking-widest mb-1 ${expandedGoal === g.id ? 'text-slate-500' : 'text-slate-400'}`}>Req. SIP</p><p className={`text-3xl font-black leading-none tracking-tight ${expandedGoal === g.id ? 'text-teal-700' : 'text-teal-400'}`}>{formatCurrency(g.sip)}</p></div><div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${expandedGoal === g.id ? 'bg-slate-100 text-slate-800' : 'bg-slate-700 text-slate-300'}`}><Icon name={expandedGoal === g.id ? "chevron-up" : "chevron-down"} size={16} /></div></div></div>
+                  <div onClick={() => setExpandedGoal(expandedGoal === g.id ? null : g.id)} className="px-4 py-3 cursor-pointer flex justify-between items-center gap-4 transition-colors relative z-10"><div className="absolute right-0 top-0 w-40 h-40 bg-teal-500/10 blur-3xl rounded-full pointer-events-none"></div><div className="flex items-center gap-3 min-w-0 pr-4"><div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center border shadow-sm ${expandedGoal === g.id ? 'bg-cyan-50 border-cyan-200 text-cyan-700' : 'bg-slate-800/80 border-slate-600/80 text-teal-400'}`}><Icon name={g.icon || "target"} size={18}/></div><div className="min-w-0"><h4 className={`text-sm font-black uppercase tracking-widest truncate ${expandedGoal === g.id ? 'text-slate-900' : 'text-white'}`} title={g.name}>{g.name}</h4><p className={`text-[10px] font-bold mt-0.5 uppercase tracking-wider truncate ${expandedGoal === g.id ? 'text-slate-500' : 'text-slate-400'}`}>Anchor Goal • Tgt: <span className={expandedGoal === g.id ? 'text-slate-800' : 'text-white'}>{formatCurrency(g.target)}</span>{safeNumber(g.allocAmt) > 0 && <span className="text-teal-400 ml-2 font-black bg-teal-900/50 px-1.5 py-0.5 rounded border border-teal-800/50">Mapped: {formatCurrency(g.allocAmt)}</span>}{safeNumber(g.mappedSip) > 0 && <span className="text-emerald-400 ml-2 font-black bg-emerald-900/50 px-1.5 py-0.5 rounded border border-emerald-800/50">SIP Mapped: {formatCurrency(g.mappedSip)}/mo</span>}</p></div></div><div className="text-right flex items-center gap-4 shrink-0"><div className="text-right"><p className={`text-[11px] font-black uppercase tracking-widest mb-0.5 ${expandedGoal === g.id ? 'text-slate-500' : 'text-slate-400'}`}>Req. SIP</p><p className={`text-xl font-black leading-none tracking-tight ${expandedGoal === g.id ? 'text-teal-700' : 'text-teal-400'}`}>{formatCurrency(g.sip)}</p></div><div className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${expandedGoal === g.id ? 'bg-slate-100 text-slate-800' : 'bg-slate-700 text-slate-300'}`}><Icon name={expandedGoal === g.id ? "chevron-up" : "chevron-down"} size={14} /></div></div></div>
                   {expandedGoal === g.id && (
                     <div className="p-5 pt-0 border-t border-slate-200/50 animate-in fade-in slide-in-from-top-4 bg-slate-50/90 backdrop-blur-md">
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-4">
@@ -2903,7 +3144,7 @@ const lifeCoverAnalysis = useMemo(() => {
               ))}
               {plan.filter(g => g.id !== 'retire').map(g => (
                 <div key={g.id} className={`group relative border rounded-2xl overflow-hidden transition-all duration-500 break-inside-avoid print-block ${expandedGoal === g.id ? 'bg-white shadow-xl border-cyan-400 ring-2 ring-cyan-500/10 md:col-span-2 lg:col-span-3 transform scale-[1.01]' : 'bg-white/80 backdrop-blur-sm border-white/80 hover:bg-white hover:shadow-lg hover:-translate-y-1'} ${g.isPaused ? 'opacity-50 grayscale' : ''}`}>
-                  <div onClick={() => setExpandedGoal(expandedGoal === g.id ? null : g.id)} className="p-4 cursor-pointer flex justify-between items-center gap-3 transition-colors relative z-10"><div className="flex items-center gap-3 min-w-0 pr-3"><div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center border shadow-sm ${expandedGoal === g.id ? 'bg-cyan-50 border-cyan-200 text-cyan-700' : 'bg-slate-100/80 border-slate-200 text-slate-600'}`}><Icon name={g.icon || "target"} size={16}/></div><div className="min-w-0"><div className="flex items-center gap-2"><h4 className="text-xs font-black uppercase tracking-widest text-slate-900 truncate" title={g.name}>{g.name} {g.isPaused && "(Paused)"}</h4>{g.id !== 'retire' && (<div className="hidden group-hover:flex items-center gap-1 bg-white border border-slate-200 rounded-md px-1.5 py-0.5 shadow-sm no-print" onClick={e => e.stopPropagation()}><button onClick={(e) => toggleGoalPause(e, g.id)} className={`p-1.5 transition-colors ${g.isPaused ? 'text-amber-600' : 'text-slate-400 hover:text-amber-600'}`} title={g.isPaused ? "Resume Goal" : "Pause Goal"}><Icon name={g.isPaused ? "play" : "pause"} size={10}/></button><div className="w-px h-3 bg-slate-200"></div><button onClick={(e) => handleStartEdit(e, g)} className="p-1.5 text-slate-400 hover:text-teal-700 transition-colors"><Icon name="edit-2" size={10}/></button><div className="w-px h-3 bg-slate-200"></div><button onClick={(e) => handleQuickDelete(e, g.id)} className="p-1.5 text-slate-400 hover:text-rose-700 transition-colors"><Icon name="trash-2" size={10}/></button></div>)}</div>{inlineEdit.id === g.id ? (<div className="flex items-center gap-2 mt-1.5 bg-cyan-50 p-1 rounded-md border border-cyan-200" onClick={e => e.stopPropagation()}><input type="number" value={inlineEdit.cost} onChange={e => setInlineEdit({...inlineEdit, cost: e.target.value})} className="w-20 bg-white border border-cyan-200 rounded px-2 py-1 text-[10px] font-bold outline-none focus:border-cyan-500 shadow-inner" autoFocus onKeyDown={(e) => { if(e.key === 'Enter') handleSaveEdit(e); }} /><button onClick={handleSaveEdit} className="p-1 bg-cyan-600 text-white rounded hover:bg-cyan-700"><Icon name="check" size={12}/></button></div>) : (<p className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-wider truncate">{g.horizon} Yrs • Tgt: <span className="text-slate-800">{formatCurrency(g.target)}</span>{safeNumber(g.allocAmt) > 0 && <span className="text-indigo-600 ml-2 font-black bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">Mapped: {formatCurrency(g.allocAmt)}</span>}</p>)}</div></div><div className="text-right flex items-center gap-3 shrink-0"><div className="text-right"><p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Req. SIP</p><p className="text-xl font-black text-teal-700 leading-none tracking-tight">{formatCurrency(g.sip)}</p></div><div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${expandedGoal === g.id ? 'bg-slate-100 text-slate-800' : 'bg-transparent text-slate-400'}`}><Icon name={expandedGoal === g.id ? "chevron-up" : "chevron-down"} size={14} /></div></div></div>
+                  <div onClick={() => setExpandedGoal(expandedGoal === g.id ? null : g.id)} className="px-3 py-2.5 cursor-pointer flex justify-between items-center gap-3 transition-colors relative z-10"><div className="flex items-center gap-3 min-w-0 pr-3"><div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center border shadow-sm ${expandedGoal === g.id ? 'bg-cyan-50 border-cyan-200 text-cyan-700' : 'bg-slate-100/80 border-slate-200 text-slate-600'}`}><Icon name={g.icon || "target"} size={14}/></div><div className="min-w-0"><div className="flex items-center gap-2"><h4 className="text-[11px] font-black uppercase tracking-widest text-slate-900 truncate" title={g.name}>{g.name} {g.isPaused && "(Paused)"}</h4>{g.id !== 'retire' && (<div className="hidden group-hover:flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1 shadow-md no-print" onClick={e => e.stopPropagation()}><button onClick={(e) => toggleGoalPause(e, g.id)} className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded transition-colors ${g.isPaused ? 'text-amber-600 bg-amber-50' : 'text-slate-400 hover:text-amber-600 hover:bg-slate-50'}`} title={g.isPaused ? "Resume Goal" : "Pause Goal"}><Icon name={g.isPaused ? "play" : "pause"} size={14}/></button><div className="w-px h-6 bg-slate-200"></div><button onClick={(e) => handleStartEdit(e, g)} className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded text-slate-400 hover:text-teal-700 hover:bg-slate-50 transition-colors"><Icon name="edit-2" size={14}/></button><div className="w-px h-6 bg-slate-200"></div><button onClick={(e) => handleQuickDelete(e, g.id)} className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded text-slate-400 hover:text-rose-700 hover:bg-rose-50 transition-colors"><Icon name="trash-2" size={14}/></button></div>)}</div>{inlineEdit.id === g.id ? (<div className="flex items-center gap-2 mt-1 bg-cyan-50 p-1 rounded-md border border-cyan-200" onClick={e => e.stopPropagation()}><input type="number" value={inlineEdit.cost} onChange={e => setInlineEdit({...inlineEdit, cost: e.target.value})} className="w-20 bg-white border border-cyan-200 rounded px-2 py-1 text-[9px] font-bold outline-none focus:border-cyan-500 shadow-inner" autoFocus onKeyDown={(e) => { if(e.key === 'Enter') handleSaveEdit(e); }} /><button onClick={handleSaveEdit} className="p-1 bg-cyan-600 text-white rounded hover:bg-cyan-700"><Icon name="check" size={10}/></button></div>) : (<p className="text-[9px] font-bold text-slate-500 mt-0.5 uppercase tracking-wider truncate">{g.horizon} Yrs • Tgt: <span className="text-slate-800">{formatCurrency(g.target)}</span>{safeNumber(g.allocAmt) > 0 && <span className="text-indigo-600 ml-2 font-black bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">Mapped: {formatCurrency(g.allocAmt)}</span>}{safeNumber(g.mappedSip) > 0 && <span className="text-teal-600 ml-2 font-black bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">SIP Mapped: {formatCurrency(g.mappedSip)}/mo</span>}</p>)}</div></div><div className="text-right flex items-center gap-3 shrink-0"><div className="text-right"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Req. SIP</p><p className="text-lg font-black text-teal-700 leading-none tracking-tight">{formatCurrency(g.sip)}</p></div><div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${expandedGoal === g.id ? 'bg-slate-100 text-slate-800' : 'bg-transparent text-slate-400'}`}><Icon name={expandedGoal === g.id ? "chevron-up" : "chevron-down"} size={14} /></div></div></div>
                   {expandedGoal === g.id && (
                     <div className="p-4 pt-0 border-t border-slate-100 animate-in fade-in slide-in-from-top-4 bg-slate-50/80 backdrop-blur-sm">
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-3">
@@ -2946,19 +3187,19 @@ const lifeCoverAnalysis = useMemo(() => {
             </div>
             
             {/* --- MASSIVE CALL TO ACTION FOR MASTER PROJECTION --- */}
-            <div className="pt-8 border-t border-cyan-300/50 no-print break-inside-avoid print-block">
-              <div className="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-2xl p-5 md:p-6 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-5 border border-slate-700 relative overflow-hidden group hover:shadow-[0_15px_40px_rgba(79,70,229,0.3)] transition-all">
+            <div className="pt-4 border-t border-cyan-300/50 no-print break-inside-avoid print-block">
+              <div className="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-xl p-3 md:px-5 md:py-3 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-700 relative overflow-hidden group hover:shadow-[0_15px_40px_rgba(79,70,229,0.3)] transition-all">
                  <div className="absolute right-0 top-0 w-40 h-40 bg-indigo-500/20 blur-[60px] rounded-full pointer-events-none group-hover:bg-indigo-500/40 transition-colors duration-700"></div>
                  <div className="text-left relative z-10 flex-1">
-                    <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-1.5 flex items-center gap-2"><Icon name="zap" size={14} /> Final Step</h3>
-                    <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Run Master Simulation</h2>
-                    <p className="text-xs font-medium text-slate-300 leading-relaxed text-justify w-full">
+                    <h3 className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-1 flex items-center gap-2"><Icon name="zap" size={12} /> Final Step</h3>
+                    <h2 className="text-lg font-black text-white mb-1 tracking-tight">Run Master Simulation</h2>
+                    <p className="text-[11px] font-medium text-slate-300 leading-relaxed text-justify w-full">
                       Launch the quantum matrix to project your exact year-by-year cashflows, compounded interest, taxes, and redemptions.
                     </p>
                  </div>
-                 <div className="shrink-0 relative z-10 w-full md:w-auto mt-2 md:mt-0">
-                    <button onClick={(e) => { e.preventDefault(); setShowFullPreview(true); }} className="w-full md:w-auto px-8 py-3.5 text-white rounded-xl font-black uppercase text-xs tracking-[0.2em] shadow-[0_5px_20px_rgba(79,70,229,0.5)] transition-all flex items-center justify-center gap-3 master-glow-btn hover:scale-[1.02] active:scale-[0.98]">
-                      <Icon name="unlock" size={18}/> Launch Matrix
+                 <div className="shrink-0 relative z-10 w-full md:w-auto mt-1 md:mt-0">
+                    <button onClick={(e) => { e.preventDefault(); setShowFullPreview(true); }} className="w-full md:w-auto px-6 py-2.5 text-white rounded-xl font-black uppercase text-[11px] tracking-[0.2em] shadow-[0_5px_20px_rgba(79,70,229,0.5)] transition-all flex items-center justify-center gap-2 master-glow-btn hover:scale-[1.02] active:scale-[0.98]">
+                      <Icon name="unlock" size={16}/> Launch Matrix
                     </button>
                  </div>
               </div>
@@ -3030,84 +3271,12 @@ const lifeCoverAnalysis = useMemo(() => {
 
                 {/* 3. CONTENT AREA - SCROLLING PANELS & SCROLLING TABLE */}
                 {projectionTab === 'strategy' && (
-                  <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar bg-[#F8FAFC]">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#F8FAFC] flex flex-col">
                     
-                    {/* TOP PANEL (Controls & Tuner) - Scrolls naturally with the page */}
-                    <div className="shrink-0 px-4 sm:px-6 pt-3 pb-2 z-30 bg-[#F8FAFC]">
+                    {/* TOP PANEL (Controls & Tuner) - Native tab scrolling */}
+                    <div className="shrink-0 px-4 sm:px-6 pt-4 pb-2 z-30">
                       <div className="w-full space-y-3">
 
-                        <div className="flex flex-wrap gap-3 justify-between items-center bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
-                           <div className="flex items-center gap-2">
-                             <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2 hidden md:block">Scenario:</div>
-                             <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 shadow-inner">
-                                <button onClick={() => setScenario('bear')} className={`px-4 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='bear' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>🐻 Bear</button>
-                                <button onClick={() => setScenario('base')} className={`px-4 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='base' ? 'bg-slate-900 text-white shadow-sm border border-slate-800' : 'text-slate-500 hover:bg-slate-50'}`}>⚖️ Base</button>
-                                <button onClick={() => setScenario('bull')} className={`px-4 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='bull' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>🐂 Bull</button>
-                             </div>
-                           </div>
-                           <div className="flex items-center gap-2">
-                             <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2 hidden md:block">Filters:</div>
-                             <div className="flex gap-1.5 shrink-0 flex-wrap justify-end">
-                               <button onClick={() => setShowPostTax(!showPostTax)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${showPostTax ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}><div className={`w-1.5 h-1.5 rounded-full ${showPostTax ? 'bg-white' : 'bg-slate-400'}`}></div>Tax Mode</button>
-                               <button onClick={() => setTaxHarvesting(!taxHarvesting)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${taxHarvesting ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}><div className={`w-1.5 h-1.5 rounded-full ${taxHarvesting ? 'bg-white' : 'bg-slate-400'}`}></div>Tax Harvest</button>
-                               <button onClick={() => setShowRealValue(!showRealValue)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${showRealValue ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}><div className={`w-1.5 h-1.5 rounded-full ${showRealValue ? 'bg-white' : 'bg-slate-400'}`}></div>Real Value</button>
-                               <div className="w-px bg-slate-300 mx-1 my-1"></div>
-                               <button onClick={() => setGlidePath(!glidePath)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${glidePath ? 'bg-amber-600 text-white shadow-md border border-amber-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}><div className={`w-1.5 h-1.5 rounded-full ${glidePath ? 'bg-white' : 'bg-slate-400'}`}></div>Glide Path</button>
-                               <button onClick={() => setSequenceRisk(!sequenceRisk)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${sequenceRisk ? 'bg-orange-600 text-white shadow-md border border-orange-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}><div className={`w-1.5 h-1.5 rounded-full ${sequenceRisk ? 'bg-white' : 'bg-slate-400'}`}></div>Seq. Risk</button>
-                               <button onClick={() => setBlackSwan(!blackSwan)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 ${blackSwan ? 'bg-rose-900 text-white shadow-[0_0_10px_rgba(225,29,72,0.5)] border border-rose-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}>🦢 Black Swan</button>
-                             </div>
-                           </div>
-                        </div>
-
-                        {/* Dynamic Definition Banners - Compact */}
-                        <div className="flex flex-col gap-1.5 animate-in fade-in duration-300 mb-2">
-                           {scenario === 'bear' && (
-                             <div className="py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-slate-700 text-[10px] flex items-center gap-2 shadow-sm">
-                               <span className="text-sm leading-none">🐻</span> <span className="font-medium"><strong className="text-slate-900 uppercase tracking-wide mr-1">Bear Shock:</strong> -15% crash in Yr 3, sluggish recovery.</span>
-                             </div>
-                           )}
-                           {scenario === 'bull' && (
-                             <div className="py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-slate-700 text-[10px] flex items-center gap-2 shadow-sm">
-                               <span className="text-sm leading-none">🐂</span> <span className="font-medium"><strong className="text-slate-900 uppercase tracking-wide mr-1">Bull Boom:</strong> +3% structural alpha added to base returns.</span>
-                             </div>
-                           )}
-                           {showPostTax && (
-                             <div className="py-1.5 px-3 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-800 text-[10px] flex items-center gap-2 shadow-sm">
-                               <Icon name="calculator" size={14} className="text-indigo-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Net Tax Mode Active:</strong> Dynamically deducting STCG/LTCG and Debt slab taxes strictly during redemption events.</span>
-                             </div>
-                           )}
-                           {taxHarvesting && (
-                             <div className="py-1.5 px-3 bg-teal-50 border border-teal-200 rounded-lg text-teal-800 text-[10px] flex items-center gap-2 shadow-sm">
-                               <Icon name="scissors" size={14} className="text-teal-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Tax Harvesting Active:</strong> Simulating annual booking of ₹1.25L tax-free equity gains to structurally optimize LTCG liability.</span>
-                             </div>
-                           )}
-                           {showRealValue && (
-                             <div className="py-1.5 px-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-[10px] flex items-center gap-2 shadow-sm">
-                               <Icon name="eye" size={14} className="text-blue-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Real Value Mode Active:</strong> Discounting future wealth back to today's purchasing power (adjusted for {effectiveInflation}% inflation).</span>
-                             </div>
-                           )}
-                           {glidePath && (
-                             <div className="py-1.5 px-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[10px] flex items-center gap-2 shadow-sm">
-                               <Icon name="trending-down" size={14} className="text-amber-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Dynamic Glide Path:</strong> Progressively shifting portfolio yields toward safe debt (7%) during the 5 years leading up to retirement.</span>
-                             </div>
-                           )}
-                           {sequenceRisk && (
-                             <div className="py-1.5 px-3 bg-orange-50 border border-orange-200 rounded-lg text-orange-800 text-[10px] flex items-center gap-2 shadow-sm">
-                               <Icon name="activity" size={14} className="text-orange-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Sequence of Returns Risk:</strong> Applying a -10% market contraction during the fragile first 3 years of retirement.</span>
-                             </div>
-                           )}
-                           {showRawNumbers && (
-                             <div className="py-1.5 px-3 bg-slate-100 border border-slate-300 rounded-lg text-slate-800 text-[10px] flex items-center gap-2 shadow-sm">
-                               <Icon name="hash" size={14} className="text-slate-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Exact Rupee Display:</strong> Showing full numerical values instead of abbreviated Lacs/Crores.</span>
-                             </div>
-                           )}
-                           {blackSwan && (
-                             <div className="py-2 px-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 text-[10px] flex items-center gap-2 shadow-sm">
-                               <Icon name="alert-triangle" size={16} className="text-rose-600 shrink-0"/> <span className="font-medium leading-relaxed"><strong className="uppercase tracking-wide mr-1 font-black">Black Swan Event Active:</strong> Simulating a devastating 35% market crash immediately after your retirement year. This rigorously tests sequence-of-returns resilience and proves if your 3-Bucket strategy can absorb catastrophic shock.</span>
-                             </div>
-                           )}
-                        </div>
-                        
                         {depletionYear && (
                            <div className="py-2.5 px-4 bg-rose-600 border border-rose-700 rounded-xl text-white flex items-center justify-between shadow-lg mb-3 animate-in slide-in-from-top-2">
                              <div className="flex items-center gap-3">
@@ -3238,41 +3407,114 @@ const lifeCoverAnalysis = useMemo(() => {
                       </div>
                     </div>
 
-                    {/* NUMBER FORMAT TAB UI (MOVED OUTSIDE SCROLL AREA TO FREE UP TABLE SPACE) */}
-                    <div className="px-4 sm:px-6 mt-4 shrink-0 flex justify-end items-center mb-3 no-print">
-                      <div className="flex items-center gap-3 bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-3">Format:</span>
-                        <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(false); }} className={`px-6 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${!showRawNumbers ? 'bg-white text-indigo-700 shadow-md border border-slate-200 scale-100' : 'text-slate-500 hover:text-slate-800 scale-95 hover:bg-slate-200/50'}`}>Abbreviated</button>
-                        <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(true); }} className={`px-6 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all ${showRawNumbers ? 'bg-white text-emerald-700 shadow-md border border-slate-200 scale-100' : 'text-slate-500 hover:text-slate-800 scale-95 hover:bg-slate-200/50'}`}>Exact ₹</button>
-                      </div>
-                    </div>
+                    {/* NEW STRUCTURE: MASSIVE SCROLLING TABLE AREA WITH PINNED FILTERS */}
+                    <div className="px-4 sm:px-6 pb-8 mt-2 flex-1 flex flex-col min-h-[85vh] sm:min-h-[800px] shrink-0" onClick={() => { setIsTunerExpanded(false); setIsGoalTunerExpanded(false); }}>
+                       <div className="w-full flex-1 bg-white border border-slate-300 rounded-xl shadow-md flex flex-col overflow-hidden relative cursor-default">
+                           
+                           {/* PINNED FILTERS & BANNERS */}
+                           <div className="shrink-0 bg-slate-50 border-b border-slate-300 p-3 flex flex-col gap-2 z-[60] shadow-sm">
+                               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+                                   <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                                     <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest hidden xl:block">Scenario:</div>
+                                     <div className="flex bg-slate-200/50 p-1.5 rounded-xl border border-slate-300 shadow-inner">
+                                        <button onClick={() => setScenario('bear')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='bear' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}>🐻 Bear</button>
+                                        <button onClick={() => setScenario('base')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='base' ? 'bg-slate-900 text-white shadow-sm border border-slate-800' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}>⚖️ Base</button>
+                                        <button onClick={() => setScenario('bull')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='bull' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}>🐂 Bull</button>
+                                     </div>
+                                     <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 lg:pb-0 w-full sm:w-auto mt-2 lg:mt-0">
+                                       <button onClick={() => setShowPostTax(!showPostTax)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${showPostTax ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}><div className={`w-1.5 h-1.5 rounded-full ${showPostTax ? 'bg-white' : 'bg-slate-400'}`}></div>Tax Mode</button>
+                                       <button onClick={() => setTaxHarvesting(!taxHarvesting)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${taxHarvesting ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}><div className={`w-1.5 h-1.5 rounded-full ${taxHarvesting ? 'bg-white' : 'bg-slate-400'}`}></div>Tax Harvest</button>
+                                       <button onClick={() => setShowRealValue(!showRealValue)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${showRealValue ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}><div className={`w-1.5 h-1.5 rounded-full ${showRealValue ? 'bg-white' : 'bg-slate-400'}`}></div>Real Value</button>
+                                       <div className="w-px h-6 bg-slate-300 mx-1 hidden sm:block"></div>
+                                       <button onClick={() => setGlidePath(!glidePath)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${glidePath ? 'bg-amber-600 text-white shadow-md border border-amber-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}><div className={`w-1.5 h-1.5 rounded-full ${glidePath ? 'bg-white' : 'bg-slate-400'}`}></div>Glide Path</button>
+                                       <button onClick={() => setSequenceRisk(!sequenceRisk)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${sequenceRisk ? 'bg-orange-600 text-white shadow-md border border-orange-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}><div className={`w-1.5 h-1.5 rounded-full ${sequenceRisk ? 'bg-white' : 'bg-slate-400'}`}></div>Seq. Risk</button>
+                                       <button onClick={() => setBlackSwan(!blackSwan)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${blackSwan ? 'bg-rose-900 text-white shadow-[0_0_10px_rgba(225,29,72,0.5)] border border-rose-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}>🦢 Black Swan</button>
+                                     </div>
+                                   </div>
+                                   
+                                   <div className="flex items-center gap-3 bg-slate-200/50 p-1.5 rounded-xl border border-slate-300 shadow-inner shrink-0 w-full lg:w-auto justify-between lg:justify-end">
+                                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Format:</span>
+                                     <div className="flex gap-1">
+                                        <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(false); }} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${!showRawNumbers ? 'bg-white text-indigo-700 shadow-sm border border-slate-200 scale-100' : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'}`}>Abbrev.</button>
+                                        <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(true); }} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${showRawNumbers ? 'bg-white text-emerald-700 shadow-sm border border-slate-200 scale-100' : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'}`}>Exact ₹</button>
+                                     </div>
+                                   </div>
+                               </div>
 
-                    {/* MASSIVE SCROLLING TABLE AREA - Flexible Maximum Height, Closes Tuners on Click */}
-                    <div className="px-4 sm:px-6 pb-12 mt-2 flex-1 flex flex-col min-h-[60vh] md:min-h-[75vh]" onClick={() => { setIsTunerExpanded(false); setIsGoalTunerExpanded(false); }}>
-                       <div className="w-full h-full max-h-[85vh] bg-white border border-slate-200 rounded-xl shadow-sm overflow-auto custom-scrollbar relative cursor-default">
-                           <table className="w-full text-left border-collapse font-sans bg-white tabular-nums text-xs min-w-[1000px]">
-                                 <thead className="sticky top-0 z-50 shadow-sm outline outline-1 outline-slate-300 bg-slate-100">
+                               {/* DYNAMIC DEFINITIONS DISPLAYED IMMEDIATELY BELOW THE ROW */}
+                               <div className="flex flex-col gap-1.5 animate-in fade-in duration-300">
+                                   {scenario === 'bear' && (
+                                     <div className="py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-slate-700 text-[10px] flex items-center gap-2 shadow-sm">
+                                       <span className="text-sm leading-none">🐻</span> <span className="font-medium"><strong className="text-slate-900 uppercase tracking-wide mr-1">Bear Shock:</strong> -15% crash in Yr 3, sluggish recovery.</span>
+                                     </div>
+                                   )}
+                                   {scenario === 'bull' && (
+                                     <div className="py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-slate-700 text-[10px] flex items-center gap-2 shadow-sm">
+                                       <span className="text-sm leading-none">🐂</span> <span className="font-medium"><strong className="text-slate-900 uppercase tracking-wide mr-1">Bull Boom:</strong> +3% structural alpha added to base returns.</span>
+                                     </div>
+                                   )}
+                                   {showPostTax && (
+                                     <div className="py-1.5 px-3 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-800 text-[10px] flex items-center gap-2 shadow-sm">
+                                       <Icon name="calculator" size={14} className="text-indigo-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Net Tax Mode Active:</strong> Dynamically deducting STCG/LTCG and Debt slab taxes strictly during redemption events.</span>
+                                     </div>
+                                   )}
+                                   {taxHarvesting && (
+                                     <div className="py-1.5 px-3 bg-teal-50 border border-teal-200 rounded-lg text-teal-800 text-[10px] flex items-center gap-2 shadow-sm">
+                                       <Icon name="scissors" size={14} className="text-teal-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Tax Harvesting Active:</strong> Simulating annual booking of ₹1.25L tax-free equity gains to structurally optimize LTCG liability.</span>
+                                     </div>
+                                   )}
+                                   {showRealValue && (
+                                     <div className="py-1.5 px-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-[10px] flex items-center gap-2 shadow-sm">
+                                       <Icon name="eye" size={14} className="text-blue-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Real Value Mode Active:</strong> Discounting future wealth back to today's purchasing power (adjusted for {effectiveInflation}% inflation).</span>
+                                     </div>
+                                   )}
+                                   {glidePath && (
+                                     <div className="py-1.5 px-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[10px] flex items-center gap-2 shadow-sm">
+                                       <Icon name="trending-down" size={14} className="text-amber-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Dynamic Glide Path:</strong> Progressively shifting portfolio yields toward safe debt (7%) during the 5 years leading up to retirement.</span>
+                                     </div>
+                                   )}
+                                   {sequenceRisk && (
+                                     <div className="py-1.5 px-3 bg-orange-50 border border-orange-200 rounded-lg text-orange-800 text-[10px] flex items-center gap-2 shadow-sm">
+                                       <Icon name="activity" size={14} className="text-orange-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Sequence of Returns Risk:</strong> Applying a -10% market contraction during the fragile first 3 years of retirement.</span>
+                                     </div>
+                                   )}
+                                   {showRawNumbers && (
+                                     <div className="py-1.5 px-3 bg-slate-100 border border-slate-300 rounded-lg text-slate-800 text-[10px] flex items-center gap-2 shadow-sm">
+                                       <Icon name="hash" size={14} className="text-slate-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Exact Rupee Display:</strong> Showing full numerical values instead of abbreviated Lacs/Crores.</span>
+                                     </div>
+                                   )}
+                                   {blackSwan && (
+                                     <div className="py-2 px-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 text-[10px] flex items-center gap-2 shadow-sm">
+                                       <Icon name="alert-triangle" size={16} className="text-rose-600 shrink-0"/> <span className="font-medium leading-relaxed"><strong className="uppercase tracking-wide mr-1 font-black">Black Swan Event Active:</strong> Simulating a devastating 35% market crash immediately after your retirement year. This rigorously tests sequence-of-returns resilience and proves if your 3-Bucket strategy can absorb catastrophic shock.</span>
+                                     </div>
+                                   )}
+                               </div>
+                           </div>
+
+                           <div className="flex-1 overflow-auto custom-scrollbar relative min-h-[500px]">
+                               <table className="w-full text-left border-collapse font-sans bg-white tabular-nums text-xs min-w-[1000px]">
+                                 <thead className="sticky top-0 z-[50] shadow-sm outline outline-1 outline-slate-300 bg-slate-100">
                                    <tr>
-                                     <th style={{ minWidth: '64px', left: 0 }} className="py-3 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-600 text-center bg-slate-200 sticky z-[60] shadow-[1px_0_0_#cbd5e1]">Yr</th>
-                                     <th style={{ minWidth: '64px', left: '64px' }} className="py-3 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-600 text-center bg-slate-200 sticky z-[60] shadow-[1px_0_0_#cbd5e1]">Age</th>
-                                     <th style={{ minWidth: '140px', left: '128px' }} className="py-3 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-700 text-right bg-slate-100 sticky z-[60] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Total SIP Flow</th>
-                                     <th className="py-3 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-emerald-700 text-right bg-emerald-50 min-w-[120px]">Market Growth</th>
-                                     <th className="py-3 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-indigo-700 text-right bg-indigo-50 min-w-[120px]" title="Compounding of Unallocated Base Wealth">Legacy Pot</th>
-                                     <th className="py-3 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-teal-700 text-right bg-teal-50 min-w-[120px]" title="Compounding of Mapped Goals & SIPs">Active Goals</th>
-                                     <th className="py-3 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-rose-700 text-right bg-rose-50 min-w-[120px]">Redemptions</th>
-                                     <th className="py-3 px-4 border-b border-slate-300 text-[12px] font-black uppercase text-slate-900 text-right bg-emerald-100 min-w-[140px]">Closing Corpus</th>
+                                     <th style={{ minWidth: '64px', left: 0 }} className="py-2.5 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-600 text-center bg-slate-200 sticky z-[60] shadow-[1px_0_0_#cbd5e1]">Yr</th>
+                                     <th style={{ minWidth: '64px', left: '64px' }} className="py-2.5 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-600 text-center bg-slate-200 sticky z-[60] shadow-[1px_0_0_#cbd5e1]">Age</th>
+                                     <th style={{ minWidth: '140px', left: '128px' }} className="py-2.5 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-700 text-right bg-slate-100 sticky z-[60] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Total SIP Flow</th>
+                                     <th className="py-2.5 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-emerald-700 text-right bg-emerald-50 min-w-[120px]">Market Growth</th>
+                                     <th className="py-2.5 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-indigo-700 text-right bg-indigo-50 min-w-[120px]" title="Compounding of Unallocated Base Wealth">Legacy Pot</th>
+                                     <th className="py-2.5 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-teal-700 text-right bg-teal-50 min-w-[120px]" title="Compounding of Mapped Goals & SIPs">Active Goals</th>
+                                     <th className="py-2.5 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-rose-700 text-right bg-rose-50 min-w-[120px]">Redemptions</th>
+                                     <th className="py-2.5 px-4 border-b border-slate-300 text-[12px] font-black uppercase text-slate-900 text-right bg-emerald-100 min-w-[140px]">Closing Corpus</th>
                                    </tr>
                                  </thead>
                                  <tbody className="text-slate-700 font-medium text-[11px]">
                                    <tr className="bg-emerald-50/20 border-b border-slate-300">
-                                     <td style={{ minWidth: '64px', left: 0 }} className="py-2 px-4 border-r border-slate-300 text-center font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[1px_0_0_#cbd5e1]">D-0</td>
-                                     <td style={{ minWidth: '64px', left: '64px' }} className="py-2 px-4 border-r border-slate-300 text-center font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[1px_0_0_#cbd5e1]">--</td>
-                                     <td style={{ minWidth: '140px', left: '128px' }} className="py-2 px-4 border-r border-slate-300 text-right font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">--</td>
-                                     <td className="py-2 px-4 border-b border-slate-300 text-right text-slate-500 italic text-[11px] tracking-widest">Baseline &rarr;</td>
-                                     <td className="py-2 px-4 border-b border-slate-300 text-right font-bold text-indigo-800 bg-indigo-50/30">{showRawNumbers ? '₹' + Math.round(unallocatedData.remaining + totalIlliquidAssets).toLocaleString('en-IN') : formatCurrency(unallocatedData.remaining + totalIlliquidAssets)}</td>
-                                     <td className="py-2 px-4 border-b border-slate-300 text-right font-bold text-teal-800 bg-teal-50/30">{showRawNumbers ? '₹' + Math.round(totalAssets - (unallocatedData.remaining + totalIlliquidAssets)).toLocaleString('en-IN') : formatCurrency(totalAssets - (unallocatedData.remaining + totalIlliquidAssets))}</td>
-                                     <td className="py-2 px-4 border-b border-slate-300 text-right text-slate-400">—</td>
-                                     <td className="py-2 px-4 border-b border-slate-300 text-right font-black text-slate-900 bg-emerald-50 text-[12px]">{showRawNumbers ? '₹' + Math.round(totals.assets).toLocaleString('en-IN') : formatCurrency(totals.assets)}</td>
+                                     <td style={{ minWidth: '64px', left: 0 }} className="py-1.5 px-4 border-r border-slate-300 text-center font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[1px_0_0_#cbd5e1]">D-0</td>
+                                     <td style={{ minWidth: '64px', left: '64px' }} className="py-1.5 px-4 border-r border-slate-300 text-center font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[1px_0_0_#cbd5e1]">--</td>
+                                     <td style={{ minWidth: '140px', left: '128px' }} className="py-1.5 px-4 border-r border-slate-300 text-right font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">--</td>
+                                     <td className="py-1.5 px-4 border-b border-slate-300 text-right text-slate-500 italic text-[11px] tracking-widest">Baseline &rarr;</td>
+                                     <td className="py-1.5 px-4 border-b border-slate-300 text-right font-bold text-indigo-800 bg-indigo-50/30">{showRawNumbers ? '₹' + Math.round(unallocatedData.remaining + totalIlliquidAssets).toLocaleString('en-IN') : formatCurrency(unallocatedData.remaining + totalIlliquidAssets)}</td>
+                                     <td className="py-1.5 px-4 border-b border-slate-300 text-right font-bold text-teal-800 bg-teal-50/30">{showRawNumbers ? '₹' + Math.round(totalAssets - (unallocatedData.remaining + totalIlliquidAssets)).toLocaleString('en-IN') : formatCurrency(totalAssets - (unallocatedData.remaining + totalIlliquidAssets))}</td>
+                                     <td className="py-1.5 px-4 border-b border-slate-300 text-right text-slate-400">—</td>
+                                     <td className="py-1.5 px-4 border-b border-slate-300 text-right font-black text-slate-900 bg-emerald-50 text-[12px]">{showRawNumbers ? '₹' + Math.round(totals.assets).toLocaleString('en-IN') : formatCurrency(totals.assets)}</td>
                                    </tr>
 
                                    {masterSimulationData.map((row, i) => {
@@ -3295,10 +3537,10 @@ const lifeCoverAnalysis = useMemo(() => {
                                      return (
                                        <React.Fragment key={i}>
                                          <tr onClick={() => setExpandedSimYear(expandedSimYear === i ? null : i)} className={`border-b hover:bg-slate-50 cursor-pointer transition-colors ${displayBal <= 0 ? 'bg-rose-50 border-rose-200' : 'border-slate-300'}`}>
-                                           <td style={{ minWidth: '64px', left: 0 }} className={`py-2 px-4 border-r text-center font-bold sticky z-30 shadow-[1px_0_0_#cbd5e1] ${displayBal <= 0 ? 'border-rose-200 text-rose-800 bg-rose-100/90' : 'border-slate-300 text-slate-500 bg-slate-50'}`}>Y-{row.yr}</td>
-                                           <td style={{ minWidth: '64px', left: '64px' }} className={`py-2 px-4 border-r text-center font-bold sticky z-30 shadow-[1px_0_0_#cbd5e1] ${displayBal <= 0 ? 'border-rose-200 text-rose-900 bg-rose-100/90' : 'border-slate-300 text-slate-800 bg-slate-50'}`}>{row.age}Y</td>
-                                           <td style={{ minWidth: '140px', left: '128px' }} className={`py-2 px-4 border-r text-right font-semibold sticky z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] ${displayBal <= 0 ? 'border-rose-200 text-rose-800/70 bg-rose-50/90' : 'border-slate-300 text-teal-800 bg-teal-50/90'}`}>{displaySip > 0 ? formatCell(displaySip) : '—'}</td>
-                                           <td className={`py-2 px-4 border-r font-semibold text-right ${displayBal <= 0 ? 'border-rose-200 text-rose-700/70' : 'border-slate-300 text-emerald-600'}`}>{displayInterest>0?`+${formatCell(displayInterest)}`:'—'}</td>
+                                           <td style={{ minWidth: '64px', left: 0 }} className={`py-1.5 px-4 border-r text-center font-bold sticky z-30 shadow-[1px_0_0_#cbd5e1] ${displayBal <= 0 ? 'border-rose-200 text-rose-800 bg-rose-100/90' : 'border-slate-300 text-slate-500 bg-slate-50'}`}>Y-{row.yr}</td>
+                                           <td style={{ minWidth: '64px', left: '64px' }} className={`py-1.5 px-4 border-r text-center font-bold sticky z-30 shadow-[1px_0_0_#cbd5e1] ${displayBal <= 0 ? 'border-rose-200 text-rose-900 bg-rose-100/90' : 'border-slate-300 text-slate-800 bg-slate-50'}`}>{row.age}Y</td>
+                                           <td style={{ minWidth: '140px', left: '128px' }} className={`py-1.5 px-4 border-r text-right font-semibold sticky z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] ${displayBal <= 0 ? 'border-rose-200 text-rose-800/70 bg-rose-50/90' : 'border-slate-300 text-teal-800 bg-teal-50/90'}`}>{displaySip > 0 ? formatCell(displaySip) : '—'}</td>
+                                           <td className={`py-1.5 px-4 border-r font-semibold text-right ${displayBal <= 0 ? 'border-rose-200 text-rose-700/70' : 'border-slate-300 text-emerald-600'}`}>{displayInterest>0?`+${formatCell(displayInterest)}`:'—'}</td>
                                            <td className={`py-1 px-3 border text-right font-medium ${displayBal <= 0 ? 'border-rose-200 text-rose-800/70 bg-rose-50/50' : 'border-slate-300 text-indigo-700 bg-indigo-50/10'}`}>{formatCell(displayLegacy)}</td>
                                            <td className={`py-1 px-3 border text-right font-medium ${displayBal <= 0 ? 'border-rose-200 text-rose-800/70 bg-rose-50/50' : 'border-slate-300 text-teal-700 bg-teal-50/10'}`}>{formatCell(displayGoals)}</td>
                                            <td className={`py-1 px-3 border text-right align-middle ${displayBal <= 0 ? 'border-rose-200' : 'border-slate-300'}`}>
@@ -3353,8 +3595,9 @@ const lifeCoverAnalysis = useMemo(() => {
                                    </tr>
                                  </tfoot>
                                </table>
-                          </div>
-                      </div>
+                           </div>
+                       </div>
+                    </div>
                   </div>
                 )}
 
