@@ -714,18 +714,23 @@
       );
     };
 
-    const PhaseWrapper = ({ num, title, layout, children, gridClasses, delayClass, themeClass = "bg-white", titleColor = "text-slate-800" }) => {
+    const PhaseWrapper = ({ num, title, layout, children, gridClasses, delayClass }) => {
       const isList = layout === 'list';
       return (
-        <div className={`relative ${isList ? 'w-full mb-4' : gridClasses} break-inside-avoid print-block animate-in fade-in duration-500 ${delayClass}`}>
+        <div className={`relative ${isList ? 'w-full mb-12' : gridClasses} break-inside-avoid print-block animate-in fade-in duration-500 ${delayClass}`}>
           {title && (
-            <div className="flex items-center gap-2 mb-2 ml-1 z-20 relative">
-              <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-xs shadow-md">{num}</div>
-              <h2 className="text-lg font-black text-slate-900 tracking-tight uppercase">{title}</h2>
-              <div className="flex-1 h-px bg-gradient-to-r from-slate-300 to-transparent ml-3"></div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 z-20 relative">
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex flex-col items-center justify-center shrink-0 shadow-lg border border-slate-700">
+                    <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 leading-none mb-0.5">Part</span>
+                    <span className="text-base font-black leading-none">{num < 10 ? `0${num}` : num}</span>
+                 </div>
+                 <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter uppercase">{title}</h2>
+              </div>
+              <div className="flex-1 h-px bg-slate-200 hidden sm:block mt-2"></div>
             </div>
           )}
-          <div className={`relative z-10 w-full p-2.5 md:p-3 rounded-xl border border-white/80 shadow-lg backdrop-blur-[40px] saturate-[180%] group ${themeClass}`}>
+          <div className="relative z-10 w-full group">
             {children}
           </div>
         </div>
@@ -1253,14 +1258,14 @@
                     
                     {profile.married && (
                       <div className="flex flex-col gap-4 animate-in slide-in-from-top-4 text-left bg-slate-50/70 p-5 rounded-2xl border border-slate-200 shadow-sm mt-3">
-                        <Toggle label="Add Co-CFO (Household Plan)?" value={profile.addCoCFO} onChange={v => setProfile({...profile, addCoCFO: v})} />
+                        <Toggle label="Include Spouse Financials (Joint Plan)?" value={profile.addCoCFO} onChange={v => setProfile({...profile, addCoCFO: v})} />
                         
                         {profile.addCoCFO && (
                           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 pt-4 border-t border-slate-200 animate-in fade-in">
                             <InputField label="Spouse Name" value={profile.spouseName} noNumbers onChange={v => setProfile({...profile, spouseName: v})} placeholder="Name" />
                             <InputField label="Spouse Age" value={profile.spouseAge} isAge suffix="Yrs" onChange={v => setProfile({...profile, spouseAge: v})} />
                             <InputField label="Spouse Monthly Income" prefix="₹" value={profile.spouseIncome} type="number" onChange={v => setProfile({...profile, spouseIncome: v})} />
-                            <InputField label="Spouse Retire Age" value={profile.spouseRetireAge} isAge suffix="Yrs" onChange={v => setProfile({...profile, spouseRetireAge: v})} />
+                            <InputField label="Spouse Retire Age" value={profile.spouseRetireAge} isAge suffix="Yrs" onChange={v => setProfile({...profile, spouseRetireAge: v})} isError={profile.spouseRetireAge && Number(profile.spouseRetireAge) <= Number(profile.spouseAge)} />
                           </div>
                         )}
                         
@@ -1352,7 +1357,7 @@
                           </div>
                         </div>
                       ))}
-                      <button onClick={() => setProfile({...profile, customReservoirs: [...(profile.customReservoirs||[]), {id: Date.now(), name: "Custom", value: "", isLiquid: true}]})} className="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-xl text-[10px] font-bold uppercase text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors">+ Add reservoir</button>
+                      <button onClick={() => setProfile({...profile, customReservoirs: [...(profile.customReservoirs||[]), {id: Date.now(), name: "Custom", value: "", isLiquid: true}]})} className="w-full py-3 bg-white border-2 border-dashed border-slate-400 rounded-xl text-[11px] font-black uppercase text-slate-800 hover:bg-slate-50 hover:border-slate-500 transition-all shadow-sm">+ Add Custom Reservoir</button>
                     </div>
 
                     <div className="space-y-3">
@@ -1368,7 +1373,7 @@
                           </div>
                         </div>
                       ))}
-                      <button onClick={() => setProfile({...profile, windfalls: [...(profile.windfalls||[]), {id: Date.now(), name: "Liquidity Event", amount: "", year: ""}]})} className="w-full py-2.5 border-2 border-dashed border-indigo-300 rounded-xl text-[10px] font-black uppercase text-indigo-600 hover:bg-indigo-50 transition-colors">+ Add Windfall</button>
+                      <button onClick={() => setProfile({...profile, windfalls: [...(profile.windfalls||[]), {id: Date.now(), name: "Liquidity Event", amount: "", year: ""}]})} className="w-full py-3 bg-white border-2 border-dashed border-indigo-400 rounded-xl text-[11px] font-black uppercase text-indigo-800 hover:bg-indigo-50 hover:border-indigo-500 transition-all shadow-sm">+ Add Future Windfall</button>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 pt-4 border-t border-slate-100 text-left">
@@ -1542,6 +1547,14 @@
       const [masterStepUp, setMasterStepUp] = useState("");
       const [isConsoleOpen, setIsConsoleOpen] = useState(false);
       const [liquidateRE, setLiquidateRE] = useState(false);
+
+      // --- NEW: Goal-Specific Asset Mixes ---
+      const [goalMixes, setGoalMixes] = useState({});
+      const [activeTunerTarget, setActiveTunerTarget] = useState('all_goals');
+      const [matrixZoom, setMatrixZoom] = useState(100);
+      const [isRealityCheckExpanded, setIsRealityCheckExpanded] = useState(true);
+      const [isControlPanelExpanded, setIsControlPanelExpanded] = useState(true);
+      const [activeWealthFlowCard, setActiveWealthFlowCard] = useState(null);
 
       const effectiveInflation = isShockMode ? 8 : currentInflation;
       const infMultiplier = 1 + (effectiveInflation / 100);
@@ -1739,7 +1752,7 @@
       }, [totalLiquidAssets, totalIlliquidAssets, allocMap, isWealthAllocated, liquidAssetsList]);
 
       const legacySimulationData = useMemo(() => {
-        if (!profile || !retireYrs) return [];
+        if (!profile || !planningHorizon) return [];
         let flow = [];
         let currentAge = safeNumber(profile.age) || 30;
         
@@ -1759,20 +1772,23 @@
         // FIX: Remove mapped SIP from the legacy unmapped engine if wealth is mapped
         let totalMappedSip = 0;
         if (isWealthAllocated) { totalMappedSip = Object.values(allocMap['activeSip'] || {}).reduce((a,b)=>a+(safeNumber(profile.currentSip)*(Number(b)/100)), 0); }
-        let annualSip = isWealthAllocated ? Math.max(0, safeNumber(profile.currentSip) - totalMappedSip) * 12 : Math.max(0, safeNumber(profile.currentSip) - totalSIPRequired) * 12;
+        let baseAnnualSip = isWealthAllocated ? Math.max(0, safeNumber(profile.currentSip) - totalMappedSip) * 12 : Math.max(0, safeNumber(profile.currentSip) - totalSIPRequired) * 12;
         
         let sipPot = 0;
         let sipRate = safeNumber(portfolioWeightedReturn) / 100 || 0.078; 
 
-        for (let i = 1; i <= retireYrs; i++) {
+        for (let i = 1; i <= planningHorizon; i++) {
+            let annualSip = (i <= retireYrs) ? baseAnnualSip : 0;
             let assetSum = trackingAssets.reduce((sum, a) => sum + a.currentVal, 0) + illiquidVal;
             let yearOpening = assetSum + sipPot;
             
             let assetGrowth = 0;
+            let liquidBreakdown = 0;
             trackingAssets.forEach(a => {
                 let g = a.currentVal * a.rate;
                 assetGrowth += g;
                 a.currentVal += g;
+                liquidBreakdown += a.currentVal;
             });
             let illGrowth = illiquidVal * illiquidRate;
             assetGrowth += illGrowth;
@@ -1784,16 +1800,51 @@
             let totalClosing = trackingAssets.reduce((sum, a) => sum + a.currentVal, 0) + illiquidVal + sipPot;
             let totalGrowth = assetGrowth + currentSipGrowth;
 
-            flow.push({ yr: i, age: currentAge + i, opening: yearOpening, sip: annualSip, growth: totalGrowth, closing: totalClosing });
+            flow.push({ 
+                yr: i, age: currentAge + i, opening: yearOpening, sip: annualSip, 
+                growth: totalGrowth, closing: totalClosing, liquidClosing: liquidBreakdown, 
+                illiquidClosing: illiquidVal, sipPotClosing: sipPot 
+            });
         }
         return flow;
-      }, [liquidAssetsList, allocMap, profile.currentSip, portfolioWeightedReturn, retireYrs, profile.age, totalIlliquidAssets]);
+      }, [liquidAssetsList, allocMap, profile.currentSip, portfolioWeightedReturn, retireYrs, profile.age, totalIlliquidAssets, isWealthAllocated, totalSIPRequired, planningHorizon]);
 
       const legacyProjection = (years) => {
         if (unallocatedData.type === 'partial') return (unallocatedData.remaining + totalIlliquidAssets) * Math.pow(1 + (getScenarioReturn(portfolioWeightedReturn, 1, safeNumber(profile.age)+1)/100), years);
         let totalProjected = 0; ASSET_CLASSES_LIST.forEach(asset => { const p = safeNumber(profile[asset.id]); if (p > 0) totalProjected += p * Math.pow(1 + (getScenarioReturn(asset.yield, 1, safeNumber(profile.age)+1) / 100), years); }); (profile.customReservoirs || []).forEach(res => totalProjected += safeNumber(res.value) * Math.pow(1 + (getScenarioReturn(8, 1, safeNumber(profile.age)+1) / 100), years));
         return totalProjected === 0 && totalAssets === 0 ? 0 : totalProjected;
       };
+
+      const unmappedCards = useMemo(() => {
+        const cards = [];
+        
+        // 1. Liquid Assets (MFs, Stocks, Cash, Custom)
+        liquidAssetsList.forEach(a => {
+            let mappedPct = Object.values(allocMap[a.id] || {}).reduce((sum, p) => sum + Number(p), 0);
+            let unmappedPct = Math.max(0, 100 - mappedPct);
+            if (unmappedPct > 0 && a.val > 0) {
+                cards.push({ id: a.id, label: a.label, type: 'Liquid Asset', startingVal: a.val * (unmappedPct / 100), rate: a.yield || 8, unmappedPct: unmappedPct });
+            }
+        });
+
+        // 2. Illiquid Assets (Real Estate)
+        if (totalIlliquidAssets > 0 && !liquidateRE) {
+            cards.push({ id: 'realAssets', label: 'Real Estate', type: 'Illiquid Asset', startingVal: totalIlliquidAssets, rate: 8, unmappedPct: 100 });
+        }
+
+        // 3. Unmapped/Surplus SIP Flow
+        let totalMappedSip = 0;
+        if (isWealthAllocated) { 
+            totalMappedSip = Object.values(allocMap['activeSip'] || {}).reduce((a,b)=>a+(safeNumber(mathProfile.currentSip)*(Number(b)/100)), 0); 
+        }
+        let initialSurplusSip = isWealthAllocated ? Math.max(0, safeNumber(mathProfile.currentSip) - totalMappedSip) : Math.max(0, safeNumber(mathProfile.currentSip) - totalSIPRequired);
+        
+        if (initialSurplusSip > 0) {
+            cards.push({ id: 'surplusSip', label: 'Unmapped Monthly SIP', type: 'Cashflow', startingVal: initialSurplusSip, rate: portfolioWeightedReturn, unmappedPct: safeNumber(mathProfile.currentSip) > 0 ? (initialSurplusSip / safeNumber(mathProfile.currentSip)) * 100 : 100 });
+        }
+
+        return cards;
+      }, [liquidAssetsList, allocMap, totalIlliquidAssets, liquidateRE, isWealthAllocated, mathProfile.currentSip, totalSIPRequired, portfolioWeightedReturn]);
 
       const masterSimulationData = useMemo(() => {
         let legacyBal = unallocatedData.remaining + totalIlliquidAssets; legacyBal += safeNumber(masterLumpsum);
@@ -1855,7 +1906,13 @@
             legacyBal += activeSurplusSip; monthSip += activeSurplusSip;
 
             if (legacyBal > 0) { let legGrowth = legacyBal * (Math.pow(1 + legacyReturn, 1/12) - 1); legacyBal += legGrowth; monthGrowth += legGrowth; }
-            buckets.forEach(b => { if (b.bal > 0) { let bGrowth = b.bal * (Math.pow(1 + b.currentReturnRate, 1/12) - 1); b.bal += bGrowth; monthGrowth += bGrowth; } if (yr <= b.horizon) { b.bal += b.sip; monthSip += b.sip; } });
+            
+            buckets.forEach(b => { 
+               // MATHEMATICAL FIX: Add SIP *before* calculating monthly growth (BGN Annuity)
+               if (yr <= b.horizon) { b.bal += b.sip; monthSip += b.sip; } 
+               if (b.bal > 0) { let bGrowth = b.bal * (Math.pow(1 + b.currentReturnRate, 1/12) - 1); b.bal += bGrowth; monthGrowth += bGrowth; } 
+            });
+            
             if (m === 11) { buckets.forEach(b => { if (yr === b.horizon && b.id !== 'retire') { let wAmt = b.bal; b.bal = 0; yearRedemptions += wAmt; monthWithdrawal += wAmt; redemptionNames.push(b.name); } }); }
             if (isRetirementPhase && currentRetirementYear > 0) {
               let remainingToWithdraw = monthlyFreedomPaycheck; let actualWithdrawnThisMonth = 0; let rB = buckets.find(x => x.id === 'retire');
@@ -2444,7 +2501,7 @@ const rebalanceMandate = useMemo(() => {
                 {profile.addCoCFO && (
                   <div className="bento-card p-4 shadow-sm border-indigo-200/50 bg-indigo-50/50">
                     <h4 className="text-xs font-black text-indigo-900 uppercase tracking-widest flex items-center gap-1.5 mb-2"><Icon name="users" size={16}/> Joint Household Strategy Activated</h4>
-                    <p className="text-xs text-slate-700 leading-relaxed font-semibold">By integrating <strong className="text-indigo-700">{profile.spouseName || "your Co-CFO"}</strong> into this master plan, your household achieves a combined inflow of <strong className="text-emerald-700">{formatCurrency(safeNumber(profile.salary) + safeNumber(profile.businessIncome) + safeNumber(profile.spouseIncome))}</strong>. This dual-engine approach significantly accelerates savings velocity and distributes financial risk across two human capital streams.</p>
+                    <p className="text-xs text-slate-700 leading-relaxed font-semibold">By integrating <strong className="text-indigo-700">{profile.spouseName || "your spouse"}</strong> into this master plan, your household achieves a combined inflow of <strong className="text-emerald-700">{formatCurrency(safeNumber(profile.salary) + safeNumber(profile.businessIncome) + safeNumber(profile.spouseIncome))}</strong>. This dual-engine approach significantly accelerates savings velocity and distributes financial risk across two human capital streams.</p>
                   </div>
                 )}
 
@@ -2687,24 +2744,24 @@ const rebalanceMandate = useMemo(() => {
 
           <PhaseWrapper num={3} title="Risk Shield" layout={blueprintLayout} gridClasses={blueprintLayout === 'compact' ? 'col-span-12 md:col-span-6' : blueprintLayout === 'bento' ? 'col-span-12 xl:col-span-4' : 'col-span-12'} delayClass="stagger-3" themeClass="bg-transparent border-none p-0 shadow-none">
    <div className="grid grid-cols-1 md:grid-cols-3 w-full bg-slate-50/80 rounded-3xl border border-slate-200 overflow-hidden shadow-md">
-      <div className="p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-200 bg-white">
+      <div className="p-4 md:p-5 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-200 bg-white">
          <div>
             <h4 className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2 mb-3"><Icon name="shield" size={20} className="text-emerald-600"/> The Moat</h4>
             <p className="text-xs font-semibold text-slate-600 leading-relaxed text-justify">Protecting your compounding engine from catastrophic external shocks.</p>
-            <div className="mt-6 p-5 bg-rose-50 border border-rose-100 rounded-2xl shadow-inner">
+            <div className="mt-4 p-4 bg-rose-50 border border-rose-100 rounded-2xl shadow-inner">
               <p className="text-[11px] font-bold text-rose-800 leading-relaxed text-justify"><strong className="text-rose-950 uppercase tracking-widest block mb-2 flex items-center gap-2"><Icon name="alert-circle" size={14}/> Advisor Warning</strong>"A single critical illness can vaporize 10+ years of compounding wealth in weeks. Do not let a hospital bill destroy your family's absolute freedom. Mathematically, protecting the core is step one."</p>
             </div>
          </div>
-         <div className={`mt-8 flex items-center justify-center gap-3 px-5 py-4 rounded-xl text-[11px] font-black uppercase tracking-widest border shadow-sm ${healthAnalysis.isAdequate ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-600 border-rose-700 text-white animate-pulse shadow-rose-200/50'}`}>
-            <Icon name={healthAnalysis.isAdequate ? "check-circle" : "alert-triangle"} size={20}/> {healthAnalysis.isAdequate ? "Moat is Secure" : "Critical Breach Detected"}
+         <div className={`mt-5 flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest border shadow-sm ${healthAnalysis.isAdequate ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-600 border-rose-700 text-white animate-pulse shadow-rose-200/50'}`}>
+            <Icon name={healthAnalysis.isAdequate ? "check-circle" : "alert-triangle"} size={18}/> {healthAnalysis.isAdequate ? "Moat is Secure" : "Critical Breach Detected"}
          </div>
       </div>
       
       <div className="flex flex-col border-b md:border-b-0 md:border-r border-slate-200 bg-white">
-         <div className="p-8 border-b border-slate-200 flex-1 flex flex-col justify-center">
+         <div className="p-4 md:p-5 border-b border-slate-200 flex-1 flex flex-col justify-center">
             <div className="flex justify-between items-center mb-4">
-               <div className="flex items-center gap-2"><Icon name="activity" size={24} className="text-rose-600"/><p className="text-xs font-black text-slate-500 uppercase tracking-widest">Medical Shield</p></div>
-               <p className="text-3xl font-black text-rose-700 tracking-tighter">{formatCurrency(healthAnalysis.recommended)}</p>
+               <div className="flex items-center gap-2"><Icon name="activity" size={20} className="text-rose-600"/><p className="text-xs font-black text-slate-500 uppercase tracking-widest">Medical Shield</p></div>
+               <p className="text-2xl lg:text-3xl font-black text-rose-700 tracking-tighter">{formatCurrency(healthAnalysis.recommended)}</p>
             </div>
             
             <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl mb-4 shadow-sm">
@@ -2720,36 +2777,36 @@ const rebalanceMandate = useMemo(() => {
 
             <p className="text-[10px] font-medium text-slate-600 leading-relaxed text-justify">Minimum required base cover accounting for aggressive 14% healthcare inflation. {healthAnalysis.shortfall > 0 ? <strong className="text-rose-600 block mt-2 text-[11px]">⚠️ Dangerous Shortfall: Underinsured by {formatCurrency(healthAnalysis.shortfall)}.</strong> : <strong className="text-emerald-600 block mt-2">✅ Optimal coverage maintained.</strong>}</p>
          </div>
-         <div className="p-8 flex-1 flex flex-col justify-center bg-slate-50/50">
+         <div className="p-4 md:p-5 flex-1 flex flex-col justify-center bg-slate-50/50">
             <div className="flex justify-between items-center mb-4">
-               <div className="flex items-center gap-2"><Icon name="wallet" size={24} className="text-amber-600"/><p className="text-xs font-black text-slate-500 uppercase tracking-widest">Liquidity Buffer</p></div>
-               <p className="text-3xl font-black text-amber-700 tracking-tighter">{formatCurrency(monthlyBurn * 6)}</p>
+               <div className="flex items-center gap-2"><Icon name="wallet" size={20} className="text-amber-600"/><p className="text-xs font-black text-slate-500 uppercase tracking-widest">Liquidity Buffer</p></div>
+               <p className="text-2xl lg:text-3xl font-black text-amber-700 tracking-tighter">{formatCurrency(monthlyBurn * 6)}</p>
             </div>
             <p className="text-xs font-medium text-slate-600 leading-relaxed text-justify">Mandatory baseline cash reserve strictly locked in FDs or Liquid funds to guarantee financial survival through exactly 6 months of zero active income.</p>
          </div>
       </div>
 
-      <div className="bg-indigo-50/40 p-8 flex flex-col justify-between">
+      <div className="bg-indigo-50/40 p-4 md:p-5 flex flex-col justify-between">
          <div>
-           <div className="flex items-center gap-3 mb-5">
-              <Icon name="heart" size={24} className="text-indigo-600"/>
+           <div className="flex items-center gap-3 mb-4">
+              <Icon name="heart" size={20} className="text-indigo-600"/>
               <p className="text-sm font-black text-indigo-900 uppercase tracking-widest">Human Capital Replacement</p>
            </div>
            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Required Term Life Cover</p>
-           <p className="text-5xl font-black text-indigo-700 tracking-tighter mb-5 inline-block px-4 py-2 bg-white border border-indigo-100 rounded-2xl shadow-sm">{formatCurrency(lifeCoverAnalysis.required)}</p>
+           <p className="text-3xl lg:text-4xl font-black text-indigo-700 tracking-tighter mb-4 inline-block px-3 py-2 bg-white border border-indigo-100 rounded-xl shadow-sm">{formatCurrency(lifeCoverAnalysis.required)}</p>
            
-           <div className="mt-2 mb-4 bg-white/60 rounded-xl p-3 border border-indigo-100 shadow-sm">
-             <p className="text-[9px] font-black text-indigo-800 uppercase tracking-widest mb-2 border-b border-indigo-100 pb-1">Estate Solvency Breakdown</p>
+           <div className="mt-1 mb-3 bg-white/60 rounded-xl p-2.5 border border-indigo-100 shadow-sm">
+             <p className="text-[9px] font-black text-indigo-800 uppercase tracking-widest mb-1.5 border-b border-indigo-100 pb-1">Estate Solvency Breakdown</p>
              <div className="grid grid-cols-3 gap-2 text-center">
-                <div><p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Goal Liability</p><p className="text-xs font-black text-rose-700">{formatCurrency(lifeCoverAnalysis.liability)}</p></div>
-                <div><p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Income Repl.</p><p className="text-xs font-black text-indigo-700">{formatCurrency(lifeCoverAnalysis.incomeRepl)}</p></div>
-                <div><p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Current Assets</p><p className="text-xs font-black text-emerald-700">-{formatCurrency(totalLiquidAssets)}</p></div>
+                <div><p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Goal Liability</p><p className="text-[11px] font-black text-rose-700">{formatCurrency(lifeCoverAnalysis.liability)}</p></div>
+                <div><p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Income Repl.</p><p className="text-[11px] font-black text-indigo-700">{formatCurrency(lifeCoverAnalysis.incomeRepl)}</p></div>
+                <div><p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Current Assets</p><p className="text-[11px] font-black text-emerald-700">-{formatCurrency(totalLiquidAssets)}</p></div>
              </div>
            </div>
            
-           <p className="text-[11px] font-medium text-slate-700 leading-relaxed text-justify bg-white/80 p-4 rounded-xl border border-slate-200 shadow-sm">If you do not wake up tomorrow, your family instantly loses this exact economic value. Term Life Insurance is mathematically required to ensure their lifestyle never downgrades.</p>
+           <p className="text-[10px] font-medium text-slate-700 leading-relaxed text-justify bg-white/80 p-3 rounded-xl border border-slate-200 shadow-sm">If you do not wake up tomorrow, your family instantly loses this exact economic value. Term Life Insurance is mathematically required to ensure their lifestyle never downgrades.</p>
          </div>
-         <div className="mt-8 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+         <div className="mt-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
             <div className="flex justify-between text-xs font-black text-slate-700 uppercase tracking-widest mb-3">
                <span className="flex flex-col gap-1"><span>Eligible / Req.</span><span className="text-indigo-700">{formatCurrency(lifeCoverAnalysis.required)}</span></span>
                <span className="flex flex-col gap-1 text-right"><span>Current Estimate</span><span className="text-slate-900">{lifeCoverAnalysis.existing > 0 ? formatCurrency(lifeCoverAnalysis.existing) : '₹0 (Uninsured)'}</span></span>
@@ -3069,121 +3126,166 @@ const rebalanceMandate = useMemo(() => {
                <div className="bg-white/80 backdrop-blur-md border border-white/80 rounded-xl px-5 py-3 shadow-sm flex items-center gap-5 shrink-0"><div className="text-center pr-5 border-r border-slate-300/50"><p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Total Goals</p><p className="text-2xl font-black text-slate-900 leading-none">{plan.length}</p></div><div><p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Total SIP Required</p><p className="text-2xl font-black text-teal-700 leading-none tracking-tight">{formatCurrency(totalSIPRequired)}<span className="text-[9px] text-slate-400 font-bold ml-1 uppercase">/mo</span></p></div></div>
             </div>
             
-            {/* NEW: Stark Reality Check Summary */}
-            <div className="mb-6 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden break-inside-avoid print-block">
-               <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
-                 <Icon name="eye" size={16} className="text-slate-600" />
-                 <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">The Inflation Reality Check</h4>
+            {/* UNIFIED GOAL EXECUTION MATRIX (Replaces Reality Check + Bulky Cards) */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden break-inside-avoid print-block relative z-10 mb-6 transition-all duration-300">
+               <div onClick={() => setIsRealityCheckExpanded(!isRealityCheckExpanded)} className="px-5 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-100 transition-colors">
+                 <div className="flex items-center gap-3">
+                   <div className="p-1.5 bg-teal-50 text-teal-600 rounded-lg"><Icon name="target" size={16} /></div>
+                   <div>
+                     <h4 className="text-sm font-black uppercase tracking-widest text-slate-900">Goal Execution & Tuning Matrix</h4>
+                     <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Click any row to expand and tune assumptions</p>
+                   </div>
+                 </div>
+                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm border ${isRealityCheckExpanded ? 'bg-white border-slate-200 text-slate-800' : 'bg-slate-100 border-slate-200 text-slate-500'}`}>
+                   <Icon name={isRealityCheckExpanded ? "chevron-up" : "chevron-down"} size={16} />
+                 </div>
                </div>
-               <div className="overflow-x-auto">
-                 <table className="w-full text-left text-xs tabular-nums">
-                   <thead className="bg-slate-50 text-[9px] font-black uppercase text-slate-500 tracking-widest">
-                     <tr>
-                       <th className="py-3 px-5 border-b border-slate-100">Financial Goal</th>
-                       <th className="py-3 px-5 border-b border-slate-100 text-right">Horizon</th>
-                       <th className="py-3 px-5 border-b border-slate-100 text-right">Cost Today</th>
-                       <th className="py-3 px-5 border-b border-slate-100 text-right text-rose-700">Inflated Target Cost</th>
-                     </tr>
-                   </thead>
-                   <tbody className="divide-y divide-slate-50">
-                     {plan.map((g) => (
-                       <tr key={`summary-${g.id}`} className="hover:bg-slate-50/50 transition-colors">
-                         <td className="py-3 px-5 font-bold text-slate-800 flex items-center gap-2"><Icon name={g.icon || "target"} size={14} className="text-slate-400"/> {g.name}</td>
-                         <td className="py-3 px-5 text-right font-medium text-slate-600">{g.horizon} Yrs</td>
-                         <td className="py-3 px-5 text-right font-medium text-slate-600">{formatCurrency(g.baseCost || g.target / Math.pow(1+(g.inflation||6)/100, g.horizon))}</td>
-                         <td className="py-3 px-5 text-right font-black text-rose-700 bg-rose-50/30">{formatCurrency(g.target)}</td>
-                       </tr>
-                     ))}
-                   </tbody>
-                 </table>
-               </div>
-            </div>
+               
+               {isRealityCheckExpanded && (
+                 <div className="flex flex-col animate-in slide-in-from-top-2">
+                    <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-3 bg-slate-100/80 border-b border-slate-200 text-[10px] font-black uppercase text-slate-500 tracking-widest items-center">
+                       <div className="col-span-3">Financial Goal</div>
+                       <div className="col-span-2">Horizon & Infl.</div>
+                       <div className="col-span-2 text-right">Cost Today</div>
+                       <div className="col-span-2 text-right text-rose-700">Target (Inflated)</div>
+                       <div className="col-span-3 text-right text-teal-700">Req. Monthly SIP</div>
+                    </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10 mb-5 break-inside-avoid print-block">
-              {plan.filter(g => g.id === 'retire').map(g => (
-                <div key={g.id} className={`group relative border rounded-2xl overflow-hidden transition-all duration-500 break-inside-avoid print-block md:col-span-2 lg:col-span-3 ${expandedGoal === g.id ? 'bg-white shadow-xl border-cyan-400 ring-2 ring-cyan-500/10' : 'bg-gradient-to-r from-slate-900 to-slate-800 border-slate-700 hover:shadow-lg'}`}>
-                  <div onClick={() => setExpandedGoal(expandedGoal === g.id ? null : g.id)} className="px-4 py-3 cursor-pointer flex justify-between items-center gap-4 transition-colors relative z-10"><div className="absolute right-0 top-0 w-40 h-40 bg-teal-500/10 blur-3xl rounded-full pointer-events-none"></div><div className="flex items-center gap-3 min-w-0 pr-4"><div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center border shadow-sm ${expandedGoal === g.id ? 'bg-cyan-50 border-cyan-200 text-cyan-700' : 'bg-slate-800/80 border-slate-600/80 text-teal-400'}`}><Icon name={g.icon || "target"} size={18}/></div><div className="min-w-0"><h4 className={`text-sm font-black uppercase tracking-widest truncate ${expandedGoal === g.id ? 'text-slate-900' : 'text-white'}`} title={g.name}>{g.name}</h4><p className={`text-[10px] font-bold mt-0.5 uppercase tracking-wider truncate ${expandedGoal === g.id ? 'text-slate-500' : 'text-slate-400'}`}>Anchor Goal • Tgt: <span className={expandedGoal === g.id ? 'text-slate-800' : 'text-white'}>{formatCurrency(g.target)}</span>{safeNumber(g.allocAmt) > 0 && <span className="text-teal-400 ml-2 font-black bg-teal-900/50 px-1.5 py-0.5 rounded border border-teal-800/50">Mapped: {formatCurrency(g.allocAmt)}</span>}{safeNumber(g.mappedSip) > 0 && <span className="text-emerald-400 ml-2 font-black bg-emerald-900/50 px-1.5 py-0.5 rounded border border-emerald-800/50">SIP Mapped: {formatCurrency(g.mappedSip)}/mo</span>}</p></div></div><div className="text-right flex items-center gap-4 shrink-0"><div className="text-right"><p className={`text-[11px] font-black uppercase tracking-widest mb-0.5 ${expandedGoal === g.id ? 'text-slate-500' : 'text-slate-400'}`}>Req. SIP</p><p className={`text-xl font-black leading-none tracking-tight ${expandedGoal === g.id ? 'text-teal-700' : 'text-teal-400'}`}>{formatCurrency(g.sip)}</p></div><div className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${expandedGoal === g.id ? 'bg-slate-100 text-slate-800' : 'bg-slate-700 text-slate-300'}`}><Icon name={expandedGoal === g.id ? "chevron-up" : "chevron-down"} size={14} /></div></div></div>
-                  {expandedGoal === g.id && (
-                    <div className="p-5 pt-0 border-t border-slate-200/50 animate-in fade-in slide-in-from-top-4 bg-slate-50/90 backdrop-blur-md">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-4">
-                        <div><label className="text-[11px] font-black text-slate-500 uppercase tracking-widest block mb-1.5">Assumed Return</label><div className="relative"><input type="number" value={g.returns} onChange={e => updateGoalParams(g.id, 'returns', e.target.value)} onKeyDown={handleKeyDownNext} className="w-full bg-white border border-slate-300 rounded-xl py-2 px-3 text-xs font-black text-slate-800 focus:border-cyan-400 outline-none shadow-sm transition-all focus:ring-2 focus:ring-cyan-500/10"/><span className="absolute right-3 top-2 text-xs font-bold text-slate-400">%</span></div></div>
-                        <div><label className="text-[11px] font-black text-slate-500 uppercase tracking-widest block mb-1.5">Annual Step-Up</label><div className="relative"><input type="number" value={g.stepUp} onChange={e => updateGoalParams(g.id, 'stepUp', e.target.value)} onKeyDown={handleKeyDownNext} className="w-full bg-white border border-slate-300 rounded-xl py-2 px-3 text-xs font-black text-slate-800 focus:border-cyan-400 outline-none shadow-sm transition-all focus:ring-2 focus:ring-cyan-500/10"/><span className="absolute right-3 top-2 text-xs font-bold text-slate-400">%</span></div></div>
-                        <div><label className="text-[11px] font-black text-slate-500 uppercase tracking-widest block mb-1.5">Inject Lumpsum</label><div className="relative"><span className="absolute left-3 top-2 text-xs font-black text-slate-400">₹</span><input type="number" value={g.lumpsum} onChange={e => updateGoalParams(g.id, 'lumpsum', e.target.value)} onKeyDown={handleKeyDownNext} className="w-full bg-white border border-slate-300 rounded-xl py-2 pl-8 pr-3 text-xs font-black text-teal-800 focus:border-cyan-400 outline-none shadow-sm transition-all focus:ring-2 focus:ring-cyan-500/10"/></div></div>
-                      </div>
-                      <div className="mt-4 pt-4 border-t border-slate-200/60">
-                        <h5 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><Icon name="list" size={12}/> Projected SIP Schedule</h5>
-                        <div className="w-full max-h-40 overflow-y-auto custom-scrollbar border border-slate-200/80 rounded-lg bg-white shadow-sm">
-                          <table className="w-full text-left text-[9px] tabular-nums">
-                            <thead className="bg-slate-100/90 backdrop-blur-sm sticky top-0 shadow-sm z-10">
-                              <tr>
-                                <th className="py-2 px-3 font-black text-slate-500 uppercase">Year</th>
-                                <th className="py-2 px-3 font-black text-slate-500 uppercase text-center">Age</th>
-                                <th className="py-2 px-3 font-black text-teal-700 uppercase text-right">Monthly SIP</th>
-                                <th className="py-2 px-3 font-black text-indigo-700 uppercase text-right">Annual Total</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                              {Array.from({length: Math.min(80, g.horizon)}).map((_, i) => {
-                                const ySip = g.sip * Math.pow(1 + ((g.stepUp || 0) / 100), i);
-                                return (
-                                  <tr key={i} className="hover:bg-slate-50 transition-colors">
-                                    <td className="py-1.5 px-3 font-bold text-slate-600">Y-{i+1}</td>
-                                    <td className="py-1.5 px-3 text-slate-500 text-center font-medium">{safeNumber(profile.age) + i + 1} Yrs</td>
-                                    <td className="py-1.5 px-3 text-right font-black text-teal-700">{formatCurrency(ySip)}<span className="text-[8px] text-teal-700/50 ml-0.5">/mo</span></td>
-                                    <td className="py-1.5 px-3 text-right font-bold text-indigo-600">{formatCurrency(ySip * 12)}</td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
+                    <div className="divide-y divide-slate-100">
+                       {plan.map(g => (
+                         <div key={g.id} className={`group flex flex-col transition-colors ${expandedGoal === g.id ? 'bg-slate-50 border-l-4 border-l-cyan-500' : 'hover:bg-slate-50 border-l-4 border-l-transparent'} ${g.isPaused ? 'opacity-60 grayscale' : ''}`}>
+                           
+                           {/* Main Row */}
+                           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 px-5 py-4 items-center cursor-pointer relative" onClick={() => setExpandedGoal(expandedGoal === g.id ? null : g.id)}>
+                             <div className="lg:col-span-3 flex items-center gap-3">
+                               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${g.id === 'retire' ? 'bg-slate-900 text-teal-400 border-slate-800 shadow-md' : 'bg-white text-slate-600 border-slate-200 shadow-sm'}`}><Icon name={g.icon || 'target'} size={16}/></div>
+                               <div className="flex-1 min-w-0">
+                                 <div className="flex items-center gap-2">
+                                   <h4 className={`text-xs font-black uppercase tracking-widest truncate ${g.id === 'retire' ? 'text-slate-900' : 'text-slate-800'}`} title={g.name}>{g.name}</h4>
+                                 </div>
+                                 {g.isPaused && <span className="text-[9px] font-bold bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded uppercase tracking-widest mt-1 inline-block">Paused</span>}
+                                 {/* Mobile Only Visibility for Costs */}
+                                 <div className="lg:hidden mt-1 flex items-center gap-2 text-[9px] font-bold">
+                                   <span className="text-slate-500">Cost: {formatCurrency(g.baseCost || g.target / Math.pow(1+(g.inflation||6)/100, g.horizon))}</span>
+                                   <span className="text-rose-600 border-l border-slate-300 pl-2">Target: {formatCurrency(g.target)}</span>
+                                 </div>
+                               </div>
+                             </div>
+
+                             <div className="hidden lg:flex lg:col-span-2 items-center gap-2">
+                               <span className="text-[10px] font-bold text-slate-600 bg-white px-2 py-1 rounded shadow-sm border border-slate-200 shrink-0">{g.horizon} Yrs</span>
+                               <span className="text-[9px] font-bold text-rose-600 bg-rose-50 px-1.5 py-1 rounded shadow-sm border border-rose-100 shrink-0">{g.inflation || 6}% Infl.</span>
+                             </div>
+
+                             <div className="hidden lg:flex lg:col-span-2 justify-end items-center">
+                               <span className="text-[11px] font-bold text-slate-600">{formatCurrency(g.baseCost || g.target / Math.pow(1+(g.inflation||6)/100, g.horizon))}</span>
+                             </div>
+
+                             <div className="hidden lg:flex lg:col-span-2 justify-end items-center">
+                               <span className="text-[11px] font-black text-rose-700 bg-rose-50/50 px-2 py-1 rounded border border-rose-100">{formatCurrency(g.target)}</span>
+                             </div>
+
+                             <div className="lg:col-span-3 flex justify-between lg:justify-end items-center gap-3">
+                               {/* Hover Actions - Fixed physical width prevents overlapping numbers */}
+                               <div className="hidden lg:flex w-[100px] justify-end shrink-0 mr-2">
+                                 {g.id !== 'retire' && (
+                                   <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1 shadow-sm" onClick={e => e.stopPropagation()}>
+                                     <button onClick={(e) => toggleGoalPause(e, g.id)} className={`w-7 h-7 flex items-center justify-center rounded transition-colors ${g.isPaused ? 'text-amber-600 bg-amber-50' : 'text-slate-400 hover:text-amber-600 hover:bg-slate-50'}`} title={g.isPaused ? "Resume Goal" : "Pause Goal"}><Icon name={g.isPaused ? "play" : "pause"} size={12}/></button>
+                                     <div className="w-px h-4 bg-slate-200"></div>
+                                     <button onClick={(e) => handleStartEdit(e, g)} className="w-7 h-7 flex items-center justify-center rounded text-slate-400 hover:text-teal-700 hover:bg-slate-50 transition-colors" title="Edit Goal Cost"><Icon name="edit-2" size={12}/></button>
+                                     <div className="w-px h-4 bg-slate-200"></div>
+                                     <button onClick={(e) => handleQuickDelete(e, g.id)} className="w-7 h-7 flex items-center justify-center rounded text-slate-400 hover:text-rose-700 hover:bg-rose-50 transition-colors" title="Delete Goal"><Icon name="trash-2" size={12}/></button>
+                                   </div>
+                                 )}
+                               </div>
+
+                               <div className="text-right min-w-[70px] shrink-0">
+                                 <p className="text-[9px] font-bold text-teal-700/70 uppercase tracking-widest lg:hidden mb-0.5">Req. SIP</p>
+                                 <p className="text-lg font-black text-teal-700 tracking-tight leading-none">{formatCurrency(g.sip)}</p>
+                               </div>
+                               
+                               <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors shrink-0 ${expandedGoal === g.id ? 'bg-teal-100 text-teal-800' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
+                                 <Icon name={expandedGoal === g.id ? "chevron-up" : "chevron-down"} size={16} />
+                               </div>
+                             </div>
+                           </div>
+
+                           {/* Inline Editor for Quick Cost Changes */}
+                           {inlineEdit.id === g.id && (
+                              <div className="px-5 pb-3 animate-in fade-in" onClick={e => e.stopPropagation()}>
+                                 <div className="flex items-center gap-2 bg-cyan-50 p-2 rounded-lg border border-cyan-200 w-fit">
+                                    <span className="text-[10px] font-black text-cyan-800 uppercase tracking-widest pl-1">Edit Cost Today:</span>
+                                    <input type="number" value={inlineEdit.cost} onChange={e => setInlineEdit({...inlineEdit, cost: e.target.value})} className="w-24 bg-white border border-cyan-200 rounded px-2 py-1.5 text-[11px] font-bold outline-none focus:border-cyan-500 shadow-inner" autoFocus onKeyDown={(e) => { if(e.key === 'Enter') handleSaveEdit(e); }} />
+                                    <button onClick={handleSaveEdit} className="p-1.5 bg-cyan-600 text-white rounded hover:bg-cyan-700 shadow-sm"><Icon name="check" size={14}/></button>
+                                 </div>
+                              </div>
+                           )}
+
+                           {/* Expanded Tuning Levers & SIP Schedule */}
+                           {expandedGoal === g.id && (
+                             <div className="px-5 pb-5 animate-in slide-in-from-top-2">
+                               <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-sm relative overflow-hidden">
+                                  <div className="absolute right-0 top-0 w-32 h-32 bg-slate-50 rounded-bl-full z-0"></div>
+                                  
+                                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 relative z-10">
+                                     <div className="space-y-4">
+                                        <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl text-[10px] text-amber-950 flex items-start gap-3 shadow-sm">
+                                           <Icon name="lightbulb" size={16} className="shrink-0 mt-0.5 text-amber-600"/>
+                                           <span className="font-medium leading-relaxed"><strong>Advisor Tip:</strong> Lower the required SIP by injecting a <strong>Lumpsum</strong> today or adding an <strong>Annual Step-Up %</strong> to scale with income over the next {g.horizon} years.</span>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                           <div><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Return</label><div className="relative"><input type="number" value={g.returns} onChange={e => updateGoalParams(g.id, 'returns', e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 text-[11px] font-black text-slate-800 outline-none focus:border-teal-500 focus:bg-white shadow-inner transition-all"/><span className="absolute right-3 top-2 text-[10px] font-bold text-slate-400">%</span></div></div>
+                                           <div><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Step-Up</label><div className="relative"><input type="number" value={g.stepUp} onChange={e => updateGoalParams(g.id, 'stepUp', e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 text-[11px] font-black text-slate-800 outline-none focus:border-teal-500 focus:bg-white shadow-inner transition-all"/><span className="absolute right-3 top-2 text-[10px] font-bold text-slate-400">%</span></div></div>
+                                           <div><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Lumpsum</label><div className="relative"><span className="absolute left-3 top-2 text-[10px] font-black text-slate-400">₹</span><input type="number" value={g.lumpsum} onChange={e => updateGoalParams(g.id, 'lumpsum', e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-lg py-2 pl-7 pr-3 text-[11px] font-black text-teal-800 outline-none focus:border-teal-500 focus:bg-white shadow-inner transition-all"/></div></div>
+                                        </div>
+                                        
+                                        {(safeNumber(g.allocAmt) > 0 || safeNumber(g.mappedSip) > 0) && (
+                                            <div className="flex gap-2 mt-3 pt-3 border-t border-slate-100">
+                                              {safeNumber(g.allocAmt) > 0 && <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded shadow-sm border border-indigo-200">Mapped PV: {formatCurrency(g.allocAmt)}</span>}
+                                              {safeNumber(g.mappedSip) > 0 && <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded shadow-sm border border-emerald-200">Mapped SIP: {formatCurrency(g.mappedSip)}/mo</span>}
+                                            </div>
+                                        )}
+                                     </div>
+
+                                     <div className="border-t xl:border-t-0 xl:border-l border-slate-200 pt-4 xl:pt-0 xl:pl-6">
+                                        <div className="flex items-center justify-between mb-3">
+                                          <h5 className="text-[10px] font-black text-slate-700 uppercase tracking-widest flex items-center gap-1.5"><Icon name="list" size={14} className="text-slate-400"/> SIP Trajectory</h5>
+                                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total: {formatCurrency(g.target)}</span>
+                                        </div>
+                                        <div className="w-full max-h-40 overflow-y-auto custom-scrollbar border border-slate-200 rounded-lg bg-slate-50 shadow-inner">
+                                          <table className="w-full text-left text-[10px] tabular-nums">
+                                            <thead className="bg-slate-200/80 backdrop-blur-sm sticky top-0 shadow-sm z-10">
+                                              <tr>
+                                                <th className="py-2 px-3 font-black text-slate-500 uppercase tracking-widest">Year</th>
+                                                <th className="py-2 px-3 font-black text-teal-700 uppercase tracking-widest text-right">Monthly SIP</th>
+                                                <th className="py-2 px-3 font-black text-indigo-700 uppercase tracking-widest text-right">Annual Total</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-200/60">
+                                              {Array.from({length: Math.min(80, g.horizon)}).map((_, i) => {
+                                                const ySip = g.sip * Math.pow(1 + ((g.stepUp || 0) / 100), i);
+                                                return (
+                                                  <tr key={i} className="hover:bg-white transition-colors">
+                                                    <td className="py-1.5 px-3 font-bold text-slate-600">Y-{i+1} <span className="text-[8px] text-slate-400 ml-1 font-medium">({safeNumber(profile.age) + i + 1}y)</span></td>
+                                                    <td className="py-1.5 px-3 text-right font-black text-teal-700">{formatCurrency(ySip)}</td>
+                                                    <td className="py-1.5 px-3 text-right font-bold text-indigo-600">{formatCurrency(ySip * 12)}</td>
+                                                  </tr>
+                                                );
+                                              })}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                     </div>
+                                  </div>
+                               </div>
+                             </div>
+                           )}
+                         </div>
+                       ))}
                     </div>
-                  )}
-                </div>
-              ))}
-              {plan.filter(g => g.id !== 'retire').map(g => (
-                <div key={g.id} className={`group relative border rounded-2xl overflow-hidden transition-all duration-500 break-inside-avoid print-block ${expandedGoal === g.id ? 'bg-white shadow-xl border-cyan-400 ring-2 ring-cyan-500/10 md:col-span-2 lg:col-span-3 transform scale-[1.01]' : 'bg-white/80 backdrop-blur-sm border-white/80 hover:bg-white hover:shadow-lg hover:-translate-y-1'} ${g.isPaused ? 'opacity-50 grayscale' : ''}`}>
-                  <div onClick={() => setExpandedGoal(expandedGoal === g.id ? null : g.id)} className="px-3 py-2.5 cursor-pointer flex justify-between items-center gap-3 transition-colors relative z-10"><div className="flex items-center gap-3 min-w-0 pr-3"><div className={`w-8 h-8 rounded-lg shrink-0 flex items-center justify-center border shadow-sm ${expandedGoal === g.id ? 'bg-cyan-50 border-cyan-200 text-cyan-700' : 'bg-slate-100/80 border-slate-200 text-slate-600'}`}><Icon name={g.icon || "target"} size={14}/></div><div className="min-w-0"><div className="flex items-center gap-2"><h4 className="text-[11px] font-black uppercase tracking-widest text-slate-900 truncate" title={g.name}>{g.name} {g.isPaused && "(Paused)"}</h4>{g.id !== 'retire' && (<div className="hidden group-hover:flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1 shadow-md no-print" onClick={e => e.stopPropagation()}><button onClick={(e) => toggleGoalPause(e, g.id)} className={`min-w-[36px] min-h-[36px] flex items-center justify-center rounded transition-colors ${g.isPaused ? 'text-amber-600 bg-amber-50' : 'text-slate-400 hover:text-amber-600 hover:bg-slate-50'}`} title={g.isPaused ? "Resume Goal" : "Pause Goal"}><Icon name={g.isPaused ? "play" : "pause"} size={14}/></button><div className="w-px h-6 bg-slate-200"></div><button onClick={(e) => handleStartEdit(e, g)} className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded text-slate-400 hover:text-teal-700 hover:bg-slate-50 transition-colors"><Icon name="edit-2" size={14}/></button><div className="w-px h-6 bg-slate-200"></div><button onClick={(e) => handleQuickDelete(e, g.id)} className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded text-slate-400 hover:text-rose-700 hover:bg-rose-50 transition-colors"><Icon name="trash-2" size={14}/></button></div>)}</div>{inlineEdit.id === g.id ? (<div className="flex items-center gap-2 mt-1 bg-cyan-50 p-1 rounded-md border border-cyan-200" onClick={e => e.stopPropagation()}><input type="number" value={inlineEdit.cost} onChange={e => setInlineEdit({...inlineEdit, cost: e.target.value})} className="w-20 bg-white border border-cyan-200 rounded px-2 py-1 text-[9px] font-bold outline-none focus:border-cyan-500 shadow-inner" autoFocus onKeyDown={(e) => { if(e.key === 'Enter') handleSaveEdit(e); }} /><button onClick={handleSaveEdit} className="p-1 bg-cyan-600 text-white rounded hover:bg-cyan-700"><Icon name="check" size={10}/></button></div>) : (<p className="text-[9px] font-bold text-slate-500 mt-0.5 uppercase tracking-wider truncate">{g.horizon} Yrs • Tgt: <span className="text-slate-800">{formatCurrency(g.target)}</span>{safeNumber(g.allocAmt) > 0 && <span className="text-indigo-600 ml-2 font-black bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">Mapped: {formatCurrency(g.allocAmt)}</span>}{safeNumber(g.mappedSip) > 0 && <span className="text-teal-600 ml-2 font-black bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">SIP Mapped: {formatCurrency(g.mappedSip)}/mo</span>}</p>)}</div></div><div className="text-right flex items-center gap-3 shrink-0"><div className="text-right"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Req. SIP</p><p className="text-lg font-black text-teal-700 leading-none tracking-tight">{formatCurrency(g.sip)}</p></div><div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${expandedGoal === g.id ? 'bg-slate-100 text-slate-800' : 'bg-transparent text-slate-400'}`}><Icon name={expandedGoal === g.id ? "chevron-up" : "chevron-down"} size={14} /></div></div></div>
-                  {expandedGoal === g.id && (
-                    <div className="p-4 pt-0 border-t border-slate-100 animate-in fade-in slide-in-from-top-4 bg-slate-50/80 backdrop-blur-sm">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-3">
-                        <div><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Assumed Return</label><div className="relative"><input type="number" value={g.returns} onChange={e => updateGoalParams(g.id, 'returns', e.target.value)} onKeyDown={handleKeyDownNext} className="w-full bg-white border border-slate-300 rounded-lg py-1.5 px-2.5 text-[10px] font-black text-slate-800 focus:border-cyan-500 outline-none shadow-sm transition-all focus:ring-1 focus:ring-cyan-500/10"/><span className="absolute right-2.5 top-1.5 text-[10px] font-bold text-slate-400">%</span></div></div>
-                        <div><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Annual Step-Up</label><div className="relative"><input type="number" value={g.stepUp} onChange={e => updateGoalParams(g.id, 'stepUp', e.target.value)} onKeyDown={handleKeyDownNext} className="w-full bg-white border border-slate-300 rounded-lg py-1.5 px-2.5 text-[10px] font-black text-slate-800 focus:border-cyan-500 outline-none shadow-sm transition-all focus:ring-1 focus:ring-cyan-500/10"/><span className="absolute right-2.5 top-1.5 text-[10px] font-bold text-slate-400">%</span></div></div>
-                        <div><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Inject Lumpsum</label><div className="relative"><span className="absolute left-2.5 top-1.5 text-[10px] font-black text-slate-400">₹</span><input type="number" value={g.lumpsum} onChange={e => updateGoalParams(g.id, 'lumpsum', e.target.value)} onKeyDown={handleKeyDownNext} className="w-full bg-white border border-slate-300 rounded-lg py-1.5 pl-6 pr-2.5 text-[10px] font-black text-teal-800 focus:border-cyan-500 outline-none shadow-sm transition-all focus:ring-1 focus:ring-cyan-500/10"/></div></div>
-                      </div>
-                      <div className="mt-3 pt-3 border-t border-slate-200/60">
-                        <h5 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5"><Icon name="list" size={12}/> Projected SIP Schedule</h5>
-                        <div className="w-full max-h-40 overflow-y-auto custom-scrollbar border border-slate-200/80 rounded-lg bg-white shadow-sm">
-                          <table className="w-full text-left text-[9px] tabular-nums">
-                            <thead className="bg-slate-100/90 backdrop-blur-sm sticky top-0 shadow-sm z-10">
-                              <tr>
-                                <th className="py-1.5 px-2 font-black text-slate-500 uppercase">Year</th>
-                                <th className="py-1.5 px-2 font-black text-slate-500 uppercase text-center">Age</th>
-                                <th className="py-1.5 px-2 font-black text-teal-700 uppercase text-right">Monthly SIP</th>
-                                <th className="py-1.5 px-2 font-black text-indigo-700 uppercase text-right">Annual Total</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                              {Array.from({length: Math.min(80, g.horizon)}).map((_, i) => {
-                                const ySip = g.sip * Math.pow(1 + ((g.stepUp || 0) / 100), i);
-                                return (
-                                  <tr key={i} className="hover:bg-slate-50 transition-colors">
-                                    <td className="py-1 px-2 font-bold text-slate-600">Y-{i+1}</td>
-                                    <td className="py-1 px-2 text-slate-500 text-center font-medium">{safeNumber(profile.age) + i + 1} Yrs</td>
-                                    <td className="py-1 px-2 text-right font-black text-teal-700">{formatCurrency(ySip)}<span className="text-[8px] text-teal-700/50 ml-0.5">/mo</span></td>
-                                    <td className="py-1 px-2 text-right font-bold text-indigo-600">{formatCurrency(ySip * 12)}</td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                 </div>
+               )}
             </div>
             
             {/* --- MASSIVE CALL TO ACTION FOR MASTER PROJECTION --- */}
@@ -3242,31 +3344,46 @@ const rebalanceMandate = useMemo(() => {
           ) : null}
 
           {showFullPreview && document.getElementById('root') ? ReactDOM.createPortal(
-            <div className="master-matrix-overlay animate-in fade-in duration-200 flex justify-center items-center p-0 md:p-2" style={{ zIndex: 999999, position: 'fixed', inset: 0, background: 'rgba(248,250,252,1)' }}>
-              <div className="w-full h-full flex flex-col bg-slate-50 relative overflow-hidden md:rounded-xl shadow-2xl">
+            <div className="master-matrix-overlay animate-in fade-in duration-200 flex justify-center items-center p-0" style={{ zIndex: 999999, position: 'fixed', inset: 0, background: 'rgba(248,250,252,1)' }}>
+              <div className="w-full h-full flex flex-col bg-slate-50 relative overflow-hidden rounded-none shadow-2xl">
                 
-                {/* 1. MAIN HEADER - COMPACTED */}
-                <div className="shrink-0 bg-white border-b border-slate-200 px-4 py-2 sm:px-6 sm:py-3 flex justify-between items-center z-50 shadow-sm">
-                  <div>
-                    <h2 className="text-lg sm:text-xl font-black text-slate-900 uppercase tracking-tighter leading-tight">Master Wealth Projection</h2>
-                    <p className="text-[9px] sm:text-[10px] text-teal-600 font-bold uppercase tracking-widest mt-0.5">Quantum Engine V2</p>
+                {/* 1. UNIFIED HEADER & TABS (BENTO STYLE) */}
+                <div className="shrink-0 bg-white border-b border-slate-200 px-4 py-2 sm:px-6 sm:py-2.5 flex flex-col md:flex-row md:items-center justify-between z-50 shadow-sm gap-3">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-black text-slate-900 uppercase tracking-tighter leading-tight">Master Projection</h2>
+                      <p className="text-[9px] text-teal-600 font-bold uppercase tracking-widest mt-0.5">Quantum Engine V2</p>
+                    </div>
+                    <div className="hidden md:block w-px h-8 bg-slate-200 mx-2"></div>
+                    <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 shadow-inner">
+                       <button onClick={() => setProjectionTab('strategy')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${projectionTab === 'strategy' ? 'bg-white text-teal-700 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'}`}>
+                         Core Strategy
+                       </button>
+                       <button onClick={() => setProjectionTab('mapping')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${projectionTab === 'mapping' ? 'bg-white text-teal-700 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'}`}>
+                         Wealth Flow
+                       </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                     <button onClick={downloadExcel} className="hidden sm:flex px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-[9px] font-black uppercase tracking-widest items-center gap-2 transition-all"><Icon name="file-spreadsheet" size={12}/> XLSX</button>
-                     <button onClick={() => setShowFullPreview(false)} className="w-8 h-8 sm:w-9 sm:h-9 bg-slate-900 text-white hover:bg-slate-800 shadow-md rounded-lg flex items-center justify-center transition-all ml-1"><Icon name="x" size={16}/></button>
+                  <div className="flex items-center gap-2 self-end md:self-auto">
+                     <button onClick={downloadExcel} className="hidden sm:flex px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-[9px] font-black uppercase tracking-widest items-center gap-2 transition-all"><Icon name="file-spreadsheet" size={12}/> Export XLSX</button>
+                     <button onClick={() => setShowFullPreview(false)} className="w-8 h-8 sm:w-9 sm:h-9 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 shadow-sm rounded-lg flex items-center justify-center transition-all ml-1"><Icon name="x" size={16}/></button>
                   </div>
                 </div>
 
-                {/* 2. TABS - COMPACTED */}
-                <div className="shrink-0 flex items-center gap-6 px-4 sm:px-6 border-b border-slate-200 bg-white pt-1">
-                   <button onClick={() => setProjectionTab('strategy')} className={`pb-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all relative ${projectionTab === 'strategy' ? 'text-teal-700' : 'text-slate-400 hover:text-slate-600'}`}>
-                     Core Strategy
-                     {projectionTab === 'strategy' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-teal-600 rounded-t-full"></div>}
-                   </button>
-                   <button onClick={() => setProjectionTab('mapping')} className={`pb-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-all relative ${projectionTab === 'mapping' ? 'text-teal-700' : 'text-slate-400 hover:text-slate-600'}`}>
-                     Existing Wealth Flow
-                     {projectionTab === 'mapping' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-teal-600 rounded-t-full"></div>}
-                   </button>
+                {/* 2. EXCEL-STYLE CLIENT CONTEXT RIBBON (ALWAYS VISIBLE WITH TOGGLE) */}
+                <div className="shrink-0 bg-slate-50/90 backdrop-blur-md border-b border-slate-200 px-4 py-2 sm:px-6 flex items-center justify-between gap-4 z-[45] shadow-[inset_0_1px_3px_rgba(0,0,0,0.02)] no-print">
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                    <div className="flex items-center gap-2"><Icon name="user" size={14} className="text-slate-400"/><span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Timeline:</span> <span className="text-[11px] font-bold text-slate-800">{profile.age} <span className="text-slate-400 font-normal mx-0.5">&rarr;</span> Retire @ {profile.retireAge} <span className="text-slate-400 font-normal mx-0.5">&rarr;</span> End @ {profile.horizonAge}</span></div>
+                    <div className="w-px h-3 bg-slate-300 hidden sm:block"></div>
+                    <div className="flex items-center gap-2"><Icon name="wallet" size={14} className="text-indigo-400"/><span className="text-[10px] font-black uppercase tracking-widest text-indigo-800/70">Liquid Wealth:</span> <span className="text-[12px] font-black text-indigo-700">{formatCurrency(totalLiquidAssets)}</span></div>
+                    <div className="w-px h-3 bg-slate-300 hidden sm:block"></div>
+                    <div className="flex items-center gap-2"><Icon name="flame" size={14} className="text-rose-400"/><span className="text-[10px] font-black uppercase tracking-widest text-rose-800/70">Burn Rate:</span> <span className="text-[11px] font-bold text-rose-600">{formatCurrency(monthlyBurnBase + monthlyInsVac)}/mo <span className="text-slate-400 font-normal mx-0.5">&rarr;</span> {formatCurrency(futureLife)}/mo <span className="text-rose-600/60 font-medium text-[9px]">(At Retirement)</span></span></div>
+                    <div className="w-px h-3 bg-slate-300 hidden sm:block"></div>
+                    <div className="flex items-center gap-2"><Icon name="refresh-cw" size={14} className="text-teal-400"/><span className="text-[10px] font-black uppercase tracking-widest text-teal-800/70">SIP Flow:</span> <span className={`text-[12px] font-black ${totalSIPRequired > safeNumber(profile.currentSip) ? 'text-rose-600' : 'text-teal-700'}`}>{formatCurrency(profile.currentSip)} <span className="text-slate-400 font-medium mx-0.5 text-[10px] uppercase">vs</span> {formatCurrency(totalSIPRequired)} <span className="text-[9px] font-bold uppercase ml-0.5 text-slate-500">Req</span></span></div>
+                  </div>
+                  <button onClick={() => setIsControlPanelExpanded(!isControlPanelExpanded)} className={`shrink-0 flex px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest items-center gap-1.5 transition-all border ${!isControlPanelExpanded ? 'bg-indigo-100 text-indigo-700 border-indigo-200 shadow-inner' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 shadow-sm'}`}>
+                     <Icon name={isControlPanelExpanded ? "chevron-up" : "chevron-down"} size={14}/> {isControlPanelExpanded ? 'Collapse' : 'Expand'}
+                  </button>
                 </div>
 
                 {/* 3. CONTENT AREA - SCROLLING PANELS & SCROLLING TABLE */}
@@ -3274,8 +3391,9 @@ const rebalanceMandate = useMemo(() => {
                   <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#F8FAFC] flex flex-col">
                     
                     {/* TOP PANEL (Controls & Tuner) - Native tab scrolling */}
-                    <div className="shrink-0 px-4 sm:px-6 pt-4 pb-2 z-30">
-                      <div className="w-full space-y-3">
+                    {isControlPanelExpanded && (
+                      <div className="shrink-0 px-4 sm:px-6 pt-4 pb-0 z-30">
+                        <div className="w-full space-y-3 mb-3 animate-in slide-in-from-top-2">
 
                         {depletionYear && (
                            <div className="py-2.5 px-4 bg-rose-600 border border-rose-700 rounded-xl text-white flex items-center justify-between shadow-lg mb-3 animate-in slide-in-from-top-2">
@@ -3305,216 +3423,245 @@ const rebalanceMandate = useMemo(() => {
                            </div>
                         )}
 
-                        {/* B. Advanced Asset Tuner Accordion */}
-                        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all duration-300">
-                           <div onClick={() => setIsTunerExpanded(!isTunerExpanded)} className="px-3 py-2 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-colors">
-                              <div className="flex items-center gap-2">
-                                 <div className="p-1 bg-indigo-50 text-indigo-600 rounded-md"><Icon name="sliders" size={10}/></div>
-                                 <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-1">Asset Tuner <Icon name={isTunerExpanded ? "chevron-up" : "chevron-down"} size={10} className="text-slate-400"/></h3>
-                              </div>
-                              <div className="bg-slate-50 border border-slate-200 rounded px-2 py-0.5 text-right flex items-center gap-2">
-                                 <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">Blended Return</p>
-                                 <p className="text-[10px] font-black text-teal-700 leading-none">{engineBlendedReturn.toFixed(2)}%</p>
-                              </div>
-                           </div>
-                           
-                           {isTunerExpanded && (
-                             <div className="p-3 border-t border-slate-100 bg-slate-50 animate-in slide-in-from-top-2">
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                                   {assetMix.map((a, idx) => {
-                                      if (a.pct === 0 && !isTunerExpanded) return null; 
-                                      return (
-                                      <div key={a.id} className={`flex flex-col p-1.5 rounded border transition-all ${a.pct > 0 || a.fundName ? 'bg-white border-indigo-200 shadow-sm' : 'bg-slate-100/50 border-slate-200'}`}>
-                                         <span className="text-[9px] font-bold text-slate-700 truncate mb-1 uppercase tracking-wider" title={a.label}>{a.label}</span>
-                                         <div className="mb-1">
-                                            <input type="text" value={a.fundName || ''} onChange={e=>{const m=[...assetMix]; m[idx].fundName=e.target.value; setAssetMix(m);}} className="w-full text-[9px] font-medium py-0.5 px-1.5 border border-slate-200 rounded bg-white outline-none focus:border-indigo-400 placeholder:text-slate-400" placeholder="AMC / Fund Name"/>
-                                         </div>
-                                         <div className="flex gap-1">
-                                            <div className="relative w-1/2 border border-slate-200 rounded bg-slate-50 flex items-center">
-                                                <span className="text-[7px] font-black text-slate-400 px-1 border-r border-slate-200 bg-slate-100 h-full flex items-center">WT</span>
-                                                <input type="number" value={a.pct===0?'':a.pct} onChange={e=>{const m=[...assetMix]; m[idx].pct=Number(e.target.value); setAssetMix(m);}} className="w-full text-[9px] font-bold py-0.5 px-1 bg-transparent text-slate-900 outline-none text-center" placeholder="0"/>
-                                            </div>
-                                            <div className="relative w-1/2 border border-slate-200 rounded bg-teal-50 flex items-center">
-                                                <span className="text-[7px] font-black text-teal-600 px-1 border-r border-teal-200 bg-teal-100 h-full flex items-center">RT</span>
-                                                <input type="number" value={a.ret===0?'':a.ret} onChange={e=>{const m=[...assetMix]; m[idx].ret=Number(e.target.value); setAssetMix(m);}} className="w-full text-[9px] font-bold py-0.5 px-1 bg-transparent text-teal-900 outline-none text-center" placeholder="0"/>
-                                            </div>
-                                         </div>
-                                      </div>
-                                   )})}
+                        {/* BENTO GRID FOR TUNERS */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-1">
+                          {/* B. Advanced Asset Tuner Accordion */}
+                          <div className={`bg-white border rounded-xl shadow-sm overflow-hidden transition-all duration-300 ${isTunerExpanded ? 'border-indigo-300 ring-1 ring-indigo-500/10 col-span-full' : 'border-slate-200'}`}>
+                             <div onClick={() => { setIsTunerExpanded(!isTunerExpanded); if(!isTunerExpanded) setIsGoalTunerExpanded(false); }} className={`px-3 py-2 flex justify-between items-center cursor-pointer transition-colors ${isTunerExpanded ? 'bg-indigo-50/80 border-b border-indigo-100' : 'hover:bg-slate-50'}`}>
+                                <div className="flex items-center gap-2">
+                                   <div className="p-1 bg-indigo-100 text-indigo-700 rounded-md"><Icon name="sliders" size={10}/></div>
+                                   <h3 className="text-[10px] font-black text-indigo-950 uppercase tracking-widest flex items-center gap-1">Asset Tuner <Icon name={isTunerExpanded ? "chevron-up" : "chevron-down"} size={10} className={isTunerExpanded ? "text-indigo-500" : "text-slate-400"}/></h3>
                                 </div>
-                                <div className="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center">
-                                   <div>
-                                      <h4 className="text-[10px] font-black text-slate-700 uppercase tracking-widest flex items-center gap-1.5"><Icon name="home" size={12}/> Illiquid Asset Unlock</h4>
-                                      <p className="text-[9px] font-medium text-slate-500 mt-0.5">Simulate liquidating Real Estate into deployable equity.</p>
-                                   </div>
-                                   <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors shadow-inner ${liquidateRE ? 'bg-indigo-600' : 'bg-slate-300'}`} onClick={() => setLiquidateRE(!liquidateRE)}>
-                                      <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${liquidateRE ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                                   </div>
+                                <div className="bg-white border border-indigo-100 rounded px-2 py-0.5 text-right flex items-center gap-2 shadow-sm">
+                                   <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">Blended Return</p>
+                                   <p className="text-[10px] font-black text-teal-700 leading-none">{(() => {
+                                      const mixToUse = activeTunerTarget === 'legacy' ? assetMix : (goalMixes[activeTunerTarget] || []);
+                                      let tPct = 0; let wRet = 0; mixToUse.forEach(a => { tPct += safeNumber(a.pct); wRet += safeNumber(a.pct) * safeNumber(a.ret); });
+                                      return tPct > 0 ? (wRet / tPct).toFixed(2) : (activeTunerTarget === 'legacy' ? engineBlendedReturn.toFixed(2) : 'Default');
+                                   })()}{activeTunerTarget === 'legacy' || (goalMixes[activeTunerTarget] && goalMixes[activeTunerTarget].some(a => a.pct > 0)) ? '%' : ''}</p>
                                 </div>
                              </div>
-                           )}
-                        </div>
+                             
+                             {isTunerExpanded && (
+                               <div className="p-3 border-t border-slate-100 bg-slate-50 animate-in slide-in-from-top-2">
+                                  <div className="mb-3 flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+                                     <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5"><Icon name="target" size={12} className="text-slate-400"/> Select Portfolio to Tune:</label>
+                                     <select value={activeTunerTarget} onChange={e => setActiveTunerTarget(e.target.value)} className="text-[10px] font-bold outline-none bg-slate-50 border border-slate-200 rounded px-2 py-1.5 text-slate-800 shadow-inner cursor-pointer focus:ring-1 focus:ring-indigo-500/30">
+                                       <option value="all_goals">All Active Goals (Bulk Apply)</option>
+                                       <option value="legacy">Master Portfolio (Legacy Pot)</option>
+                                       {plan.map(g => <option key={g.id} value={g.id}>Goal: {g.name}</option>)}
+                                     </select>
+                                  </div>
+                                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                                     {(activeTunerTarget === 'legacy' ? assetMix : (goalMixes[activeTunerTarget] || assetMix.map(a => ({...a, pct: 0, fundName: ''})))).map((a, idx) => {
+                                        if (a.pct === 0 && !isTunerExpanded) return null; 
+                                        return (
+                                        <div key={a.id} className={`flex flex-col p-1.5 rounded border transition-all ${a.pct > 0 || a.fundName ? 'bg-white border-indigo-200 shadow-sm ring-1 ring-indigo-500/10' : 'bg-slate-100/50 border-slate-200 hover:bg-white hover:border-slate-300'}`}>
+                                           <span className="text-[9px] font-bold text-slate-700 truncate mb-1 uppercase tracking-wider" title={a.label}>{a.label}</span>
+                                           <div className="mb-1">
+                                              <input type="text" value={a.fundName || ''} onChange={e=>{
+                                                  const val = e.target.value;
+                                                  if (activeTunerTarget === 'legacy') { const m=[...assetMix]; m[idx].fundName=val; setAssetMix(m); }
+                                                  else if (activeTunerTarget === 'all_goals') { const m = goalMixes['all_goals'] ? [...goalMixes['all_goals']] : assetMix.map(x => ({...x, pct:0, fundName:''})); m[idx].fundName=val; const next = {...goalMixes, all_goals: m}; plan.forEach(g => next[g.id] = m); setGoalMixes(next); }
+                                                  else { const m = goalMixes[activeTunerTarget] ? [...goalMixes[activeTunerTarget]] : assetMix.map(x => ({...x, pct:0, fundName:''})); m[idx].fundName=val; setGoalMixes({...goalMixes, [activeTunerTarget]: m}); }
+                                              }} className="w-full text-[9px] font-medium py-0.5 px-1.5 border border-slate-200 rounded bg-white outline-none focus:border-indigo-400 placeholder:text-slate-400 shadow-inner" placeholder="AMC / Fund Name"/>
+                                           </div>
+                                           <div className="flex gap-1">
+                                              <div className="relative w-1/2 border border-slate-200 rounded bg-slate-50 flex items-center shadow-inner">
+                                                  <span className="text-[7px] font-black text-slate-400 px-1 border-r border-slate-200 bg-slate-100 h-full flex items-center">WT</span>
+                                                  <input type="number" value={a.pct===0?'':a.pct} onChange={e=>{
+                                                      const val = Number(e.target.value);
+                                                      if (activeTunerTarget === 'legacy') { const m=[...assetMix]; m[idx].pct=val; setAssetMix(m); }
+                                                      else if (activeTunerTarget === 'all_goals') { const m = goalMixes['all_goals'] ? [...goalMixes['all_goals']] : assetMix.map(x => ({...x, pct:0, fundName:''})); m[idx].pct=val; const next = {...goalMixes, all_goals: m}; plan.forEach(g => next[g.id] = m); setGoalMixes(next); }
+                                                      else { const m = goalMixes[activeTunerTarget] ? [...goalMixes[activeTunerTarget]] : assetMix.map(x => ({...x, pct:0, fundName:''})); m[idx].pct=val; setGoalMixes({...goalMixes, [activeTunerTarget]: m}); }
+                                                  }} className="w-full text-[9px] font-bold py-0.5 px-1 bg-transparent text-slate-900 outline-none text-center" placeholder="0"/>
+                                              </div>
+                                              <div className="relative w-1/2 border border-slate-200 rounded bg-teal-50 flex items-center shadow-inner">
+                                                  <span className="text-[7px] font-black text-teal-600 px-1 border-r border-teal-200 bg-teal-100 h-full flex items-center">RT</span>
+                                                  <input type="number" value={a.ret===0?'':a.ret} onChange={e=>{
+                                                      const val = Number(e.target.value);
+                                                      if (activeTunerTarget === 'legacy') { const m=[...assetMix]; m[idx].ret=val; setAssetMix(m); }
+                                                      else if (activeTunerTarget === 'all_goals') { const m = goalMixes['all_goals'] ? [...goalMixes['all_goals']] : assetMix.map(x => ({...x, pct:0, fundName:''})); m[idx].ret=val; const next = {...goalMixes, all_goals: m}; plan.forEach(g => next[g.id] = m); setGoalMixes(next); }
+                                                      else { const m = goalMixes[activeTunerTarget] ? [...goalMixes[activeTunerTarget]] : assetMix.map(x => ({...x, pct:0, fundName:''})); m[idx].ret=val; setGoalMixes({...goalMixes, [activeTunerTarget]: m}); }
+                                                  }} className="w-full text-[9px] font-bold py-0.5 px-1 bg-transparent text-teal-900 outline-none text-center" placeholder="0"/>
+                                              </div>
+                                           </div>
+                                        </div>
+                                     )})}
+                                  </div>
+                                  <div className="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center">
+                                     <div>
+                                        <h4 className="text-[10px] font-black text-slate-700 uppercase tracking-widest flex items-center gap-1.5"><Icon name="home" size={12}/> Illiquid Asset Unlock</h4>
+                                        <p className="text-[9px] font-medium text-slate-500 mt-0.5">Simulate liquidating Real Estate into deployable equity.</p>
+                                     </div>
+                                     <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors shadow-inner ${liquidateRE ? 'bg-indigo-600' : 'bg-slate-300'}`} onClick={() => setLiquidateRE(!liquidateRE)}>
+                                        <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${liquidateRE ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                                     </div>
+                                  </div>
+                               </div>
+                             )}
+                          </div>
 
-                        {/* C. Goal Accelerators Accordion */}
-                        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all duration-300 mt-2">
-                           <div onClick={() => setIsGoalTunerExpanded(!isGoalTunerExpanded)} className="px-3 py-2 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-colors">
-                              <div className="flex items-center gap-2">
-                                 <div className="p-1 bg-emerald-50 text-emerald-600 rounded-md"><Icon name="target" size={10}/></div>
-                                 <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-1">Goal Accelerators <Icon name={isGoalTunerExpanded ? "chevron-up" : "chevron-down"} size={10} className="text-slate-400"/></h3>
-                              </div>
-                              <div className="bg-slate-50 border border-slate-200 rounded px-2 py-0.5 text-right flex items-center gap-2">
-                                 <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">Total SIP Req</p>
-                                 <p className="text-[10px] font-black text-teal-700 leading-none">{formatCurrency(totalSIPRequired)}</p>
-                              </div>
-                           </div>
-                           
-                           {isGoalTunerExpanded && (
-                             <div className="p-2 border-t border-slate-100 bg-slate-50 flex flex-col gap-1.5 max-h-[35vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-top-2">
-                                {plan.map(g => (
-                                   <div key={g.id} className={`flex flex-col bg-white border rounded-lg transition-all ${matrixExpandedGoal === g.id ? 'border-emerald-300 shadow-md ring-1 ring-emerald-500/20' : 'border-slate-200 shadow-sm hover:border-slate-300'}`}>
-                                      <div onClick={() => setMatrixExpandedGoal(matrixExpandedGoal === g.id ? null : g.id)} className="flex justify-between items-center p-2.5 cursor-pointer">
-                                         <div className="flex items-center gap-2 w-1/2">
-                                            <div className="w-6 h-6 rounded bg-slate-100 text-slate-500 flex items-center justify-center shrink-0"><Icon name={g.icon || 'target'} size={12}/></div>
-                                            <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest truncate">{g.name}</span>
-                                         </div>
-                                         <div className="flex items-center gap-3 w-1/2 justify-end">
-                                            <div className="text-right hidden sm:block"><p className="text-[7px] text-slate-400 uppercase font-bold">Target</p><p className="text-[9px] font-black text-slate-700">{formatCurrency(g.target)}</p></div>
-                                            <div className="text-right"><p className="text-[7px] text-slate-400 uppercase font-bold">Req. SIP</p><p className="text-[11px] font-black text-teal-700">{formatCurrency(g.sip)}</p></div>
-                                            <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${matrixExpandedGoal === g.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>
-                                              <Icon name={matrixExpandedGoal === g.id ? "chevron-up" : "chevron-down"} size={12}/>
-                                            </div>
-                                         </div>
-                                      </div>
-                                      {matrixExpandedGoal === g.id && (
-                                         <div className="p-3 pt-0 border-t border-slate-100 bg-slate-50/50 flex flex-col gap-3 animate-in fade-in rounded-b-lg">
-                                            <div className="bg-emerald-50/50 border border-emerald-100 p-2 rounded-md text-[9px] text-emerald-900 flex items-start gap-2 mt-3">
-                                               <Icon name="zap" size={12} className="shrink-0 mt-0.5 text-emerald-600"/>
-                                               <span className="font-medium leading-relaxed"><strong>Accelerate {g.name}:</strong> Enter a lumpsum injection or an annual SIP step-up below to instantly recalculate and lower your required starting SIP.</span>
-                                            </div>
-                                            <div className="grid grid-cols-3 gap-3">
-                                               <InputField label="Return %" value={g.returns} onChange={e => updateGoalParams(g.id, 'returns', e.target.value)} suffix="%" />
-                                               <InputField label="Step-up %" value={g.stepUp} onChange={e => updateGoalParams(g.id, 'stepUp', e.target.value)} suffix="%" />
-                                               <InputField label="Lumpsum" value={g.lumpsum} onChange={e => updateGoalParams(g.id, 'lumpsum', e.target.value)} prefix="₹" />
-                                            </div>
-                                         </div>
-                                      )}
-                                   </div>
-                                ))}
+                          {/* C. Goal Accelerators Accordion */}
+                          <div className={`bg-white border rounded-xl shadow-sm overflow-hidden transition-all duration-300 ${isGoalTunerExpanded ? 'border-emerald-300 ring-1 ring-emerald-500/10 col-span-full' : 'border-slate-200'}`}>
+                             <div onClick={() => { setIsGoalTunerExpanded(!isGoalTunerExpanded); if(!isGoalTunerExpanded) setIsTunerExpanded(false); }} className={`px-3 py-2 flex justify-between items-center cursor-pointer transition-colors ${isGoalTunerExpanded ? 'bg-emerald-50/80 border-b border-emerald-100' : 'hover:bg-slate-50'}`}>
+                                <div className="flex items-center gap-2">
+                                   <div className="p-1 bg-emerald-100 text-emerald-700 rounded-md"><Icon name="target" size={10}/></div>
+                                   <h3 className="text-[10px] font-black text-emerald-950 uppercase tracking-widest flex items-center gap-1">Goal Accelerators <Icon name={isGoalTunerExpanded ? "chevron-up" : "chevron-down"} size={10} className={isGoalTunerExpanded ? "text-emerald-500" : "text-slate-400"}/></h3>
+                                </div>
+                                <div className="bg-white border border-emerald-100 rounded px-2 py-0.5 text-right flex items-center gap-2 shadow-sm">
+                                   <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">Total SIP Req</p>
+                                   <p className="text-[10px] font-black text-teal-700 leading-none">{formatCurrency(totalSIPRequired)}</p>
+                                </div>
                              </div>
-                           )}
+                             
+                             {isGoalTunerExpanded && (
+                               <div className="p-2 border-t border-slate-100 bg-slate-50 flex flex-col gap-1.5 max-h-[35vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-top-2">
+                                  {plan.map(g => (
+                                     <div key={g.id} className={`flex flex-col bg-white border rounded-lg transition-all ${matrixExpandedGoal === g.id ? 'border-emerald-300 shadow-md ring-1 ring-emerald-500/20' : 'border-slate-200 shadow-sm hover:border-slate-300'}`}>
+                                        <div onClick={() => setMatrixExpandedGoal(matrixExpandedGoal === g.id ? null : g.id)} className="flex justify-between items-center p-2.5 cursor-pointer">
+                                           <div className="flex items-center gap-2 w-1/2">
+                                              <div className="w-6 h-6 rounded bg-slate-100 text-slate-500 flex items-center justify-center shrink-0"><Icon name={g.icon || 'target'} size={12}/></div>
+                                              <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest truncate">{g.name}</span>
+                                           </div>
+                                           <div className="flex items-center gap-3 w-1/2 justify-end">
+                                              <div className="text-right hidden sm:block"><p className="text-[7px] text-slate-400 uppercase font-bold">Target</p><p className="text-[9px] font-black text-slate-700">{formatCurrency(g.target)}</p></div>
+                                              <div className="text-right"><p className="text-[7px] text-slate-400 uppercase font-bold">Req. SIP</p><p className={`text-[11px] font-black ${g.sip <= 0 ? 'text-emerald-600' : 'text-teal-700'}`}>{g.sip <= 0 ? '₹0 (Funded)' : formatCurrency(g.sip)}</p></div>
+                                              <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${matrixExpandedGoal === g.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'}`}>
+                                                <Icon name={matrixExpandedGoal === g.id ? "chevron-up" : "chevron-down"} size={12}/>
+                                              </div>
+                                           </div>
+                                        </div>
+                                        {matrixExpandedGoal === g.id && (
+                                           <div className="p-3 pt-0 border-t border-slate-100 bg-slate-50/50 flex flex-col gap-3 animate-in fade-in rounded-b-lg">
+                                              <div className="bg-gradient-to-r from-emerald-50 to-white border border-emerald-100 p-2.5 rounded-lg text-[9px] text-emerald-950 flex items-start gap-2 mt-3 shadow-sm">
+                                                 <Icon name="lightbulb" size={14} className="shrink-0 mt-0.5 text-emerald-600"/>
+                                                 <span className="font-medium leading-relaxed">
+                                                   <strong>Advisor Intelligence for {g.name}:</strong> 
+                                                   {g.sip <= 0 ? 
+                                                      ` Goal fully funded via mapped assets.` :
+                                                      ` To drop this SIP to ₹0, inject a lumpsum of <strong>${formatCurrency(Math.max(0, g.remainingTarget / Math.pow(1 + (g.returns||12)/100, g.horizon)))}</strong> today. Or, add a <strong>10% Annual Step-Up</strong> to reduce starting SIP to <strong>${formatCurrency(calculateStepUpSip(g.remainingTarget, g.horizon, g.returns||12, 10, safeNumber(g.lumpsum)))}/mo</strong>.`
+                                                   }
+                                                 </span>
+                                              </div>
+                                              <div className="grid grid-cols-3 gap-3">
+                                                 <InputField label="Return %" value={g.returns} onChange={e => updateGoalParams(g.id, 'returns', e.target.value)} suffix="%" />
+                                                 <InputField label="Step-up %" value={g.stepUp} onChange={e => updateGoalParams(g.id, 'stepUp', e.target.value)} suffix="%" />
+                                                 <InputField label="Lumpsum" value={g.lumpsum} onChange={e => updateGoalParams(g.id, 'lumpsum', e.target.value)} prefix="₹" />
+                                              </div>
+                                           </div>
+                                        )}
+                                     </div>
+                                  ))}
+                               </div>
+                             )}
+                          </div>
                         </div>
 
+                        </div>
                       </div>
-                    </div>
+                    )}
 
-                    {/* NEW STRUCTURE: MASSIVE SCROLLING TABLE AREA WITH PINNED FILTERS */}
-                    <div className="px-4 sm:px-6 pb-8 mt-2 flex-1 flex flex-col min-h-[85vh] sm:min-h-[800px] shrink-0" onClick={() => { setIsTunerExpanded(false); setIsGoalTunerExpanded(false); }}>
-                       <div className="w-full flex-1 bg-white border border-slate-300 rounded-xl shadow-md flex flex-col overflow-hidden relative cursor-default">
+                    {/* NEW STRUCTURE: EXCEL-EDGE MASSIVE SCROLLING TABLE AREA */}
+                    <div className="flex-1 flex flex-col shrink-0" onClick={() => { setIsTunerExpanded(false); setIsGoalTunerExpanded(false); }}>
+                       <div className="w-full flex-1 bg-white flex flex-col overflow-hidden relative cursor-default border-t border-slate-300 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
                            
-                           {/* PINNED FILTERS & BANNERS */}
-                           <div className="shrink-0 bg-slate-50 border-b border-slate-300 p-3 flex flex-col gap-2 z-[60] shadow-sm">
-                               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
-                                   <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                                     <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest hidden xl:block">Scenario:</div>
-                                     <div className="flex bg-slate-200/50 p-1.5 rounded-xl border border-slate-300 shadow-inner">
-                                        <button onClick={() => setScenario('bear')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='bear' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}>🐻 Bear</button>
-                                        <button onClick={() => setScenario('base')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='base' ? 'bg-slate-900 text-white shadow-sm border border-slate-800' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}>⚖️ Base</button>
-                                        <button onClick={() => setScenario('bull')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='bull' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}>🐂 Bull</button>
-                                     </div>
-                                     <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 lg:pb-0 w-full sm:w-auto mt-2 lg:mt-0">
-                                       <button onClick={() => setShowPostTax(!showPostTax)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${showPostTax ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}><div className={`w-1.5 h-1.5 rounded-full ${showPostTax ? 'bg-white' : 'bg-slate-400'}`}></div>Tax Mode</button>
-                                       <button onClick={() => setTaxHarvesting(!taxHarvesting)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${taxHarvesting ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}><div className={`w-1.5 h-1.5 rounded-full ${taxHarvesting ? 'bg-white' : 'bg-slate-400'}`}></div>Tax Harvest</button>
-                                       <button onClick={() => setShowRealValue(!showRealValue)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${showRealValue ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}><div className={`w-1.5 h-1.5 rounded-full ${showRealValue ? 'bg-white' : 'bg-slate-400'}`}></div>Real Value</button>
-                                       <div className="w-px h-6 bg-slate-300 mx-1 hidden sm:block"></div>
-                                       <button onClick={() => setGlidePath(!glidePath)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${glidePath ? 'bg-amber-600 text-white shadow-md border border-amber-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}><div className={`w-1.5 h-1.5 rounded-full ${glidePath ? 'bg-white' : 'bg-slate-400'}`}></div>Glide Path</button>
-                                       <button onClick={() => setSequenceRisk(!sequenceRisk)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${sequenceRisk ? 'bg-orange-600 text-white shadow-md border border-orange-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}><div className={`w-1.5 h-1.5 rounded-full ${sequenceRisk ? 'bg-white' : 'bg-slate-400'}`}></div>Seq. Risk</button>
-                                       <button onClick={() => setBlackSwan(!blackSwan)} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-1.5 shrink-0 ${blackSwan ? 'bg-rose-900 text-white shadow-[0_0_10px_rgba(225,29,72,0.5)] border border-rose-500' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'}`}>🦢 Black Swan</button>
-                                     </div>
+                           {isControlPanelExpanded && (
+                             <React.Fragment>
+                               {/* PRO TACTICAL TOOLBAR - UPGRADED SEGMENTED CONTROLS */}
+                               <div className="shrink-0 bg-white border-b border-slate-200 px-3 py-2 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 z-[60] shadow-sm relative animate-in slide-in-from-top-1">
+                                   <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto">
+                                       {/* Scenario Segmented Control */}
+                                       <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-1 rounded-xl shadow-inner">
+                                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-2 pr-1">Scenario:</span>
+                                          <div className="flex bg-slate-200/50 p-0.5 rounded-lg">
+                                            <button onClick={() => setScenario('bear')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='bear' ? 'bg-white text-rose-600 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}>🐻 Bear</button>
+                                            <button onClick={() => setScenario('base')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='base' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>⚖️ Base</button>
+                                            <button onClick={() => setScenario('bull')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-1.5 ${scenario==='bull' ? 'bg-white text-emerald-600 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}>🐂 Bull</button>
+                                          </div>
+                                       </div>
+
+                                       {/* Tactical Levers (Hardware LED Switches) */}
+                                       <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 p-1 rounded-xl shadow-inner overflow-x-auto custom-scrollbar">
+                                         <button onClick={() => setShowPostTax(!showPostTax)} className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 border ${showPostTax ? 'bg-indigo-100 border-indigo-300 text-indigo-800 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 shadow-sm'}`}><div className={`w-2 h-2 rounded-full border ${showPostTax ? 'bg-indigo-600 border-indigo-700' : 'bg-slate-300 border-slate-400'}`}></div>Tax Mode</button>
+                                         <button onClick={() => setTaxHarvesting(!taxHarvesting)} className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 border ${taxHarvesting ? 'bg-teal-100 border-teal-300 text-teal-800 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 shadow-sm'}`}><div className={`w-2 h-2 rounded-full border ${taxHarvesting ? 'bg-teal-600 border-teal-700' : 'bg-slate-300 border-slate-400'}`}></div>Harvest</button>
+                                         <button onClick={() => setShowRealValue(!showRealValue)} className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 border ${showRealValue ? 'bg-blue-100 border-blue-300 text-blue-800 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 shadow-sm'}`}><div className={`w-2 h-2 rounded-full border ${showRealValue ? 'bg-blue-600 border-blue-700' : 'bg-slate-300 border-slate-400'}`}></div>Real Val</button>
+                                         <button onClick={() => setGlidePath(!glidePath)} className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 border ${glidePath ? 'bg-amber-100 border-amber-300 text-amber-800 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 shadow-sm'}`}><div className={`w-2 h-2 rounded-full border ${glidePath ? 'bg-amber-600 border-amber-700' : 'bg-slate-300 border-slate-400'}`}></div>Glide Path</button>
+                                         <button onClick={() => setSequenceRisk(!sequenceRisk)} className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 border ${sequenceRisk ? 'bg-orange-100 border-orange-300 text-orange-800 shadow-sm' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 shadow-sm'}`}><div className={`w-2 h-2 rounded-full border ${sequenceRisk ? 'bg-orange-600 border-orange-700' : 'bg-slate-300 border-slate-400'}`}></div>Seq. Risk</button>
+                                         <button onClick={() => setBlackSwan(!blackSwan)} className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-1.5 shrink-0 border ${blackSwan ? 'bg-rose-100 border-rose-300 text-rose-800 shadow-sm ring-1 ring-rose-500/20' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50 shadow-sm'}`}><div className={`w-2 h-2 rounded-full border ${blackSwan ? 'bg-rose-600 border-rose-700 animate-pulse' : 'bg-slate-300 border-slate-400'}`}></div>🦢 Black Swan</button>
+                                       </div>
                                    </div>
                                    
-                                   <div className="flex items-center gap-3 bg-slate-200/50 p-1.5 rounded-xl border border-slate-300 shadow-inner shrink-0 w-full lg:w-auto justify-between lg:justify-end">
-                                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-2">Format:</span>
-                                     <div className="flex gap-1">
-                                        <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(false); }} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${!showRawNumbers ? 'bg-white text-indigo-700 shadow-sm border border-slate-200 scale-100' : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'}`}>Abbrev.</button>
-                                        <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(true); }} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${showRawNumbers ? 'bg-white text-emerald-700 shadow-sm border border-slate-200 scale-100' : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'}`}>Exact ₹</button>
-                                     </div>
+                                   {/* Formatting Segmented Control */}
+                                   <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-1 rounded-xl shadow-inner shrink-0 w-full xl:w-auto">
+                                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-2 pr-1">Format:</span>
+                                      <div className="flex bg-slate-200/60 p-0.5 rounded-lg flex-1 xl:flex-none">
+                                        <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(false); }} className={`flex-1 xl:flex-none px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${!showRawNumbers ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}>Abbrev.</button>
+                                        <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(true); }} className={`flex-1 xl:flex-none px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${showRawNumbers ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}>Exact ₹</button>
+                                      </div>
                                    </div>
                                </div>
 
                                {/* DYNAMIC DEFINITIONS DISPLAYED IMMEDIATELY BELOW THE ROW */}
-                               <div className="flex flex-col gap-1.5 animate-in fade-in duration-300">
+                               <div className="flex flex-wrap gap-1.5 px-3 py-1.5 bg-slate-50 border-b border-slate-200 shadow-inner shrink-0 animate-in slide-in-from-top-1">
                                    {scenario === 'bear' && (
-                                     <div className="py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-slate-700 text-[10px] flex items-center gap-2 shadow-sm">
-                                       <span className="text-sm leading-none">🐻</span> <span className="font-medium"><strong className="text-slate-900 uppercase tracking-wide mr-1">Bear Shock:</strong> -15% crash in Yr 3, sluggish recovery.</span>
-                                     </div>
+                                     <div className="py-0.5 px-2 bg-white border border-slate-200 rounded text-slate-700 text-[9px] flex items-center gap-1 shadow-sm"><span className="text-[10px] leading-none">🐻</span> <span className="font-medium"><strong className="text-slate-900 uppercase tracking-wide mr-1">Bear Shock:</strong> -15% crash in Yr 3, sluggish recovery.</span></div>
                                    )}
                                    {scenario === 'bull' && (
-                                     <div className="py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-slate-700 text-[10px] flex items-center gap-2 shadow-sm">
-                                       <span className="text-sm leading-none">🐂</span> <span className="font-medium"><strong className="text-slate-900 uppercase tracking-wide mr-1">Bull Boom:</strong> +3% structural alpha added to base returns.</span>
-                                     </div>
+                                     <div className="py-0.5 px-2 bg-white border border-slate-200 rounded text-slate-700 text-[9px] flex items-center gap-1 shadow-sm"><span className="text-[10px] leading-none">🐂</span> <span className="font-medium"><strong className="text-slate-900 uppercase tracking-wide mr-1">Bull Boom:</strong> +3% structural alpha added to base returns.</span></div>
                                    )}
                                    {showPostTax && (
-                                     <div className="py-1.5 px-3 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-800 text-[10px] flex items-center gap-2 shadow-sm">
-                                       <Icon name="calculator" size={14} className="text-indigo-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Net Tax Mode Active:</strong> Dynamically deducting STCG/LTCG and Debt slab taxes strictly during redemption events.</span>
-                                     </div>
+                                     <div className="py-0.5 px-2 bg-indigo-50 border border-indigo-200 rounded text-indigo-800 text-[9px] flex items-center gap-1 shadow-sm"><Icon name="calculator" size={10} className="text-indigo-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Net Tax Mode Active:</strong> Deducting STCG/LTCG & Debt slab taxes during redemptions.</span></div>
                                    )}
                                    {taxHarvesting && (
-                                     <div className="py-1.5 px-3 bg-teal-50 border border-teal-200 rounded-lg text-teal-800 text-[10px] flex items-center gap-2 shadow-sm">
-                                       <Icon name="scissors" size={14} className="text-teal-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Tax Harvesting Active:</strong> Simulating annual booking of ₹1.25L tax-free equity gains to structurally optimize LTCG liability.</span>
-                                     </div>
+                                     <div className="py-0.5 px-2 bg-teal-50 border border-teal-200 rounded text-teal-800 text-[9px] flex items-center gap-1 shadow-sm"><Icon name="scissors" size={10} className="text-teal-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Tax Harvesting:</strong> Annual booking of ₹1.25L tax-free equity gains.</span></div>
                                    )}
                                    {showRealValue && (
-                                     <div className="py-1.5 px-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-[10px] flex items-center gap-2 shadow-sm">
-                                       <Icon name="eye" size={14} className="text-blue-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Real Value Mode Active:</strong> Discounting future wealth back to today's purchasing power (adjusted for {effectiveInflation}% inflation).</span>
-                                     </div>
+                                     <div className="py-0.5 px-2 bg-blue-50 border border-blue-200 rounded text-blue-800 text-[9px] flex items-center gap-1 shadow-sm"><Icon name="eye" size={10} className="text-blue-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Real Value Mode:</strong> Discounting wealth to today's purchasing power.</span></div>
                                    )}
                                    {glidePath && (
-                                     <div className="py-1.5 px-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[10px] flex items-center gap-2 shadow-sm">
-                                       <Icon name="trending-down" size={14} className="text-amber-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Dynamic Glide Path:</strong> Progressively shifting portfolio yields toward safe debt (7%) during the 5 years leading up to retirement.</span>
-                                     </div>
+                                     <div className="py-0.5 px-2 bg-amber-50 border border-amber-200 rounded text-amber-800 text-[9px] flex items-center gap-1 shadow-sm"><Icon name="trending-down" size={10} className="text-amber-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Glide Path:</strong> Shifting to safe debt (7%) 5 years before retirement.</span></div>
                                    )}
                                    {sequenceRisk && (
-                                     <div className="py-1.5 px-3 bg-orange-50 border border-orange-200 rounded-lg text-orange-800 text-[10px] flex items-center gap-2 shadow-sm">
-                                       <Icon name="activity" size={14} className="text-orange-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Sequence of Returns Risk:</strong> Applying a -10% market contraction during the fragile first 3 years of retirement.</span>
-                                     </div>
+                                     <div className="py-0.5 px-2 bg-orange-50 border border-orange-200 rounded text-orange-800 text-[9px] flex items-center gap-1 shadow-sm"><Icon name="activity" size={10} className="text-orange-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Sequence Risk:</strong> -10% market contraction during first 3 years of retirement.</span></div>
                                    )}
                                    {showRawNumbers && (
-                                     <div className="py-1.5 px-3 bg-slate-100 border border-slate-300 rounded-lg text-slate-800 text-[10px] flex items-center gap-2 shadow-sm">
-                                       <Icon name="hash" size={14} className="text-slate-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Exact Rupee Display:</strong> Showing full numerical values instead of abbreviated Lacs/Crores.</span>
-                                     </div>
+                                     <div className="py-0.5 px-2 bg-slate-200 border border-slate-300 rounded text-slate-800 text-[9px] flex items-center gap-1 shadow-sm"><Icon name="hash" size={10} className="text-slate-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1">Exact Rupee Display</strong></span></div>
                                    )}
                                    {blackSwan && (
-                                     <div className="py-2 px-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 text-[10px] flex items-center gap-2 shadow-sm">
-                                       <Icon name="alert-triangle" size={16} className="text-rose-600 shrink-0"/> <span className="font-medium leading-relaxed"><strong className="uppercase tracking-wide mr-1 font-black">Black Swan Event Active:</strong> Simulating a devastating 35% market crash immediately after your retirement year. This rigorously tests sequence-of-returns resilience and proves if your 3-Bucket strategy can absorb catastrophic shock.</span>
-                                     </div>
+                                     <div className="py-0.5 px-2 bg-rose-50 border border-rose-200 rounded text-rose-800 text-[9px] flex items-center gap-1 shadow-sm"><Icon name="alert-triangle" size={10} className="text-rose-600 shrink-0"/> <span className="font-medium"><strong className="uppercase tracking-wide mr-1 font-black">Black Swan Event:</strong> -35% market crash immediately after retirement.</span></div>
+                                   )}
+                                   {(!scenario || scenario === 'base') && !showPostTax && !taxHarvesting && !showRealValue && !glidePath && !sequenceRisk && !showRawNumbers && !blackSwan && (
+                                     <div className="py-0.5 px-2 text-slate-400 text-[9px] flex items-center gap-1"><span className="font-bold uppercase tracking-widest">Standard Base Projection Active</span></div>
                                    )}
                                </div>
-                           </div>
+                             </React.Fragment>
+                           )}
 
-                           <div className="flex-1 overflow-auto custom-scrollbar relative min-h-[500px]">
-                               <table className="w-full text-left border-collapse font-sans bg-white tabular-nums text-xs min-w-[1000px]">
-                                 <thead className="sticky top-0 z-[50] shadow-sm outline outline-1 outline-slate-300 bg-slate-100">
+                           <div className="flex-1 overflow-auto custom-scrollbar relative min-h-[500px] bg-slate-50/50">
+                               <table className="w-full text-left border-collapse font-sans bg-white tabular-nums text-xs min-w-[1000px]" style={{ zoom: matrixZoom / 100 }}>
+                                 <thead className="sticky top-0 z-[50] shadow-sm outline outline-1 outline-slate-200 bg-slate-50">
                                    <tr>
-                                     <th style={{ minWidth: '64px', left: 0 }} className="py-2.5 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-600 text-center bg-slate-200 sticky z-[60] shadow-[1px_0_0_#cbd5e1]">Yr</th>
-                                     <th style={{ minWidth: '64px', left: '64px' }} className="py-2.5 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-600 text-center bg-slate-200 sticky z-[60] shadow-[1px_0_0_#cbd5e1]">Age</th>
-                                     <th style={{ minWidth: '140px', left: '128px' }} className="py-2.5 px-4 border-b border-r border-slate-300 text-[11px] font-black uppercase text-slate-700 text-right bg-slate-100 sticky z-[60] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Total SIP Flow</th>
-                                     <th className="py-2.5 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-emerald-700 text-right bg-emerald-50 min-w-[120px]">Market Growth</th>
-                                     <th className="py-2.5 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-indigo-700 text-right bg-indigo-50 min-w-[120px]" title="Compounding of Unallocated Base Wealth">Legacy Pot</th>
-                                     <th className="py-2.5 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-teal-700 text-right bg-teal-50 min-w-[120px]" title="Compounding of Mapped Goals & SIPs">Active Goals</th>
-                                     <th className="py-2.5 px-4 border-b border-slate-300 text-[11px] font-black uppercase text-rose-700 text-right bg-rose-50 min-w-[120px]">Redemptions</th>
-                                     <th className="py-2.5 px-4 border-b border-slate-300 text-[12px] font-black uppercase text-slate-900 text-right bg-emerald-100 min-w-[140px]">Closing Corpus</th>
+                                     <th style={{ minWidth: '64px', left: 0 }} className="py-2 px-3 border-b border-r border-slate-200 text-[10px] font-bold uppercase text-slate-500 text-center bg-slate-50 sticky z-[60] shadow-[1px_0_0_#e2e8f0]">Yr</th>
+                                     <th style={{ minWidth: '64px', left: '64px' }} className="py-2 px-3 border-b border-r border-slate-200 text-[10px] font-bold uppercase text-slate-500 text-center bg-slate-50 sticky z-[60] shadow-[1px_0_0_#e2e8f0]">Age</th>
+                                     <th style={{ minWidth: '120px', left: '128px' }} className="py-2 px-3 border-b border-r border-slate-200 text-[10px] font-bold uppercase text-slate-500 text-right bg-slate-50 sticky z-[60] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] border-t-2 border-t-transparent">Total SIP Flow</th>
+                                     <th className="py-2 px-3 border-b border-r border-slate-200 text-[10px] font-bold uppercase text-slate-500 text-right bg-slate-50 min-w-[100px] border-t-2 border-t-emerald-400">Market Growth</th>
+                                     <th className="py-2 px-3 border-b border-r border-slate-200 text-[10px] font-bold uppercase text-slate-500 text-right bg-slate-50 min-w-[100px] border-t-2 border-t-indigo-400" title="Compounding of Unallocated Base Wealth">Legacy Pot</th>
+                                     <th className="py-2 px-3 border-b border-r border-slate-200 text-[10px] font-bold uppercase text-slate-500 text-right bg-slate-50 min-w-[100px] border-t-2 border-t-teal-400" title="Compounding of Mapped Goals & SIPs">Active Goals</th>
+                                     <th className="py-2 px-3 border-b border-slate-200 text-[10px] font-bold uppercase text-slate-500 text-right bg-slate-50 min-w-[100px] border-t-2 border-t-rose-400">Redemptions</th>
+                                     <th className="py-2 px-3 border-b border-slate-200 border-l-2 border-l-emerald-400 text-[11px] font-black uppercase text-slate-800 text-right bg-emerald-50 min-w-[120px] border-t-2 border-t-emerald-600">Closing Corpus</th>
                                    </tr>
                                  </thead>
                                  <tbody className="text-slate-700 font-medium text-[11px]">
-                                   <tr className="bg-emerald-50/20 border-b border-slate-300">
-                                     <td style={{ minWidth: '64px', left: 0 }} className="py-1.5 px-4 border-r border-slate-300 text-center font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[1px_0_0_#cbd5e1]">D-0</td>
-                                     <td style={{ minWidth: '64px', left: '64px' }} className="py-1.5 px-4 border-r border-slate-300 text-center font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[1px_0_0_#cbd5e1]">--</td>
-                                     <td style={{ minWidth: '140px', left: '128px' }} className="py-1.5 px-4 border-r border-slate-300 text-right font-bold text-slate-500 sticky bg-slate-50 z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">--</td>
-                                     <td className="py-1.5 px-4 border-b border-slate-300 text-right text-slate-500 italic text-[11px] tracking-widest">Baseline &rarr;</td>
-                                     <td className="py-1.5 px-4 border-b border-slate-300 text-right font-bold text-indigo-800 bg-indigo-50/30">{showRawNumbers ? '₹' + Math.round(unallocatedData.remaining + totalIlliquidAssets).toLocaleString('en-IN') : formatCurrency(unallocatedData.remaining + totalIlliquidAssets)}</td>
-                                     <td className="py-1.5 px-4 border-b border-slate-300 text-right font-bold text-teal-800 bg-teal-50/30">{showRawNumbers ? '₹' + Math.round(totalAssets - (unallocatedData.remaining + totalIlliquidAssets)).toLocaleString('en-IN') : formatCurrency(totalAssets - (unallocatedData.remaining + totalIlliquidAssets))}</td>
-                                     <td className="py-1.5 px-4 border-b border-slate-300 text-right text-slate-400">—</td>
-                                     <td className="py-1.5 px-4 border-b border-slate-300 text-right font-black text-slate-900 bg-emerald-50 text-[12px]">{showRawNumbers ? '₹' + Math.round(totals.assets).toLocaleString('en-IN') : formatCurrency(totals.assets)}</td>
+                                   <tr className="bg-white border-b border-slate-200">
+                                     <td style={{ minWidth: '64px', left: 0 }} className="py-1.5 px-3 border-r border-slate-200 text-center font-semibold text-slate-400 sticky bg-white z-30 shadow-[1px_0_0_#e2e8f0]">D-0</td>
+                                     <td style={{ minWidth: '64px', left: '64px' }} className="py-1.5 px-3 border-r border-slate-200 text-center font-semibold text-slate-400 sticky bg-white z-30 shadow-[1px_0_0_#e2e8f0]">--</td>
+                                     <td style={{ minWidth: '120px', left: '128px' }} className="py-1.5 px-3 border-r border-slate-200 text-right font-semibold text-slate-400 sticky bg-white z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">--</td>
+                                     <td className="py-1.5 px-3 border-r border-slate-200 text-right text-slate-400 italic text-[10px]">Baseline &rarr;</td>
+                                     <td className="py-1.5 px-3 border-r border-slate-200 text-right font-semibold text-indigo-700 bg-white">{showRawNumbers ? '₹' + Math.round(unallocatedData.remaining + totalIlliquidAssets).toLocaleString('en-IN') : formatCurrency(unallocatedData.remaining + totalIlliquidAssets)}</td>
+                                     <td className="py-1.5 px-3 border-r border-slate-200 text-right font-semibold text-teal-700 bg-white">{showRawNumbers ? '₹' + Math.round(totalAssets - (unallocatedData.remaining + totalIlliquidAssets)).toLocaleString('en-IN') : formatCurrency(totalAssets - (unallocatedData.remaining + totalIlliquidAssets))}</td>
+                                     <td className="py-1.5 px-3 border-b border-slate-200 text-right text-slate-300">—</td>
+                                     <td className="py-1.5 px-3 border-b border-slate-200 border-l-2 border-l-emerald-400 text-right font-bold text-slate-900 bg-emerald-50 text-[12px]">{showRawNumbers ? '₹' + Math.round(totals.assets).toLocaleString('en-IN') : formatCurrency(totals.assets)}</td>
                                    </tr>
 
                                    {masterSimulationData.map((row, i) => {
@@ -3534,43 +3681,49 @@ const rebalanceMandate = useMemo(() => {
                                          displayBal /= discount; displaySip /= discount; displayInterest /= discount; 
                                          displayWithdrawal /= discount; displayLegacy /= discount; displayGoals /= discount; 
                                      }
+                                     
+                                     const isBankrupt = displayBal <= 0;
+                                     const rowBg = isBankrupt ? 'bg-rose-50 hover:bg-rose-100 border-rose-100' : (i % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50 hover:bg-slate-100/80');
+                                     const stickyBg = isBankrupt ? 'bg-rose-50' : (i % 2 === 0 ? 'bg-white' : 'bg-[#fdfdfd]');
+                                     const closingBg = isBankrupt ? 'bg-rose-100/50 text-rose-800 border-l-rose-300' : 'bg-emerald-50/30 text-slate-800 border-l-emerald-400';
+                                     
                                      return (
                                        <React.Fragment key={i}>
-                                         <tr onClick={() => setExpandedSimYear(expandedSimYear === i ? null : i)} className={`border-b hover:bg-slate-50 cursor-pointer transition-colors ${displayBal <= 0 ? 'bg-rose-50 border-rose-200' : 'border-slate-300'}`}>
-                                           <td style={{ minWidth: '64px', left: 0 }} className={`py-1.5 px-4 border-r text-center font-bold sticky z-30 shadow-[1px_0_0_#cbd5e1] ${displayBal <= 0 ? 'border-rose-200 text-rose-800 bg-rose-100/90' : 'border-slate-300 text-slate-500 bg-slate-50'}`}>Y-{row.yr}</td>
-                                           <td style={{ minWidth: '64px', left: '64px' }} className={`py-1.5 px-4 border-r text-center font-bold sticky z-30 shadow-[1px_0_0_#cbd5e1] ${displayBal <= 0 ? 'border-rose-200 text-rose-900 bg-rose-100/90' : 'border-slate-300 text-slate-800 bg-slate-50'}`}>{row.age}Y</td>
-                                           <td style={{ minWidth: '140px', left: '128px' }} className={`py-1.5 px-4 border-r text-right font-semibold sticky z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] ${displayBal <= 0 ? 'border-rose-200 text-rose-800/70 bg-rose-50/90' : 'border-slate-300 text-teal-800 bg-teal-50/90'}`}>{displaySip > 0 ? formatCell(displaySip) : '—'}</td>
-                                           <td className={`py-1.5 px-4 border-r font-semibold text-right ${displayBal <= 0 ? 'border-rose-200 text-rose-700/70' : 'border-slate-300 text-emerald-600'}`}>{displayInterest>0?`+${formatCell(displayInterest)}`:'—'}</td>
-                                           <td className={`py-1 px-3 border text-right font-medium ${displayBal <= 0 ? 'border-rose-200 text-rose-800/70 bg-rose-50/50' : 'border-slate-300 text-indigo-700 bg-indigo-50/10'}`}>{formatCell(displayLegacy)}</td>
-                                           <td className={`py-1 px-3 border text-right font-medium ${displayBal <= 0 ? 'border-rose-200 text-rose-800/70 bg-rose-50/50' : 'border-slate-300 text-teal-700 bg-teal-50/10'}`}>{formatCell(displayGoals)}</td>
-                                           <td className={`py-1 px-3 border text-right align-middle ${displayBal <= 0 ? 'border-rose-200' : 'border-slate-300'}`}>
+                                         <tr onClick={() => setExpandedSimYear(expandedSimYear === i ? null : i)} className={`border-b border-slate-100 cursor-pointer transition-colors ${rowBg}`}>
+                                           <td style={{ minWidth: '64px', left: 0 }} className={`py-1.5 px-3 border-r text-center font-medium sticky z-30 shadow-[1px_0_0_#e2e8f0] ${isBankrupt ? 'border-rose-100 text-rose-600' : 'border-slate-100 text-slate-500'} ${stickyBg}`}>Y-{row.yr}</td>
+                                           <td style={{ minWidth: '64px', left: '64px' }} className={`py-1.5 px-3 border-r text-center font-semibold sticky z-30 shadow-[1px_0_0_#e2e8f0] ${isBankrupt ? 'border-rose-100 text-rose-800' : 'border-slate-100 text-slate-700'} ${stickyBg}`}>{row.age}Y</td>
+                                           <td style={{ minWidth: '120px', left: '128px' }} className={`py-1.5 px-3 border-r text-right font-semibold sticky z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.02)] ${isBankrupt ? 'border-rose-100 text-rose-600' : 'border-slate-100 text-slate-600'} ${stickyBg}`}>{displaySip > 0 ? formatCell(displaySip) : '—'}</td>
+                                           <td className={`py-1.5 px-3 border-r font-semibold text-right ${isBankrupt ? 'border-rose-100 text-rose-500' : 'border-slate-100 text-emerald-600'}`}>{displayInterest>0?`+${formatCell(displayInterest)}`:'—'}</td>
+                                           <td className={`py-1.5 px-3 border-r text-right font-medium ${isBankrupt ? 'border-rose-100 text-rose-600' : 'border-slate-100 text-indigo-600'}`}>{formatCell(displayLegacy)}</td>
+                                           <td className={`py-1.5 px-3 border-r text-right font-medium ${isBankrupt ? 'border-rose-100 text-rose-600' : 'border-slate-100 text-teal-600'}`}>{formatCell(displayGoals)}</td>
+                                           <td className={`py-1.5 px-3 text-right align-middle ${isBankrupt ? 'border-rose-100' : 'border-slate-100'}`}>
                                              {displayWithdrawal > 0 ? (
                                                <div className="flex flex-col items-end justify-center h-full">
-                                                  <span className="font-black text-rose-600 leading-none">-{formatCell(displayWithdrawal)}</span>
-                                                  {showPostTax && taxAndLoad > 0 && <span className="text-[9px] text-indigo-500 font-bold leading-none mt-0.5">+{formatCell(taxAndLoad)} Tax</span>}
+                                                  <span className="font-semibold text-rose-600 leading-none">-{formatCell(displayWithdrawal)}</span>
+                                                  {showPostTax && taxAndLoad > 0 && <span className="text-[8px] text-indigo-400 font-medium leading-none mt-1">+{formatCell(taxAndLoad)} Tax</span>}
                                                   {row.withdrawalNames && row.withdrawalNames.length > 0 && (
-                                                    <span className="text-[8px] text-rose-800/70 font-bold uppercase tracking-widest mt-0.5 leading-none text-right max-w-[120px] truncate" title={row.withdrawalNames.join(', ')}>
+                                                    <span className="text-[7px] text-rose-500 font-medium uppercase tracking-widest mt-1 leading-none text-right max-w-[120px] truncate" title={row.withdrawalNames.join(', ')}>
                                                       {row.withdrawalNames.join(', ')}
                                                     </span>
                                                   )}
                                                </div>
-                                             ) : <span className="text-slate-300 font-bold leading-none">—</span>}
+                                             ) : <span className="text-slate-300 font-medium leading-none">—</span>}
                                            </td>
-                                           <td className={`py-1 px-3 border text-right font-black text-[12px] ${displayBal <= 0 ? 'border-rose-300 text-rose-900 bg-rose-100' : 'border-slate-300 text-slate-900 bg-emerald-50/30'}`}>{formatCell(displayBal)}</td>
+                                           <td className={`py-1.5 px-3 text-right font-bold text-[12px] border-l-2 ${closingBg}`}>{formatCell(displayBal)}</td>
                                          </tr>
                                          {expandedSimYear === i && (
-                                           <tr className="bg-slate-100 shadow-inner">
-                                             <td colSpan="8" className="p-0 border-b-2 border-slate-400">
+                                           <tr className="bg-slate-50 shadow-inner">
+                                             <td colSpan="8" className="p-0 border-b-2 border-slate-300">
                                                 <div className="p-2 flex flex-col items-center">
-                                                   <table className="w-full text-left border-collapse bg-white border border-slate-300 shadow-sm rounded overflow-hidden tabular-nums">
-                                                     <thead className="bg-slate-200 border-b border-slate-300">
-                                                        <tr><th className="py-1 px-2 border-r border-slate-300 text-[9px] font-black uppercase text-slate-600 text-center">Month</th><th className="py-1 px-2 border-r border-slate-300 text-[9px] font-black uppercase text-slate-600 text-right">Opening</th><th className="py-1 px-2 border-r border-slate-300 text-[9px] font-black uppercase text-teal-700 text-right">SIP Flow</th><th className="py-1 px-2 border-r border-slate-300 text-[9px] font-black uppercase text-emerald-700 text-right">Growth</th><th className="py-1 px-2 border-r border-slate-300 text-[9px] font-black uppercase text-rose-700 text-right">Outflow</th><th className="py-1 px-2 text-[9px] font-black uppercase text-slate-800 text-right bg-slate-100">Closing</th></tr>
+                                                   <table className="w-full text-left border-collapse bg-white border border-slate-200 shadow-sm rounded overflow-hidden tabular-nums">
+                                                     <thead className="bg-slate-100 border-b border-slate-200">
+                                                        <tr><th className="py-1 px-2 border-r border-slate-200 text-[9px] font-bold uppercase text-slate-500 text-center">Month</th><th className="py-1 px-2 border-r border-slate-200 text-[9px] font-bold uppercase text-slate-500 text-right">Opening</th><th className="py-1 px-2 border-r border-slate-200 text-[9px] font-bold uppercase text-teal-600 text-right">SIP Flow</th><th className="py-1 px-2 border-r border-slate-200 text-[9px] font-bold uppercase text-emerald-600 text-right">Growth</th><th className="py-1 px-2 border-r border-slate-200 text-[9px] font-bold uppercase text-rose-600 text-right">Outflow</th><th className="py-1 px-2 text-[9px] font-bold uppercase text-slate-600 text-right bg-slate-50">Closing</th></tr>
                                                      </thead>
                                                      <tbody className="divide-y divide-slate-100">
                                                        {row.monthlyFlows.map((mth, mIdx) => {
                                                          let dOp = mth.opening; let dSip = mth.sip; let dGr = mth.growth; let dCl = mth.closing; let dW = mth.withdrawal;
                                                          if (showRealValue) { const dsc = Math.pow(infMultiplier, row.yr); dOp /= dsc; dSip /= dsc; dGr /= dsc; dCl /= dsc; dW /= dsc; }
-                                                         return (<tr key={mIdx} className="border-b border-slate-200 hover:bg-slate-50 transition-colors"><td className="py-1 px-2 border-r border-slate-200 text-slate-500 font-bold text-[10px] text-center bg-slate-50/50">M-{mth.m}</td><td className="py-1 px-2 border-r border-slate-200 text-slate-600 font-medium text-[10px] text-right">{formatCurrency(dOp)}</td><td className="py-1 px-2 border-r border-slate-200 text-teal-700 font-medium text-[10px] text-right">{dSip>0?formatCurrency(dSip):'-'}</td><td className="py-1 px-2 border-r border-slate-200 text-emerald-600 font-medium text-[10px] text-right">{dGr>0?`+${formatCurrency(dGr)}`:'-'}</td><td className="py-1 px-2 border-r border-slate-200 text-rose-500 font-medium text-[10px] text-right">{dW > 0 ? `-${formatCurrency(dW)}` : '-'}</td><td className="py-1 px-2 text-slate-900 font-bold text-[10px] text-right bg-slate-50/50">{formatCurrency(dCl)}</td></tr>)
+                                                         return (<tr key={mIdx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors"><td className="py-1 px-2 border-r border-slate-100 text-slate-400 font-medium text-[10px] text-center bg-slate-50/30">M-{mth.m}</td><td className="py-1 px-2 border-r border-slate-100 text-slate-500 font-medium text-[10px] text-right">{formatCurrency(dOp)}</td><td className="py-1 px-2 border-r border-slate-100 text-teal-600 font-medium text-[10px] text-right">{dSip>0?formatCurrency(dSip):'-'}</td><td className="py-1 px-2 border-r border-slate-100 text-emerald-500 font-medium text-[10px] text-right">{dGr>0?`+${formatCurrency(dGr)}`:'-'}</td><td className="py-1 px-2 border-r border-slate-100 text-rose-400 font-medium text-[10px] text-right">{dW > 0 ? `-${formatCurrency(dW)}` : '-'}</td><td className="py-1 px-2 text-slate-700 font-semibold text-[10px] text-right bg-slate-50/30">{formatCurrency(dCl)}</td></tr>)
                                                        })}
                                                      </tbody>
                                                    </table>
@@ -3582,16 +3735,16 @@ const rebalanceMandate = useMemo(() => {
                                      );
                                    })}
                                  </tbody>
-                                 <tfoot className="sticky bottom-0 z-[40] bg-slate-900 text-white shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.3)]">
+                                 <tfoot className="sticky bottom-0 z-[40] bg-slate-50 text-slate-800 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] outline outline-1 outline-slate-300">
                                    <tr>
-                                     <td style={{ minWidth: '64px', left: 0 }} className="py-3 px-2 border-t border-r border-slate-700 text-center font-black uppercase text-teal-400 text-[9px] tracking-widest bg-slate-950 sticky z-[50] shadow-[1px_0_0_#334155]">Terminal</td>
-                                     <td style={{ minWidth: '64px', left: '64px' }} className="py-3 px-2 border-t border-r border-slate-700 text-center font-black uppercase text-teal-400 text-[9px] tracking-widest bg-slate-950 sticky z-[50] shadow-[1px_0_0_#334155]">Age {safeNumber(profile.age) + planningHorizon}</td>
-                                     <td style={{ minWidth: '140px', left: '128px' }} className="py-3 px-4 border-t border-r border-slate-700 text-right font-black text-slate-300 bg-slate-900 text-sm sticky z-[50] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.5)]">
+                                     <td style={{ minWidth: '64px', left: 0 }} className="py-3 px-2 border-t-2 border-r border-slate-300 text-center font-bold uppercase text-slate-500 text-[10px] tracking-widest bg-slate-100 sticky z-[50] shadow-[1px_0_0_#cbd5e1]">Terminal</td>
+                                     <td style={{ minWidth: '64px', left: '64px' }} className="py-3 px-2 border-t-2 border-r border-slate-300 text-center font-bold uppercase text-slate-500 text-[10px] tracking-widest bg-slate-100 sticky z-[50] shadow-[1px_0_0_#cbd5e1]">Age {safeNumber(profile.age) + planningHorizon}</td>
+                                     <td style={{ minWidth: '140px', left: '128px' }} className="py-3 px-4 border-t-2 border-r border-slate-300 text-right font-bold text-slate-600 bg-slate-100 text-sm sticky z-[50] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                                        {formatCurrency(masterSimulationData[masterSimulationData.length-1]?.totalPrincipal)} 
-                                       <span className="text-[9px] text-slate-500 font-bold block mt-1 uppercase tracking-widest">Total Cap. Inv.</span>
+                                       <span className="text-[9px] text-slate-400 font-medium block mt-1 uppercase tracking-widest">Total Cap. Inv.</span>
                                      </td>
-                                     <td colSpan="4" className="py-3 px-4 border-t border-slate-700 text-right font-bold text-slate-400 text-[11px] bg-slate-900 uppercase tracking-widest">Final Projected Portfolio Value &rarr;</td>
-                                     <td className="py-3 px-4 border-t border-slate-700 text-right font-black text-emerald-400 text-lg bg-slate-800 tracking-tighter">{formatCurrency(masterSimulationData[masterSimulationData.length-1]?.closing)}</td>
+                                     <td colSpan="4" className="py-3 px-4 border-t-2 border-slate-300 text-right font-semibold text-slate-500 text-[12px] bg-slate-50 uppercase tracking-widest">Final Projected Portfolio Value &rarr;</td>
+                                     <td className="py-3 px-4 border-t-2 border-slate-300 border-l-2 border-l-emerald-400 text-right font-black text-slate-800 text-xl bg-emerald-50 tracking-tighter">{formatCurrency(masterSimulationData[masterSimulationData.length-1]?.closing)}</td>
                                    </tr>
                                  </tfoot>
                                </table>
@@ -3601,129 +3754,216 @@ const rebalanceMandate = useMemo(() => {
                   </div>
                 )}
 
+                {/* NEW STRUCTURE: UNMAPPED WEALTH FLOW (MAPPING TAB) */}
                 {projectionTab === 'mapping' && (
-                  <div className="flex-1 flex flex-col bg-[#F8FAFC] animate-in fade-in slide-in-from-bottom-4 overflow-hidden">
-                    <div className="flex-1 flex flex-col p-4 sm:p-6 gap-6 overflow-y-auto custom-scrollbar">
-                       
-                       {/* TOP SECTION: Summary Cards */}
-                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 shrink-0">
-                          {/* Unallocated / Legacy Growth */}
-                          <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden">
-                             <div className="absolute right-[-10%] bottom-[-10%] w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl"></div>
-                             <div className="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4 border border-indigo-200 shadow-sm relative z-10"><Icon name="trending-up" size={20} /></div>
-                             <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-2 relative z-10">Unmapped Legacy Engine</h4>
-                             <p className="text-[10px] font-medium text-slate-600 leading-relaxed mb-6 relative z-10 px-4">
-                               This strictly unmapped wealth compounds independently. {!isWealthAllocated && safeNumber(profile.currentSip) > 0 ? `Ongoing SIP of ${formatCurrency(profile.currentSip)}/mo fuels this engine.` : `(Ongoing SIP is directed to active goals).`}
-                             </p>
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full relative z-10 text-left">
-                                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl shadow-sm">
-                                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Current Value</p>
-                                   <p className="text-xl font-black text-slate-900 tracking-tight">{formatCurrency(unallocatedData.remaining + totalIlliquidAssets)}</p>
-                                </div>
-                                <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm">
-                                   <p className="text-[9px] font-black text-indigo-800 uppercase tracking-widest mb-1">Value at Ret.</p>
-                                   <p className="text-xl font-black text-indigo-700 tracking-tight">{formatCurrency(legacySimulationData[legacySimulationData.length - 1]?.closing || legacyProjection(retireYrs))}</p>
+                  <div className="flex-1 flex flex-col shrink-0 bg-[#F8FAFC]">
+                     <div className="w-full flex-1 bg-white flex flex-col overflow-hidden relative cursor-default border-t border-slate-300 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+                         
+                         {/* TOOLBAR */}
+                         <div className="shrink-0 bg-white border-b border-slate-200 px-3 py-2 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 z-[60] shadow-sm relative animate-in slide-in-from-top-1">
+                             <div className="flex items-center gap-3">
+                                 <div className="bg-blue-50 border border-blue-200 p-1.5 rounded-lg flex items-center gap-2 shadow-inner px-3">
+                                     <Icon name="unlock" size={14} className="text-blue-600" />
+                                     <span className="text-[10px] text-blue-900 font-bold uppercase tracking-widest flex items-center">
+                                         Unmapped Wealth Flow <span className="text-blue-300 mx-2">|</span> 
+                                         <span className="font-medium text-blue-700 normal-case tracking-normal">
+                                             Projecting the isolated growth of your leftover assets year-by-year until Age {safeNumber(mathProfile.horizonAge)}. 
+                                             {plan.some(g => g.sip > 0) ? " Tip: Map these to your active goals to instantly lower your required monthly SIP." : " These surplus assets compound independently to build your ultimate legacy."}
+                                         </span>
+                                     </span>
+                                 </div>
+                             </div>
+                             <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-1 rounded-xl shadow-inner shrink-0 w-full xl:w-auto">
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-2 pr-1">Format:</span>
+                                <div className="flex bg-slate-200/60 p-0.5 rounded-lg flex-1 xl:flex-none">
+                                  <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(false); }} className={`flex-1 xl:flex-none px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${!showRawNumbers ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}>Abbrev.</button>
+                                  <button onClick={(e) => { e.stopPropagation(); setShowRawNumbers(true); }} className={`flex-1 xl:flex-none px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${showRawNumbers ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}>Exact ₹</button>
                                 </div>
                              </div>
-                          </div>
+                         </div>
 
-                          {/* Mapped Goals Summary */}
-                          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col max-h-[300px]">
-                            <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-4 border-b border-slate-100 pb-3 flex items-center gap-2"><Icon name="git-merge" size={14} className="text-emerald-500"/> Mapped to Active Goals</h4>
-                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
-                              {!isWealthAllocated || (totalLiquidAssets - unallocatedData.remaining) <= 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center py-6 text-center"><div className="w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-3"><Icon name="inbox" size={16}/></div><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">No wealth mapped.</p></div>
-                              ) : (
-                                liquidAssetsList.map(asset => {
-                                  const assetAllocMap = allocMap[asset.id] || {}; 
-                                  const allocatedAmt = Object.entries(assetAllocMap).reduce((sum, [gId, pct]) => { if(plan.find(x=>x.id===gId)) return sum + (asset.val * (pct/100)); return sum; }, 0);
-                                  if (allocatedAmt <= 0) return null;
-                                  return (
-                                    <div key={asset.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                                      <div className="flex justify-between items-center mb-2">
-                                        <h5 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">{asset.label}</h5>
-                                        <span className="text-[9px] font-black text-emerald-700 bg-emerald-100/50 px-2 py-0.5 rounded shadow-sm border border-emerald-200/50">{formatCurrency(allocatedAmt)}</span>
-                                      </div>
-                                      <div className="space-y-1.5">
-                                         {Object.entries(assetAllocMap).map(([gId, pct]) => {
-                                           const g = plan.find(x => x.id === gId);
-                                           if(!g || pct <= 0) return null;
-                                           const pv = asset.val * (pct/100);
-                                           const assetRet = (getScenarioReturn(asset.yield || 8, 1) || (asset.yield || 8)) / 100;
-                                           const fv = pv * Math.pow(1 + assetRet, g.horizon);
-                                           return (
-                                             <div key={gId} className="flex justify-between items-center text-[9px] font-bold bg-white p-1.5 border border-slate-200 rounded shadow-sm">
-                                               <span className="text-slate-700 truncate mr-2 uppercase tracking-widest">{g.name} <span className="text-slate-400 normal-case">({g.horizon}y)</span></span>
-                                               <div className="flex items-center gap-2">
-                                                 <span className="text-slate-400 line-through decoration-slate-300 font-medium" title="Present Value">{formatCurrency(pv)}</span>
-                                                 <Icon name="arrow-right" size={10} className="text-slate-300" />
-                                                 <span className="text-emerald-700 shrink-0 font-black" title="Projected Future Value">{formatCurrency(fv)}</span>
-                                               </div>
+                         <div className="flex-1 overflow-auto custom-scrollbar p-4 sm:p-6 bg-slate-50/50">
+                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 animate-in slide-in-from-bottom-4 duration-500">
+                                 {unmappedCards.length === 0 ? (
+                                     <div className="col-span-full flex flex-col items-center justify-center p-12 bg-white rounded-xl border border-slate-200 shadow-sm text-center min-h-[300px]">
+                                         <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-4 border border-emerald-100 shadow-inner">
+                                            <Icon name="check-circle" size={40} className="text-emerald-500" />
+                                         </div>
+                                         <p className="text-sm font-black text-slate-900 uppercase tracking-widest mb-2">Zero Wealth Waste</p>
+                                         <p className="text-xs font-semibold text-slate-500 max-w-sm">100% of your assets and SIPs are efficiently mapped to your goals. There is no idle or unallocated wealth to display.</p>
+                                     </div>
+                                 ) : unmappedCards.map((card, idx) => {
+                                     const formatCell = (val) => showRawNumbers ? '₹' + Math.round(safeNumber(val)).toLocaleString('en-IN') : formatCurrency(val);
+                                     
+                                     // NEW: Accurate Year-by-Year Calculation including SIP Step-Up
+                                     const fullFlow = [];
+                                     let currentBal = card.type === 'Cashflow' ? 0 : card.startingVal;
+                                     let currentSip = card.type === 'Cashflow' ? card.startingVal : 0;
+                                     const r = card.rate / 100;
+                                     const sipStepUp = safeNumber(mathProfile.sipStepUp) / 100;
+
+                                     for(let y=1; y<=planningHorizon; y++) {
+                                         let yearSip = 0;
+                                         if (card.type === 'Cashflow' && y <= retireYrs) {
+                                             let yrBal = currentBal;
+                                             let mSip = currentSip;
+                                             let monthlyRate = Math.pow(1 + r, 1/12) - 1;
+                                             for(let m=0; m<12; m++) {
+                                                 yrBal = yrBal * (1 + monthlyRate) + mSip;
+                                                 yearSip += mSip;
+                                             }
+                                             currentBal = yrBal;
+                                             currentSip *= (1 + sipStepUp); // apply step up for next year
+                                         } else {
+                                             currentBal = currentBal * (1 + r);
+                                         }
+                                         let displayBal = currentBal;
+                                         if (showRealValue) displayBal /= Math.pow(infMultiplier, y);
+                                         
+                                         fullFlow.push({
+                                             yr: y, age: safeNumber(mathProfile.age) + y, val: displayBal, flow: yearSip
+                                         });
+                                     }
+
+                                     const uniqueYears = [...new Set([1, 5, 10, retireYrs, planningHorizon].filter(y => y > 0 && y <= planningHorizon).sort((a,b)=>a-b))];
+                                     const rows = uniqueYears.map(yr => fullFlow[yr-1]);
+                                     
+                                     const isRealEstate = card.type === 'Illiquid Asset';
+                                     const isSip = card.type === 'Cashflow';
+                                     const themeColor = isRealEstate ? 'amber' : isSip ? 'teal' : 'indigo';
+                                     const cardWithFlow = { ...card, fullFlow, themeColor };
+
+                                     return (
+                                         <div key={card.id} onClick={() => setActiveWealthFlowCard(cardWithFlow)} className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col group cursor-pointer hover:shadow-lg hover:border-indigo-300 hover:ring-1 hover:ring-indigo-500/20 transition-all">
+                                             <div className={`p-4 bg-${themeColor}-50/50 border-b border-slate-100 flex justify-between items-start gap-3`}>
+                                                 <div className="flex items-center gap-2.5">
+                                                     <div className={`p-2 bg-${themeColor}-100 text-${themeColor}-700 rounded-lg shadow-sm`}><Icon name={isRealEstate ? 'home' : isSip ? 'refresh-cw' : 'landmark'} size={16} /></div>
+                                                     <div>
+                                                        <h4 className="font-black text-slate-800 uppercase tracking-widest text-[11px] truncate max-w-[140px]" title={card.label}>{card.label}</h4>
+                                                        <p className={`text-[9px] font-bold text-${themeColor}-700 uppercase mt-0.5 tracking-wider`}>{card.type}</p>
+                                                     </div>
+                                                 </div>
+                                                 <span className={`text-[9px] font-black bg-${themeColor}-100 text-${themeColor}-800 px-2 py-1 rounded-md shadow-inner border border-${themeColor}-200 shrink-0`}>{Math.round(card.unmappedPct)}% Free</span>
                                              </div>
-                                           );
-                                         })}
-                                      </div>
-                                    </div>
-                                  );
-                                })
-                              )}
-                            </div>
-                          </div>
-                       </div>
+                                             
+                                             <div className="p-4 grid grid-cols-2 gap-4 border-b border-slate-100 bg-slate-50/30">
+                                                 <div>
+                                                     <p className="text-[9px] text-slate-500 uppercase tracking-widest font-black mb-0.5">{isSip ? 'Monthly Surplus' : 'Present Value'}</p>
+                                                     <p className={`text-xl font-black text-slate-900 tracking-tighter`}>{formatCell(card.startingVal)}</p>
+                                                 </div>
+                                                 <div className="text-right">
+                                                     <p className="text-[9px] text-slate-500 uppercase tracking-widest font-black mb-0.5">Assumed Yield</p>
+                                                     <p className={`text-xl font-black text-${themeColor}-600 tracking-tighter`}>{card.rate.toFixed(1)}%</p>
+                                                 </div>
+                                             </div>
 
-                       {/* BOTTOM SECTION: Detailed Flow Table */}
-                       <div className="flex-1 flex flex-col bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden min-h-[350px]">
-                           <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
-                               <div>
-                                   <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><Icon name="table" size={14} className="text-indigo-600"/> Unmapped Wealth Ledger</h3>
-                                   <p className="text-[9px] font-medium text-slate-500 mt-1">Year-by-year compounding projection of your strictly unmapped assets.</p>
-                               </div>
+                                             <div className="flex-1 bg-white p-2">
+                                                 <table className="w-full text-left text-[10px] tabular-nums">
+                                                     <thead className="bg-slate-50/80 rounded-lg">
+                                                         <tr>
+                                                             <th className="py-2 px-3 font-bold text-slate-400 uppercase tracking-widest rounded-tl-lg">Year</th>
+                                                             <th className="py-2 px-3 font-bold text-slate-400 uppercase tracking-widest text-right">Age</th>
+                                                             <th className={`py-2 px-3 font-bold text-${themeColor}-600 uppercase tracking-widest text-right rounded-tr-lg`}>{showRealValue ? 'Real Value' : 'Projected FV'}</th>
+                                                         </tr>
+                                                     </thead>
+                                                     <tbody className="divide-y divide-slate-100">
+                                                         {rows.map((r) => (
+                                                             <tr key={r.yr} className="hover:bg-slate-50 transition-colors">
+                                                                 <td className="py-2.5 px-3 font-semibold text-slate-600">
+                                                                    Y-{r.yr}
+                                                                    {r.yr === retireYrs && <span className="ml-1.5 text-[8px] bg-slate-200 text-slate-600 px-1 rounded uppercase font-bold">Retire</span>}
+                                                                    {r.yr === planningHorizon && <span className="ml-1.5 text-[8px] bg-slate-200 text-slate-600 px-1 rounded uppercase font-bold">Term.</span>}
+                                                                 </td>
+                                                                 <td className="py-2.5 px-3 font-semibold text-slate-600 text-right">{r.age}Y</td>
+                                                                 <td className="py-2.5 px-3 font-black text-slate-900 text-right text-[11px]">{formatCell(r.val)}</td>
+                                                             </tr>
+                                                         ))}
+                                                     </tbody>
+                                                 </table>
+                                             </div>
+                                         </div>
+                                     );
+                                 })}
+                             </div>
+                         </div>
+                     </div>
+
+                     {/* NEW: ASSET DRILLDOWN MODAL */}
+                     {activeWealthFlowCard && (
+                        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200" onClick={() => setActiveWealthFlowCard(null)}>
+                           <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300 border border-slate-100" onClick={e => e.stopPropagation()}>
+                              <div className={`p-5 border-b border-slate-100 flex justify-between items-center bg-${activeWealthFlowCard.themeColor}-50/50`}>
+                                 <div className="flex items-center gap-3">
+                                    <div className={`p-2 bg-${activeWealthFlowCard.themeColor}-100 text-${activeWealthFlowCard.themeColor}-700 rounded-lg shadow-sm`}><Icon name={activeWealthFlowCard.type === 'Illiquid Asset' ? 'home' : activeWealthFlowCard.type === 'Cashflow' ? 'refresh-cw' : 'landmark'} size={20} /></div>
+                                    <div>
+                                       <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">{activeWealthFlowCard.label}</h2>
+                                       <p className={`text-[10px] font-bold text-${activeWealthFlowCard.themeColor}-700 uppercase tracking-widest`}>{activeWealthFlowCard.type} <span className="mx-1">•</span> {activeWealthFlowCard.rate.toFixed(1)}% CAGR {activeWealthFlowCard.type === 'Cashflow' && safeNumber(mathProfile.sipStepUp) > 0 && <span className="ml-1 px-1.5 py-0.5 bg-teal-100 text-teal-800 rounded shadow-sm border border-teal-200">+{mathProfile.sipStepUp}% Step-Up</span>}</p>
+                                    </div>
+                                 </div>
+                                 <button onClick={() => setActiveWealthFlowCard(null)} className="text-slate-400 hover:text-slate-800 bg-white shadow-sm border border-slate-200 hover:bg-slate-100 p-2 rounded-full transition-all"><Icon name="x" size={18} /></button>
+                              </div>
+                              
+                              <div className="flex-1 overflow-auto custom-scrollbar bg-slate-50/50 p-4 sm:p-6">
+                                 <table className="w-full text-left border-collapse font-sans bg-white tabular-nums text-xs shadow-sm rounded-xl overflow-hidden border border-slate-200">
+                                    <thead className="sticky top-0 z-[50] shadow-sm bg-slate-100 outline outline-1 outline-slate-200">
+                                       <tr>
+                                          <th className="py-3 px-4 border-b border-slate-200 text-[10px] font-bold uppercase text-slate-500 text-center bg-slate-100">Year</th>
+                                          <th className="py-3 px-4 border-b border-slate-200 text-[10px] font-bold uppercase text-slate-500 text-center bg-slate-100">Age</th>
+                                          {activeWealthFlowCard.type === 'Cashflow' && <th className="py-3 px-4 border-b border-slate-200 text-[10px] font-bold uppercase text-teal-600 text-right bg-slate-100">Annual SIP Flow</th>}
+                                          <th className="py-3 px-4 border-b border-slate-200 text-[11px] font-black uppercase text-indigo-700 text-right bg-indigo-50/50 border-l border-indigo-100">{showRealValue ? 'Real Value (Discounted)' : 'Projected Compounded Value'}</th>
+                                       </tr>
+                                    </thead>
+                                    <tbody className="text-slate-700 font-medium text-[11px] divide-y divide-slate-100">
+                                       <tr className="bg-white hover:bg-slate-50 transition-colors">
+                                          <td className="py-2.5 px-4 text-center font-bold text-slate-500">Today</td>
+                                          <td className="py-2.5 px-4 text-center font-bold text-slate-600">{mathProfile.age}Y</td>
+                                          {activeWealthFlowCard.type === 'Cashflow' && <td className="py-2.5 px-4 text-right font-bold text-teal-600">—</td>}
+                                          <td className="py-2.5 px-4 text-right font-black text-[12px] text-indigo-900 bg-indigo-50/30 border-l border-indigo-50">{showRawNumbers ? '₹' + Math.round(activeWealthFlowCard.type === 'Cashflow' ? 0 : activeWealthFlowCard.startingVal).toLocaleString('en-IN') : formatCurrency(activeWealthFlowCard.type === 'Cashflow' ? 0 : activeWealthFlowCard.startingVal)}</td>
+                                       </tr>
+                                       {activeWealthFlowCard.fullFlow.map((row, i) => {
+                                          const formatCell = (val) => showRawNumbers ? '₹' + Math.round(safeNumber(val)).toLocaleString('en-IN') : formatCurrency(val);
+                                          const isMilestone = row.yr === retireYrs || row.yr === planningHorizon || row.yr % 5 === 0;
+                                          return (
+                                             <tr key={row.yr} className={`transition-colors hover:bg-slate-50 ${isMilestone ? 'bg-slate-50/50' : 'bg-white'}`}>
+                                                <td className="py-2.5 px-4 text-center font-bold text-slate-500">
+                                                   Y-{row.yr}
+                                                   {row.yr === retireYrs && <span className="ml-1.5 text-[8px] bg-amber-100 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded shadow-sm uppercase font-black">Retire</span>}
+                                                   {row.yr === planningHorizon && <span className="ml-1.5 text-[8px] bg-slate-200 text-slate-600 border border-slate-300 px-1.5 py-0.5 rounded shadow-sm uppercase font-black">End</span>}
+                                                </td>
+                                                <td className="py-2.5 px-4 text-center font-bold text-slate-600">{row.age}Y</td>
+                                                {activeWealthFlowCard.type === 'Cashflow' && <td className="py-2.5 px-4 text-right font-bold text-teal-600">{row.flow > 0 ? formatCell(row.flow) : '—'}</td>}
+                                                <td className="py-2.5 px-4 text-right font-black text-[12px] text-indigo-900 bg-indigo-50/30 border-l border-indigo-50">{formatCell(row.val)}</td>
+                                             </tr>
+                                          );
+                                       })}
+                                    </tbody>
+                                 </table>
+                              </div>
                            </div>
-                           <div className="flex-1 overflow-auto custom-scrollbar relative">
-                               {((unallocatedData.remaining + totalIlliquidAssets) <= 0 && (isWealthAllocated || safeNumber(profile.currentSip) <= 0)) ? (
-                                   <div className="p-12 text-center flex flex-col items-center justify-center h-full bg-emerald-50/30">
-                                       <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4 shadow-sm border border-emerald-200"><Icon name="check-circle" size={32} /></div>
-                                       <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-2">100% Capital Efficiency</h4>
-                                       <p className="text-[10px] font-medium text-slate-500 max-w-sm mx-auto leading-relaxed">All your deployable wealth has been actively mapped to your strategic goals. You have no idle assets decaying to inflation.</p>
-                                   </div>
-                               ) : (
-                                   <table className="w-full text-left border-collapse font-sans tabular-nums text-xs min-w-[600px]">
-                                       <thead className="sticky top-0 z-20 shadow-sm bg-slate-100 outline outline-1 outline-slate-200">
-                                           <tr>
-                                               <th className="py-2.5 px-4 font-black text-slate-600 uppercase tracking-widest text-[9px]">Yr / Age</th>
-                                               <th className="py-2.5 px-4 font-black text-slate-600 uppercase tracking-widest text-[9px] text-right">Opening Balance</th>
-                                               {!isWealthAllocated && <th className="py-2.5 px-4 font-black text-teal-700 uppercase tracking-widest text-[9px] text-right bg-teal-50/50">Ongoing SIP</th>}
-                                               <th className="py-2.5 px-4 font-black text-emerald-700 uppercase tracking-widest text-[9px] text-right bg-emerald-50/50">Est. Growth</th>
-                                               <th className="py-2.5 px-4 font-black text-indigo-900 uppercase tracking-widest text-[9px] text-right bg-indigo-50/50">Closing Corpus</th>
-                                           </tr>
-                                       </thead>
-                                       <tbody className="divide-y divide-slate-100 text-[11px]">
-                                           {legacySimulationData.map((row, i) => (
-                                               <tr key={i} className="hover:bg-slate-50/80 transition-colors group">
-                                                   <td className="py-2.5 px-4">
-                                                       <div className="flex items-center gap-2">
-                                                           <span className="bg-slate-800 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Y-{row.yr}</span>
-                                                           <span className="text-slate-500 font-medium text-[10px]">{row.age} Yrs</span>
-                                                       </div>
-                                                   </td>
-                                                   <td className="py-2.5 px-4 text-right font-medium text-slate-600">{showRawNumbers ? '₹'+Math.round(row.opening).toLocaleString('en-IN') : formatCurrency(row.opening)}</td>
-                                                   {!isWealthAllocated && <td className="py-2.5 px-4 text-right font-bold text-teal-700 bg-teal-50/30 group-hover:bg-teal-50/60 transition-colors">+{showRawNumbers ? '₹'+Math.round(row.sip).toLocaleString('en-IN') : formatCurrency(row.sip)}</td>}
-                                                   <td className="py-2.5 px-4 text-right font-bold text-emerald-600 bg-emerald-50/30 group-hover:bg-emerald-50/60 transition-colors">+{showRawNumbers ? '₹'+Math.round(row.growth).toLocaleString('en-IN') : formatCurrency(row.growth)}</td>
-                                                   <td className="py-2.5 px-4 text-right font-black text-indigo-900 bg-indigo-50/30 group-hover:bg-indigo-50/60 transition-colors">{showRawNumbers ? '₹'+Math.round(row.closing).toLocaleString('en-IN') : formatCurrency(row.closing)}</td>
-                                               </tr>
-                                           ))}
-                                       </tbody>
-                                   </table>
-                               )}
-                           </div>
-                       </div>
-                    </div>
+                        </div>
+                     )}
                   </div>
                 )}
+
+                {/* 4. EXCEL STATUS BAR */}
+                <div className="shrink-0 bg-slate-100 border-t border-slate-300 px-4 py-2 flex justify-between items-center text-[10px] font-bold text-slate-600 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] z-[90]">
+                   <div className="flex items-center gap-3">
+                     <span className="flex items-center gap-1.5"><Icon name="check-circle" size={14} className="text-emerald-600"/> READY</span>
+                     <div className="w-px h-3 bg-slate-300"></div>
+                     <span>CALCULATE: AUTOMATIC</span>
+                   </div>
+                   <div className="flex items-center gap-3">
+                      <button onClick={() => setMatrixZoom(Math.max(50, matrixZoom - 10))} className="hover:text-slate-900 transition-colors p-1"><Icon name="minus" size={14}/></button>
+                      <input type="range" min="50" max="150" step="10" value={matrixZoom} onChange={(e) => setMatrixZoom(Number(e.target.value))} className="w-32 accent-teal-600 cursor-pointer" />
+                      <button onClick={() => setMatrixZoom(Math.min(150, matrixZoom + 10))} className="hover:text-slate-900 transition-colors p-1"><Icon name="plus" size={14}/></button>
+                      <span className="w-10 text-right font-black text-slate-800 text-[11px]">{matrixZoom}%</span>
+                   </div>
+                </div>
               </div>
             </div>,
             document.getElementById('root')
           ) : null}
+
         </div>
       );
     };
@@ -3734,12 +3974,11 @@ const rebalanceMandate = useMemo(() => {
       const [isTaskSwitcherOpen, setIsTaskSwitcherOpen] = useState(false); 
       const [showResetConfirm, setShowResetConfirm] = useState(false); 
       const [isFAQOpen, setIsFAQOpen] = useState(false); 
-      
-      // --- NEW CLOUD VAULT STATE ---
+      const [isGeneratingBlueprint, setIsGeneratingBlueprint] = useState(false);
       const [isCloudVaultOpen, setIsCloudVaultOpen] = useState(false);
-      const [cloudState, setCloudState] = useState('idle'); // idle, saving, loading, success_save, error
       const [shareCode, setShareCode] = useState('');
       const [inputCode, setInputCode] = useState('');
+      const [cloudState, setCloudState] = useState('idle');
       const [vaultError, setVaultError] = useState('');
       
       const parallaxRef = useRef(null); 
@@ -3808,7 +4047,17 @@ const rebalanceMandate = useMemo(() => {
         return () => { window.removeEventListener('mousemove', handleMove); cancelAnimationFrame(frame); }; 
       }, []);
       
-      const handleNav = (id) => { if (id === 5 && (safeNumber(profile.retireAge) <= safeNumber(profile.age))) return; setStep(id); };
+      const handleNav = (id) => { 
+        if (id === 5 && (safeNumber(profile.retireAge) <= safeNumber(profile.age))) return; 
+        if (id === 5 && step !== 5) {
+           setIsTaskSwitcherOpen(false);
+           setIsGeneratingBlueprint(true);
+           // Give the UI a moment to show the loader, then calculate the massive Step 5 tree
+           setTimeout(() => { setStep(5); setIsGeneratingBlueprint(false); }, 1200);
+        } else {
+           setStep(id); 
+        }
+      };
       const confirmResetJourney = () => { localStorage.removeItem('financial_brain_profile'); setProfile({...emptyProfile}); setStep(1); setView('cover'); setShowResetConfirm(false); };
       
       const exportJSON = () => {
@@ -4048,6 +4297,19 @@ const rebalanceMandate = useMemo(() => {
             <FloatingPillCloud active={view === 'cover'} />
           </div>
 
+          {/* ENGINE CALCULATION OVERLAY (Masks UI freeze during Step 5 load) */}
+          {isGeneratingBlueprint && document.body ? ReactDOM.createPortal(
+            <div className="fixed inset-0 z-[9999999] bg-white/95 backdrop-blur-md flex flex-col items-center justify-center no-print shadow-2xl animate-in fade-in duration-300">
+               <div className="relative mb-8">
+                  <div className="absolute inset-0 bg-teal-400 blur-2xl opacity-40 rounded-full animate-pulse"></div>
+                  <Icon name="cpu" size={64} className="text-teal-600 relative z-10 animate-bounce-subtle" />
+               </div>
+               <h2 className="text-3xl font-black text-slate-900 uppercase tracking-widest mb-3">Initializing Quantum Engine</h2>
+               <p className="text-sm font-bold text-slate-500 uppercase tracking-widest animate-pulse">Calculating 200+ Monte Carlo simulations & executing tax vectors...</p>
+            </div>,
+            document.body
+          ) : null}
+
           <div className="relative h-full w-full overflow-hidden flex flex-col text-left">
             {view !== 'cover' && (
               <header className="px-6 py-4 premium-card border-b border-white/60 flex justify-between items-center no-print animate-in slide-in-from-top duration-700 shrink-0 text-left z-50 rounded-none shadow-[0_4px_20px_rgba(15,23,42,0.03)]">
@@ -4130,10 +4392,10 @@ const rebalanceMandate = useMemo(() => {
                       <div className="flex flex-col items-end gap-1">
                         <div className="flex gap-2">
                           <button onClick={() => step > 1 ? setStep(step-1) : setView('cover')} className="w-10 h-10 bg-white/80 border border-slate-200 text-slate-700 rounded-lg flex items-center justify-center hover:bg-white active:scale-95 transition-all shadow-sm text-left"><Icon name="arrow-left" size={16}/></button>
-                          <button disabled={(step === 1 && (safeNumber(profile.retireAge) <= safeNumber(profile.age))) || (step === 4 && (!profile.horizonAge || safeNumber(profile.horizonAge) <= safeNumber(profile.retireAge)))} onClick={() => { if(step < 5) setStep(step+1); }} className="px-5 py-2 h-10 bg-slate-900 text-white rounded-lg font-bold uppercase text-[10px] tracking-widest shadow-md active:scale-95 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:bg-slate-950 text-left"> {step === 4 ? 'Generate' : 'Next Step'} <Icon name="arrow-right" size={14}/> </button>
+                          <button disabled={(step === 1 && ((safeNumber(profile.retireAge) <= safeNumber(profile.age)) || (profile.addCoCFO && safeNumber(profile.spouseRetireAge) <= safeNumber(profile.spouseAge)))) || (step === 4 && (!profile.horizonAge || safeNumber(profile.horizonAge) <= safeNumber(profile.retireAge)))} onClick={() => handleNav(step + 1)} className="px-5 py-2 h-10 bg-slate-900 text-white rounded-lg font-bold uppercase text-[10px] tracking-widest shadow-md active:scale-95 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:bg-slate-950 text-left"> {step === 4 ? 'Generate' : 'Next Step'} <Icon name="arrow-right" size={14}/> </button>
                         </div>
                         {step === 4 && (!profile.horizonAge || safeNumber(profile.horizonAge) <= safeNumber(profile.retireAge)) && (<span className="text-[9px] text-rose-600 font-bold animate-pulse text-right px-1 pt-0.5">Horizon Age > Retirement</span>)}
-                        {step === 1 && (safeNumber(profile.retireAge) <= safeNumber(profile.age)) && (<span className="text-[9px] text-rose-600 font-bold animate-pulse text-right px-1 pt-0.5">Retirement Age > Current Age</span>)}
+                        {step === 1 && ((safeNumber(profile.retireAge) <= safeNumber(profile.age)) || (profile.addCoCFO && safeNumber(profile.spouseRetireAge) <= safeNumber(profile.spouseAge))) && (<span className="text-[9px] text-rose-600 font-bold animate-pulse text-right px-1 pt-0.5">Retire Ages must be > Current Ages</span>)}
                       </div>
                     )}
                   </div>
